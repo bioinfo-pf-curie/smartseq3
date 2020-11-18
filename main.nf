@@ -368,9 +368,9 @@ process mergeReads {
 
   ## Save % UMIs reads 
   nb_lines=\$(wc -l < ${reads[0]})
-  nb_totreads=\$(( \$nb_lines / 4 ))
+  nb_totreads=\$(( $nb_lines / 4 ))
   nb_umis=\$(wc -l < ${prefix}_umisReadsIDs)
-  echo \$(( \$nb_umis / \$nb_totreads * 100 )) > ${prefix}_percent_umi.txt
+  echo \$(( $nb_umis / $nb_totreads * 100 )) > ${prefix}_percent_umi.txt
   """
 }
 
