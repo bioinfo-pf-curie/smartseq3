@@ -367,10 +367,10 @@ process mergeReads {
   cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
 
   ## Save % UMIs reads 
-  nb_lines=$(wc -l < ${reads[0]})
-  nb_totreads=\$(( $nb_lines / 4 ))
-  nb_umis=$(wc -l < ${prefix}_umisReadsIDs)
-  echo \$(( $nb_umis / $nb_totreads * 100 )) > ${prefix}_percent_umi.txt
+  nb_lines=`wc -l < ${reads[0]}`
+  nb_totreads=\$(( \$nb_lines / 4 ))
+  nb_umis=`wc -l < ${prefix}_umisReadsIDs`
+  echo \$(( \$nb_umis / \$nb_totreads * 100 )) > ${prefix}_percent_umi.txt
   """
 }
 
