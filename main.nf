@@ -385,7 +385,7 @@ process trimmSeq{
   publishDir "${params.outDir}/mergeReads", mode: 'copy'
 
   input:
-  set val(prefix), file(totReadsR1), file(totReadsR2) into chMergeReads
+  set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
 
   output:
   set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
