@@ -373,7 +373,7 @@ process mergeReads {
   echo \$nb_totreads >> test
   nb_umis=`wc -l < ${prefix}_umisReadsIDs`
   echo \$nb_umis >> test
-  echo \$(( \$nb_umis / \$nb_totreads * 100 )) > ${prefix}_percent_umi.txt
+  echo \$(( \$nb_umis * 100 / \$nb_totreads )) > ${prefix}_percent_umi.txt
   """
 }
 
