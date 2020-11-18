@@ -132,14 +132,15 @@ if( params.gtf ){
     .fromPath(params.gtf)
     .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
 }
-//genomeGtf.into {gtfSTARCh, gtfFeatureCountsCh}
+genomeGtf.into {gtfSTARCh, gtfFeatureCountsCh}
 
 if ( params.starIndex ){
   genomeIndex=Channel
     .fromPath(params.starIndex)
     .ifEmpty { exit 1, "Star not found: ${params.starIndex}" }
 }
-//genomeIndex.into { chStar; chStarNOT }
+
+genomeIndex.into { chStar; chStarNOT }
 
 /*----------------*/
 
@@ -348,7 +349,7 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
-  set val(prefix), file("*_percent_umi.txt") into chPercentUMI
+  set val(prefix), file("*_countSummary.txt") into chcountSummaryExtUMI
 
   script:
   """
@@ -370,7 +371,8 @@ process mergeReads {
   nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
   nb_totreads=\$(( \$nb_lines / 4 ))
   nb_umis=`wc -l < ${prefix}_umisReadsIDs`
-  echo \$(( \$nb_umis * 100 / \$nb_totreads )) > ${prefix}_percent_umi.txt
+  echo "tot_reads: \$nb_totreads" > ${prefix}_countSummary.txt
+  echo "percentUMI: \$(( \$nb_umis * 100 / \$nb_totreads ))" >> ${prefix}_countSummary.txt
   """
 }
 
@@ -394,27 +396,28 @@ process trimmSeq{
   """
 }
 
-/*
 process readAlignment {
   tag "${prefix}"
+  label 'STAR'
+  label 'highCpu'
+  label 'highMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
   file genomeIndex from chStar.collect()
   file genomeGtf from gtfSTARCh.collect()
-  set val(prefix), file(umiExtractedR1) , file(umiExtractedR2) from umiExtractedCh
+  set val(prefix), file(trimmedR1) , file(trimmedR2) from chTrimmedReads
 	
   output :
-  set val(prefix), file("*Aligned.sortedByCoord.out.bam") into alignedBamCh
-  file "*.out" into alignmentLogs
-  set val(prefix), file ("*_index_mqc.log") into indexCounts
+  set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
+  file "*.out" into chAlignmentLogs
 
   script:  
   """
   STAR \
     --genomeDir $genomeIndex \
     --sjdbGTFfil $genomeGtf \
-    --readFilesIn ${umiExtractedR1},${umiExtractedR2} \
+    --readFilesIn ${trimmedR1},${trimmedR2} \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
@@ -422,12 +425,9 @@ process readAlignment {
     --clip3pAdapterSeq CTGTCTCTTATACACATCT
   # --limitSjdbInsertNsj 2000000 --outFilterIntronMotifs RemoveNoncanonicalUnannotated
 
-  # Add the number of barcoded reads as first line of the index count file
-  #barcoded=`grep "Number of input reads" ${prefix}Log.final.out | cut -d'|' -f2 ` 
-  #echo "\$(echo 'Barcoded,'\$barcoded | cat - ${bcIndxCounts} )" > ${prefix}_index_mqc.log
   """
 }
-*/
+
 
 
 
