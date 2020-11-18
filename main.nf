@@ -348,15 +348,15 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
-  set val(prefix), file("*_percent_umi"
+  set val(prefix), file("*_percent_umi.txt") into chPercentUMI
   script:
   """
   # Get UMI reads
-  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}_umisReadsIDs.txt
+  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}_umisReadsIDs
 
   # Extract non umis reads
-  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+  seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Merge non umis reads + umi reads (with umi in read names)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
@@ -368,8 +368,9 @@ process mergeReads {
   ## Save % UMIs reads 
   nb_lines=$(wc -l < ${reads[0]})
   nb_totreads=$(( $nb_lines / 4 ))
-  nb_umis=$(wc -l < ${prefix}_umisReadsIDs.txt)
-  ${prefix}_percent_umi=$(( $nb_umis / $nb_totreads * 100 ))
+  nb_umis=$(wc -l < ${prefix}_umisReadsIDs)
+  $(( $nb_umis / $nb_totreads * 100 )) > ${prefix}_percent_umi.txt
+  
   """
 }
 
