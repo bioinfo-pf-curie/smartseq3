@@ -376,7 +376,7 @@ process mergeReads {
 
 process trimmSeq{
   tag "${prefix}"
-  label 'seqkit'
+  label 'cutadapt'
   label 'medCpu'
   label 'medMem'
   publishDir "${params.outDir}/mergeReads", mode: 'copy'
@@ -409,9 +409,7 @@ process readAlignment {
   file "*.out" into alignmentLogs
   set val(prefix), file ("*_index_mqc.log") into indexCounts
 
-  script:
-  opts = " --limitSjdbInsertNsj 2000000 --clip3pAdapterSeq CTGTCTCTTATACACATCT " 
-  
+  script:  
   """
   STAR \
     --genomeDir $genomeIndex \
@@ -422,7 +420,7 @@ process readAlignment {
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
     --clip3pAdapterSeq CTGTCTCTTATACACATCT
-  # --limitSjdbInsertNsj 2000000 --outFilterIntronMotifs RemoveNoncanonicalUnannotated ??????????
+  # --limitSjdbInsertNsj 2000000 --outFilterIntronMotifs RemoveNoncanonicalUnannotated
 
   # Add the number of barcoded reads as first line of the index count file
   #barcoded=`grep "Number of input reads" ${prefix}Log.final.out | cut -d'|' -f2 ` 
