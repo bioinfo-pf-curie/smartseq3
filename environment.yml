@@ -1,0 +1,29 @@
+name: SmartSeq3
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - conda-forge::pymdown-extensions=8.0.1
+  - bioconda::subread=1.6.2
+  - bioconda::samtools=1.10
+  - bioconda::star=2.7.2b
+  - bioconda::umi_tools=1.0.1
+  - bioconda::fastx_toolkit=0.0.14
+  - bioconda::fastqc=0.11.8
+  - bioconda::bowtie2=2.3.5.1
+  - bioconda::seqtk=1.3
+  - bioconda::multiqc=1.8
+  - conda-forge::python=3.6.10
+  - bioconda::biopython=1.70
+  - bioconda::python-sortedcontainers=2.1.0
+  - bioconda::seqkit=0.14.0
+  # R-packages
+  - conda-forge::r-base
+  - r::r-stringi
+  - conda-forge::r-reshape2
+  - bioconda::bioconductor-dropletutils
+  - conda-forge::r-plotrix
+  - conda-forge::r-dplyr
+  - conda-forge::r-matrix
+  - conda-forge::r-seurat

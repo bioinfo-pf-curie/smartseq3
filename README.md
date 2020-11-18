@@ -1,3 +1,3 @@
-# smartseq3
+# smartSeq3
 
-Smartseq3 scRNAseq data analysis. 
+Demultiplexing and QC of single cell smartSeq3 data. 
