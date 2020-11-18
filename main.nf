@@ -373,11 +373,32 @@ process mergeReads {
   echo \$nb_totreads >> test
   nb_umis=`wc -l < ${prefix}_umisReadsIDs`
   echo \$nb_umis >> test
-  echo \$(( \$nb_umis * 100 / \$nb_totreads )) > ${prefix}_percent_umi.txt
+  `echo \$(( \$nb_umis * 100 / \$nb_totreads ))` > ${prefix}_percent_umi.txt
   """
 }
 
-/*process readAlignment {
+process trimmSeq{
+  tag "${prefix}"
+  label 'seqkit'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outDir}/mergeReads", mode: 'copy'
+
+  input:
+  set val(prefix), file(totReadsR1), file(totReadsR2) into chMergeReads
+
+  output:
+  set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
+  set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
+
+  script:
+  """
+  cutadapt -G XGCATACGAT{30} --minimum-length=15 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  """
+}
+
+/*
+process readAlignment {
   tag "${prefix}"
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
