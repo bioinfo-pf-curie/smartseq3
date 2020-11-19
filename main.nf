@@ -140,7 +140,7 @@ if (params.starIndex){
   Channel
     .fromPath(params.starIndex, checkIfExists: true)
     .ifEmpty {exit 1, "STAR index file not found: ${params.starIndex}"}
-    .into { chStar; chStarNOT }
+    .set { chStar }
 } else {
   exit 1, "STAR index file not found: ${params.starIndex}"
 }
@@ -149,7 +149,7 @@ params.gtf = genomeRef ? params.genomes[ genomeRef ].gtf ?: false : false
 if (params.gtf) {
   Channel
     .fromPath(params.gtf, checkIfExists: true)
-    .into { chStar; chStarNOT }
+    .set { chGtfSTAR }
 }
 else {
   exit 1, "GTF annotation file not specified!"
