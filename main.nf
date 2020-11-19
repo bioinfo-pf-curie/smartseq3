@@ -126,8 +126,12 @@ if ( params.metadata ){
 }                 
 
 
-/* ADDED -------------*/
-if( params.gtf ){
+/* Genomes -------------*/
+
+// Configurable reference genomes
+genomeRef = params.genome
+
+/*if( params.gtf ){
   genomeGtf=Channel
     .fromPath(params.gtf)
     .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
@@ -139,6 +143,27 @@ if ( params.starIndex ){
     .fromPath(params.starIndex)
     .ifEmpty { exit 1, "Star not found: ${params.starIndex}" }
     .into { chStar; chStarNOT }
+}*/
+
+params.starIndex = genomeRef ? params.genomes[ genomeRef ].starIndex ?: false : false
+if (params.starIndex){
+  Channel
+    .fromPath(params.starIndex, checkIfExists: true)
+    .ifEmpty {exit 1, "STAR index file not found: ${params.starIndex}"}
+    .combine( [ genomeRef ] ) 
+    .into { chStar; chStarNOT }
+} else {
+  exit 1, "STAR index file not found: ${params.starIndex}"
+}
+
+params.gtf = genomeRef ? params.genomes[ genomeRef ].gtf ?: false : false
+if (params.gtf) {
+  Channel
+    .fromPath(params.gtf, checkIfExists: true)
+    .into { chStar; chStarNOT }
+}
+else {
+  exit 1, "GTF annotation file not specified!"
 }
 
 /*----------------*/
@@ -404,7 +429,7 @@ process readAlignment {
 
   input :
   file genomeIndex from chStar.collect()
-  file genomeGtf from gtfSTARCh.collect()
+  file genomeGtf from chGtfSTAR.collect()
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chTrimmedReads
 	
   output :
