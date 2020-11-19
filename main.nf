@@ -55,6 +55,9 @@ def helpMessage() {
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
+  
+  References: If not specified in the configuration file or you wish to overwrite any of the references given by the --genome field
+  --genomeAnnotationPath [file]      Path  to genome annotation folder
 
   Other options:
     --outDir [file]               The output directory where the results will be saved
@@ -318,7 +321,7 @@ summary['Second min Count umis per Cell']  = params.minCountPerCell2
 summary['First min Count genes per Cell']  = params.minCountPerCellGene1
 summary['Second min Count genes per Cell']  = params.minCountPerCellGene2
 /*--------------------------------*/
-
+summary['Annotation']   = params.genomeAnnotationPath
 summary['Max Memory']     = params.maxMemory
 summary['Max CPUs']       = params.maxCpus
 summary['Max Time']       = params.maxTime
