@@ -363,6 +363,7 @@ process mergeReads {
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
   set val(prefix), file("*_countSummary.txt") into chcountSummaryExtUMI
+  file("v_seqkit.txt") into chSeqkitVersion
 
   script:
   """
@@ -386,6 +387,8 @@ process mergeReads {
   nb_umis=`wc -l < ${prefix}_umisReadsIDs`
   echo "tot_reads: \$nb_totreads" > ${prefix}_countSummary.txt
   echo "percentUMI: \$(( \$nb_umis * 100 / \$nb_totreads ))" >> ${prefix}_countSummary.txt
+
+  seqkit --version &> v_seqkit.txt
   """
 }
 
@@ -402,10 +405,12 @@ process trimReads{
   output:
   set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
   set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
+  file("v_cutadapt.txt") into chCutadaptVersion
 
   script:
   """
   cutadapt -G XGCATACGAT{30} --minimum-length=15 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  cutadapt --version &> v_cutadapt.txt
   """
 }
 
@@ -425,6 +430,7 @@ process readAlignment {
   output :
   set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
   file "*.out" into chAlignmentLogs
+  file("v_star.txt") into chStarVersion
 
   script:  
   """
@@ -444,6 +450,7 @@ process readAlignment {
     # limitSjdbInsertNsj = augmente le nombre de splice junctions à inserer
     # outFilterIntronMotifs = supprime les sp non annotées
 
+  STAR --version &> v_star.txt
   """
 }
 
@@ -461,6 +468,7 @@ process readsAssignment {
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
   file "*.summary" into assignmentLogs
+  file("v_featurecounts.txt") into chFCversion
 
   script:
   """	
@@ -471,6 +479,8 @@ process readsAssignment {
     -R BAM \
     -g gene_name \
     ${alignedBam}
+
+  featureCounts -v &> v_featurecounts.txt
     """
 }
 
@@ -486,11 +496,14 @@ process sortBam {
 	
   output:
   set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_getUmis
+  file("v_samtools.txt") into chSamtoolsVersion
 
   script :
   oname = assignBam.toString() - ~/(.bam)?$/
   """
   samtools sort -@ ${task.cpus} ${assignBam} -o ${oname}Sorted.bam
+
+  samtools --version &> v_samtools.txt
   """
 }
 
@@ -506,17 +519,20 @@ set val(prefix), file(assignedBam) from chSortedBAM_bigWig
 
 output:
 set val(prefix), file("*_coverage.bw") into chBigWig
+file("v_bamcoverage.txt") into chBamCoverageVersion
 
 script:
 """
 samtools index ${assignedBam}
 bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw
+
+bamCoverage --version &> v_bamcoverage.txt
 """
 }
 
 process getUmiReads {
   tag "${prefix}"
-  label 'STAR'
+  label 'samtools'
   label 'medhCpu'
   label 'medMem'
   publishDir "${params.outDir}/getUmiReads", mode: 'copy'
@@ -573,6 +589,12 @@ process getSoftwareVersions{
 
   input:
   file 'v_umi_tools.txt' from chUmiToolsVersion.first().ifEmpty([])
+  file("v_seqkit.txt") from chSeqkitVersion.first().ifEmpty([])
+  file("v_cutadapt.txt") from chCutadaptVersion.first().ifEmpty([])
+  file("v_star.txt") from chStarVersion.first().ifEmpty([])
+  file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
+  file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
+  file("v_bamcoverage.txt") from chBamCoverageVersion.first().ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
