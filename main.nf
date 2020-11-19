@@ -131,16 +131,15 @@ if( params.gtf ){
   genomeGtf=Channel
     .fromPath(params.gtf)
     .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
+    .into { chGtfSTAR ; chGtfFeatureCounts}
 }
-genomeGtf.into { chGtfSTAR ; chGtfFeatureCounts}
 
 if ( params.starIndex ){
   genomeIndex=Channel
     .fromPath(params.starIndex)
     .ifEmpty { exit 1, "Star not found: ${params.starIndex}" }
+    .into { chStar; chStarNOT }
 }
-
-genomeIndex.into { chStar; chStarNOT }
 
 /*----------------*/
 
