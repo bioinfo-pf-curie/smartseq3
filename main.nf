@@ -149,7 +149,7 @@ params.gtf = genomeRef ? params.genomes[ genomeRef ].gtf ?: false : false
 if (params.gtf) {
   Channel
     .fromPath(params.gtf, checkIfExists: true)
-    .set { chGtfSTAR; chGtfFC }
+    .into { chGtfSTAR; chGtfFC }
 }
 else {
   exit 1, "GTF annotation file not specified!"
