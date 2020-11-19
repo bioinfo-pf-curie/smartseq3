@@ -56,7 +56,7 @@ def helpMessage() {
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
   
-  References: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
+  Genomes: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
   --starIndex [dir]                  Index for STAR aligner
 
@@ -134,20 +134,6 @@ if ( params.metadata ){
 
 // Configurable reference genomes
 genomeRef = params.genome
-
-/*if( params.gtf ){
-  genomeGtf=Channel
-    .fromPath(params.gtf)
-    .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
-    .into { chGtfSTAR ; chGtfFeatureCounts}
-}
-
-if ( params.starIndex ){
-  genomeIndex=Channel
-    .fromPath(params.starIndex)
-    .ifEmpty { exit 1, "Star not found: ${params.starIndex}" }
-    .into { chStar; chStarNOT }
-}*/
 
 params.starIndex = genomeRef ? params.genomes[ genomeRef ].starIndex ?: false : false
 if (params.starIndex){
@@ -423,7 +409,7 @@ process trimReads{
   """
 }
 
-/*
+
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
@@ -450,12 +436,126 @@ process readAlignment {
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
-    --clip3pAdapterSeq CTGTCTCTTATACACATCT
-  # --limitSjdbInsertNsj 2000000 --outFilterIntronMotifs RemoveNoncanonicalUnannotated
+    --clip3pAdapterSeq CTGTCTCTTATACACATCT \
+    --limitSjdbInsertNsj 2000000 \
+    --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
+
+    # clip3pAdapterSeq = coupe l'adaptater 3' des R2 (~2%) 
+    # limitSjdbInsertNsj = augmente le nombre de splice junctions à inserer
+    # outFilterIntronMotifs = supprime les sp non annotées
+
   """
 }
-*/
 
+process readsAssignment {
+  tag "${prefix}"
+  label 'featureCounts'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outdir}/readsAssignment", mode: 'copy'
+
+  input :
+  set val(prefix), file(alignedBam) from chAlignedBam
+  file(genome) from chGtf.collect()
+
+  output : 
+  set val(prefix), file("*featureCounts.bam") into chAssignBam
+  file "*.summary" into assignmentLogs
+
+  script:
+  """	
+  featureCounts \
+    -a ${genome} \
+    -o ${prefix}_counts \
+    -T ${task.cpus} \
+    -R BAM \
+    -g gene_name \
+    ${alignedBam}
+    """
+}
+
+process sortBam {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outdir}/sortBam", mode: 'copy'
+
+  input:
+  set val(prefix), file(assignBam) from chAssignBam
+	
+  output:
+  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_getUmis
+
+  script :
+  oname = counts.toString() - ~/(.bam)?$/
+  """
+  samtools sort -@ ${task.cpus} ${assignBam} -o ${oname}Sorted.bam
+  """
+}
+
+process bigWig {
+tag "${prefix}"
+label 'bamCoverage'
+label 'medCpu'
+label 'medMem'
+publishDir "${params.outdir}/bigWig", mode: 'copy'
+
+input:
+set val(prefix), file(assignedBam) from chSortedBAM_bigWig
+
+output:
+set val(prefix), file("*_coverage.bw") into chBigWig
+
+script:
+"""
+samtools index ${assignedBam}
+bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw
+"""
+}
+
+process getUmiReads {
+  tag "${prefix}"
+  label 'STAR'
+  label 'medhCpu'
+  label 'medMem'
+  publishDir "${params.outDir}/getUmiReads", mode: 'copy'
+
+  input :
+  set val(prefix), file(alignedBam) from chSortedBAM_getUmis
+
+  output:
+  set val(prefix), file("*_UMIs.featureCounts.bam") into chUmiBam
+
+  script:  
+  """
+  samtools view -H ${alignedBam} > ${prefix}_UMIs.featureCounts.sam
+  samtools view ${alignedBam} | awk '/[0-9]_/ {print \$0}' >> ${prefix}_UMIs.featureCounts.sam
+  samtools view -bh ${prefix}_UMIs.featureCounts.sam > ${prefix}_UMIs.featureCounts.bam
+  """
+}
+
+
+process countMatrices {
+  tag "${prefix}"
+  label 'umiTools'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outdir}/countMatrices", mode: 'copy'
+
+  input:
+  set val(prefix), file(umiBam) from chUmiBam
+
+  output:
+  set val(prefix), file("*CountSorted.tsv.gz") into umiMatrixSorted_filterPr, umiMatrixSorted_distribPr, umiMatrixSorted_cellCountsPr, umiMatrixSorted_10XPr
+
+  script:
+  """
+  # Count UMIs per gene per cell
+  samtools index ${umiBam}
+  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}Counts.tsv.gz
+  """
+}
 
 
 /***********
