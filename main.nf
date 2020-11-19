@@ -132,7 +132,7 @@ if( params.gtf ){
     .fromPath(params.gtf)
     .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
 }
-genomeGtf.into {gtfSTARCh, gtfFeatureCountsCh}
+genomeGtf.into { chGtfSTAR ; chGtfFeatureCounts}
 
 if ( params.starIndex ){
   genomeIndex=Channel
