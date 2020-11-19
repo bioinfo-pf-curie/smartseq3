@@ -413,8 +413,8 @@ process trimReads{
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
-  label 'medCpu'
-  label 'medMem'
+  label 'highCpu'
+  label 'highMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
