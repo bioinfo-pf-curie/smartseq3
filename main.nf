@@ -149,7 +149,7 @@ params.gtf = genomeRef ? params.genomes[ genomeRef ].gtf ?: false : false
 if (params.gtf) {
   Channel
     .fromPath(params.gtf, checkIfExists: true)
-    .set { chGtfSTAR }
+    .set { chGtfSTAR; chGtfFC }
 }
 else {
   exit 1, "GTF annotation file not specified!"
@@ -456,7 +456,7 @@ process readsAssignment {
 
   input :
   set val(prefix), file(alignedBam) from chAlignedBam
-  file(genome) from chGtf.collect()
+  file(genome) from chGtfFC.collect()
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
