@@ -56,7 +56,7 @@ def helpMessage() {
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
   
-  References: If not specified in the configuration file or you wish to overwrite any of the references given by the --genome field
+  References: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
   --starIndex [dir]                  Index for STAR aligner
 
