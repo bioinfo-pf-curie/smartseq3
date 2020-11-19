@@ -58,6 +58,7 @@ def helpMessage() {
   
   References: If not specified in the configuration file or you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
+  --starIndex [dir]                  Index for STAR aligner
 
   Other options:
     --outDir [file]               The output directory where the results will be saved
@@ -153,7 +154,6 @@ if (params.starIndex){
   Channel
     .fromPath(params.starIndex, checkIfExists: true)
     .ifEmpty {exit 1, "STAR index file not found: ${params.starIndex}"}
-    .combine( [ genomeRef ] ) 
     .into { chStar; chStarNOT }
 } else {
   exit 1, "STAR index file not found: ${params.starIndex}"
@@ -403,12 +403,12 @@ process mergeReads {
   """
 }
 
-process trimmSeq{
+process trimReads{
   tag "${prefix}"
   label 'cutadapt'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outDir}/mergeReads", mode: 'copy'
+  publishDir "${params.outDir}/trimReads", mode: 'copy'
 
   input:
   set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
@@ -423,6 +423,7 @@ process trimmSeq{
   """
 }
 
+/*
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
@@ -451,10 +452,9 @@ process readAlignment {
     --outSAMtype BAM SortedByCoordinate \
     --clip3pAdapterSeq CTGTCTCTTATACACATCT
   # --limitSjdbInsertNsj 2000000 --outFilterIntronMotifs RemoveNoncanonicalUnannotated
-
   """
 }
-
+*/
 
 
 
