@@ -430,7 +430,7 @@ process readAlignment {
   """
   STAR \
     --genomeDir $genomeIndex \
-    --sjdbGTFfil $genomeGtf \
+    --sjdbGTFfile $genomeGtf \
     --readFilesIn ${trimmedR1},${trimmedR2} \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
