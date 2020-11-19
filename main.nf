@@ -488,7 +488,7 @@ process sortBam {
   set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_getUmis
 
   script :
-  oname = counts.toString() - ~/(.bam)?$/
+  oname = counts.assignBam() - ~/(.bam)?$/
   """
   samtools sort -@ ${task.cpus} ${assignBam} -o ${oname}Sorted.bam
   """
