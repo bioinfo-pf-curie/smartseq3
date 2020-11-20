@@ -13,7 +13,7 @@ read_count_desc: 'millions'
 
 custom_data:
 
-    stats:
+    summary:
       file_format: 'csv'
       section_name: 'General Metrics'
       description: ' of sequenced data'
@@ -129,7 +129,7 @@ custom_plot_config:
 ## Display
 
 report_section_order:
-  stats:
+  summary:
     order: 1
   gene_saturation:
     order: -400
