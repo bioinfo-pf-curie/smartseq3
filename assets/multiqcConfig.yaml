@@ -12,14 +12,14 @@ read_count_desc: 'millions'
 ## Custom content
 
 custom_data:
-    my_stats:
-        file_format: 'csv'
-        section_name: 'General Metrics'
-        description: ' of sequenced data'
-        plot_type: 'table'
-        pconfig:
-            namespace: 'stats'
-          id: 'stats'
+    stats:
+      file_format: 'csv'
+      section_name: 'General Metrics'
+      description: ' of sequenced data'
+      plot_type: 'table'
+      pconfig:
+          namespace: 'summary'
+          id: 'summary'
           title: 'General Statistics'
           save_file: true
           col1_header: 'Sample ID'
@@ -33,8 +33,8 @@ custom_data:
                 scale: 'YlGnBu'
                 format: '{:,.0f}'
                 placement: 3000
-              Percent_Barcoded:
-                title: 'Barcoded (%)'
+              Percent_UMIs:
+                title: 'UMIs (%)'
                 min: 0
                 max: 100
                 scale: 'RdYlGn'
@@ -62,15 +62,6 @@ custom_data:
                 scale: 'YlGnBu'
                 format: '{:,.0f}'
                 placement: 7000
-                
-    summary:
-      file_format: 'csv'
-      section_name: 'Reads repartition'
-      description: ''
-      plot_type: 'bargraph'
-      pconfig:
-        id: 'summary'
-        title: 'Reads repartition'
     
   sp:
    summary:
