@@ -388,7 +388,10 @@ process mergeReads {
   echo "tot_reads: \$nb_totreads" > ${prefix}_countSummary.txt
   echo "percentUMI: \$(( \$nb_umis * 100 / \$nb_totreads ))" >> ${prefix}_countSummary.txt
 
-  seqkit --version &> v_seqkit.txt
+  # Get version 
+  echo SeqKit > name
+  seqkit --help | grep Version > version
+  paste name version > v_seqkit.txt
   """
 }
 
