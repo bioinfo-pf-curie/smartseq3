@@ -66,38 +66,7 @@ custom_data:
   sp:
    summary:
       fn: 'table_mqc.stats'
-   
 
-
-table_cond_formatting_rules:
-    Percent_of_rRNA:
-        pass:
-            - lt: 10
-        warn:
-            - gt: 10
-        fail:
-            - gt: 20
-    Percent_of_aligned_reads:
-        pass:
-            - gt: 80
-        warn:
-            - lt: 80
-        fail:
-            - lt: 50
-    Percent_duplicates:
-        pass:
-            - lt: 35
-        warn:
-            - gt: 35
-        fail:
-            - gt: 50
-
-
-################################
-## Clean sample names
-
-extra_fn_clean_exts:
-    - 'gcurve.txt'
 
 ###############################
 ## Modules 
