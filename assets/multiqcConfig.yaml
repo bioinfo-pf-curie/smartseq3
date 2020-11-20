@@ -38,7 +38,7 @@ custom_data:
                 title: 'UMIs (%)'
                 min: 0
                 max: 100
-                scale: 'RdYlGn'
+                scale: 'YlGnBu'
                 suffix: '%'
                 format: '{:,.1f}'
                 placement: 4000
