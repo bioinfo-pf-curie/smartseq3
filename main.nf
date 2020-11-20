@@ -424,7 +424,7 @@ process readAlignment {
   tag "${prefix}"
   label 'STAR'
   label 'highCpu'
-  label 'highMem'
+  label 'extraMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
