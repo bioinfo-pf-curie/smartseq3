@@ -63,8 +63,8 @@ custom_data:
                 scale: 'YlGnBu'
                 format: '{:,.0f}'
                 placement: 7000
-    
-  sp:
+
+sp:
    summary:
       fn: 'table_mqc.stats'
 
