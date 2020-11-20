@@ -563,13 +563,14 @@ process countMatrices {
   set val(prefix), file(umiBam) from chUmiBam
 
   output:
-  set val(prefix), file("*CountSorted.tsv.gz") into umiMatrixSorted_filterPr, umiMatrixSorted_distribPr, umiMatrixSorted_cellCountsPr, umiMatrixSorted_10XPr
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices
+  set val(prefix), file("_UmiCounts.log") into chMatricesLog
 
   script:
   """
   # Count UMIs per gene per cell
   samtools index ${umiBam}
-  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}Counts.tsv.gz
+  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
   """
 }
 
