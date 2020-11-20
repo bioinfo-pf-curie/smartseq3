@@ -701,7 +701,6 @@ process getSoftwareVersions{
   !params.skipSoftVersions
 
   input:
-  file splan from chSplan.collect()
   file 'v_umi_tools.txt' from chUmiToolsVersion.first().ifEmpty([])
   file("v_seqkit.txt") from chSeqkitVersion.first().ifEmpty([])
   file("v_cutadapt.txt") from chCutadaptVersion.first().ifEmpty([])
@@ -761,7 +760,7 @@ process multiqc {
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
   //LOGS
-  
+
 
   output: 
   file splan
