@@ -781,6 +781,11 @@ process multiqc {
   //isPE = params.singleEnd ? "" : "-p"
   designOpts= params.design ? "-d ${params.design}" : ""
   modules_list = "-m custom_content -m star -m featureCounts -m samtools -m deeptools -m cutadapt"
+
+  umisFiltre1 = params.minCountPerCell1 ? "--minCountPerCell1 ${params.minCountPerCell1}" : ""
+  umisFiltre2 = params.minCountPerCell2 ? "--minCountPerCell2 ${params.minCountPerCell2}" : ""
+  umisFiltreGene1 = params.minCountPerCellGene1 ? "--minCountPerCellGene1 ${params.minCountPerCellGene1}" : ""
+  umisFiltreGene2 = params.minCountPerCellGene2 ? "--minCountPerCellGene2 ${params.minCountPerCellGene2}" : ""
   """
   stat2mqc.sh ${splan} ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
