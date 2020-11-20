@@ -25,23 +25,18 @@ do
     tot_reads=`grep "Number of input reads" star/${sample}Log.final.out | cut -d'|' -f2`
     pUMIs=`grep "percentUMI:" mergeReads/${sample}_pUMIs.txt | cut -d':' -f2`
     aligned=` grep "Uniquely mapped reads number" star/${sample}Log.final.out | cut -d'|' -f2 `
+    paligned=` grep "Uniquely mapped reads %" star/${sample}Log.final.out | cut -d'|' -f2 `
     aligned_assigned=`grep "Assigned" FC/${sample}_counts.summary | cut -f2`
-
     # Number of assigned across barcoded and aligned
     NotAligned=`echo $(( $tot_reads - $aligned ))`
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
     NotAligned_NotAssigned=`echo $(( $tot_reads - $aligned_assigned ))`
 
-    if [ $aligned != 0 ]; then  
-        pbarcoded_aligned=$(echo "scale=2; ($aligned*100/$tot_reads)" | bc -l)
-    else
-	    pbarcoded_aligned= 0
-    fi
 
     if [ $aligned_assigned != 0 ]; then  
         paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/$tot_reads)" | bc -l)
     else
-	    pbarcoded_aligned_assigned=0
+	    paligned_assigned=0
     fi
 
     ##### Filtre Count
