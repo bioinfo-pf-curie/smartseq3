@@ -763,8 +763,8 @@ process multiqc {
   //LOGS
   file ('trimming/*') from chtrimmedReadsLog.collect()
   file ('star/*') from chAlignmentLogs.collect()
-  file ('FC/*') into chAssignmentLogs
-  file ('coverage/*') into chBigWigLog
+  file ('FC/*') from chAssignmentLogs.collect()
+  file ('coverage/*') from chBigWigLog.collect()
 
 
   output: 
