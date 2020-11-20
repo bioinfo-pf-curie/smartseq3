@@ -1,2 +1,1 @@
-L384T27,exp7_pl1_F1,test/data/L384T27.R1.fq.gz,test/data/L384T27.R2.fq.gz
-L384T28,exp7_pl1_G1,test/data/L384T28.R1.fq.gz,test/data/L384T28.R2.fq.gz
+toy_L384T27,exp7_pl1_F1,test/data/toy_L384T27.R1.fq.gz,test/data/toy_L384T27.R2.fq.gz
