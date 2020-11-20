@@ -40,7 +40,7 @@ do
     fi
 
     ##### Filtre Count
-    tot_cells=`wc -l $all_samples`
+    tot_cells=`wc -l $splan`
     #filtre1=`sed -n 2p countsFiltre/${sample}_countsFiltre.log`
     #filtre2=`sed -n 3p countsFiltre/${sample}_countsFiltre.log`
     #filtreG1=`sed -n 4p countsFiltre/${sample}_countsFiltre.log`
