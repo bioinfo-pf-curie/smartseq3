@@ -365,7 +365,7 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
-  set val(prefix), file("*_countSummary.txt") into chcountSummaryExtUMI
+  set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   file("v_seqkit.txt") into chSeqkitVersion
 
   script:
@@ -388,8 +388,7 @@ process mergeReads {
   nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
   nb_totreads=\$(( \$nb_lines / 4 ))
   nb_umis=`wc -l < ${prefix}_umisReadsIDs`
-  echo "tot_reads: \$nb_totreads" > ${prefix}_countSummary.txt
-  echo "percentUMI: \$(( \$nb_umis * 100 / \$nb_totreads ))" >> ${prefix}_countSummary.txt
+  echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
 
   # Get version 
   echo SeqKit > name
@@ -760,10 +759,13 @@ process multiqc {
   file metadata from chMetadata.ifEmpty([])
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
-  //LOGS
+  //Modules
   file ('trimming/*') from chtrimmedReadsLog.collect()
   file ('star/*') from chAlignmentLogs.collect()
   file ('FC/*') from chAssignmentLogs.collect()
+  //LOGS
+  file ('umiExtract/*') from chUmiExtractedLog.collect()
+  file('mergeReads/*') into chCountSummaryExtUMI
   file ('coverage/*') from chBigWigLog.collect()
 
 
