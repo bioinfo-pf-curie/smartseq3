@@ -13,14 +13,14 @@ read_count_desc: 'millions'
 
 custom_data:
 
-    summary:
+    stats:
       file_format: 'csv'
       section_name: 'General Metrics'
       description: ' of sequenced data'
       plot_type: 'table'
       pconfig:
-          namespace: 'summary'
-          id: 'summary'
+          namespace: 'stats'
+          id: 'stats'
           title: 'General Statistics'
           save_file: true
           col1_header: 'Sample ID'
@@ -65,7 +65,7 @@ custom_data:
                 placement: 7000
 
 sp:
-   summary:
+   stats:
       fn: 'table_mqc.stats'
 
 
@@ -129,7 +129,7 @@ custom_plot_config:
 ## Display
 
 report_section_order:
-  summary:
+  stats:
     order: 1
   gene_saturation:
     order: -400
