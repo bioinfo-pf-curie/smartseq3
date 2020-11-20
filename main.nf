@@ -772,7 +772,7 @@ process multiqc {
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   //isPE = params.singleEnd ? "" : "-p"
   designOpts= params.design ? "-d ${params.design}" : ""
-  modules_list = "-m custom_content -umi_tools -m star -m featureCounts -m samtools -m deeptools"
+  modules_list = "-m custom_content -m umi_tools -m star -m featureCounts -m samtools -m deeptools"
   """
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
