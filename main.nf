@@ -473,7 +473,7 @@ process readsAssignment {
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
-  file "*.summary" into assignmentLogs
+  file "*.summary" into chAssignmentLogs
   file("v_featurecounts.txt") into chFCversion
 
   script:
@@ -525,12 +525,13 @@ set val(prefix), file(assignedBam) from chSortedBAM_bigWig
 
 output:
 set val(prefix), file("*_coverage.bw") into chBigWig
+set val(prefix), file("*_coverage.log") into chBigWigLog
 file("v_bamcoverage.txt") into chBamCoverageVersion
 
 script:
 """
 samtools index ${assignedBam}
-bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw
+bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
 
 bamCoverage --version &> v_bamcoverage.txt
 """
@@ -760,10 +761,15 @@ process multiqc {
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
   //LOGS
+  file ('trimming/*') from chtrimmedReadsLog.collect()
+  file ('star/*') from chAlignmentLogs.collect()
+  file ('FC/*') into chAssignmentLogs
+  file ('coverage/*') into chBigWigLog
+
 
   output: 
   file splan
-  file "*_report.html" into multiqc_report
+  file "*report.html" into multiqc_report
   file "*_data"
 
   script:
@@ -772,7 +778,7 @@ process multiqc {
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   //isPE = params.singleEnd ? "" : "-p"
   designOpts= params.design ? "-d ${params.design}" : ""
-  modules_list = "-m custom_content -m star -m featureCounts -m samtools -m deeptools"
+  modules_list = "-m custom_content -m star -m featureCounts -m samtools -m deeptools -m cutadapt"
   """
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
