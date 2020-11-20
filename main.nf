@@ -569,7 +569,7 @@ process countMatrices {
 
   output:
   set val(prefix), file("*_Counts.tsv.gz") into chMatrices
-  set val(prefix), file("_UmiCounts.log") into chMatricesLog
+  set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
   """
@@ -760,7 +760,6 @@ process multiqc {
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
   //LOGS
-
 
   output: 
   file splan
