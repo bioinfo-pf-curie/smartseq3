@@ -782,6 +782,7 @@ process multiqc {
   designOpts= params.design ? "-d ${params.design}" : ""
   modules_list = "-m custom_content -m star -m featureCounts -m samtools -m deeptools -m cutadapt"
   """
+  stat2mqc.sh ${splan} ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
