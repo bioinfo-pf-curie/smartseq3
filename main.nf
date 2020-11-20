@@ -765,7 +765,7 @@ process multiqc {
   file ('FC/*') from chAssignmentLogs.collect()
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
-  file('mergeReads/*') into chCountSummaryExtUMI
+  file('mergeReads/*') from chCountSummaryExtUMI.collect()
   file ('coverage/*') from chBigWigLog.collect()
 
 
