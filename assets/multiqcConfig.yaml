@@ -19,126 +19,63 @@ custom_data:
         plot_type: 'table'
         pconfig:
             namespace: 'stats'
-            id: 'stats'
-            title: 'General Statistics'
-            save_file: true
-            col1_header: 'Sample ID'
-        headers:
-            Sample_name:
-              title: 'Sample Name'
-              scale: false
-              format: '{:.0f}'
-              placement: 2000
-            Number_of_reads:
-              title: 'Total Reads'
-              scale: 'YlGnBu'
-              format: '{:,.0f}'
-              placement: 4000
-            Number_of_rRNA:
-              title: 'rRNA'
-              scale: 'RdYlGn-rev'
-              format: '{:,.0f}'
-              hidden: true
-              placement: 5000
-            Percent_of_rRNA:
-              title: 'rRNA (%)'
-              min: 0
-              max: 100
-              scale: 'RdYlGn-rev'
-              suffix: '%'
-              format: '{:,.1f}'
-              placement: 6000
-            Strandness:
-              scale: false
-              placement: 3000
-            Number_of_aligned_reads:
-              title: 'Aligned Reads'
-              scale: 'RdYlGn'
-              format: '{:,0f}'
-              hidden: true
-              placement: 7000
-            Percent_of_aligned_reads:
-              title: 'Aligned Reads (%)'
-              min: 0
-              max: 100
-              scale: 'RdYlGn'
-              suffix: '%'
-              format: '{:,.1f}'
-              placement: 8000
-            Number_of_uniquely_aligned_reads:
-              title: 'Unique Reads'
-              scale: 'RdYlGn'
-              format: '{:,.0f}'
-              hidden: true
-              placement: 9000
-            Percent_uniquely_aligned_reads:
-              title: 'Unique Reads (%)'
-              min: 0
-              max: 100
-              scale: 'RdYlGn'
-              suffix: '%'
-              format: '{:,.1f}'
-              placement: 10000
-            Number_of_multiple_aligned_reads:
-              title: 'Multiple Reads'
-              scale: 'RdYlGn-rev'
-              format: '{:,0f}'
-              hidden: true
-              placement: 11000
-            Percent_multiple_aligned:
-              title: 'Multiple Reads (%)'
-              min: 0
-              max: 100
-              scale: 'RdYlGn-rev'
-              suffix: '%'
-              format: '{:,.1f}'
-              placement: 12000
-            Number_of_duplicates:
-              title: 'Duplicates'
-              scale: 'RdYlGn-rev'
-              format: '{:,0f}'
-              hidden: true
-              placement: 13000
-            Percent_duplicates:
-              title: 'Duplicates (%)'
-              min: 0
-              max: 100
-              scale: 'RdYlGn-rev'
-              suffix: '%'
-              format: '{:,.1f}'
-              placement: 14000
-
-    gene_type:
-       file_format: 'csv'
-       section_name: 'Expressed Genes'
-       description: 'with a TPM value > 1 are considered. The number of expressed genes per sample was splitted into the 5 most abundant classes following the known gene annotations.'
-       plot_type: 'bargraph'
-       pconfig:
-            namespace: 'genetype'
-            id: 'genetype'
-            title: 'Expressed Genes'
-            ylab: 'Number of expressed genes (TPM>1)'
-            scale: 'Pastel1'
-
-    gene_saturation:
-       file_format: 'tsv'
-       section_name: 'Gene-based saturation'
-       description: 'plot showing the number of detected genes for a given set of subsampling values.'
-       plot_type: 'linegraph'
-       pconfig:
-            namespace: 'gene saturation'
-            id: 'genesaturation'
-            title: 'Gene-based Saturation'
-            ylab: 'Number of detected genes'
-            xlab: 'Number of reads (M)'
-
-sp:
-   my_stats:
-      fn: '*.stats'
-   gene_type:
-      fn: '*genetype.txt'
-   gene_saturation:
-      fn: '*gcurve.txt'
+          id: 'stats'
+          title: 'General Statistics'
+          save_file: true
+          col1_header: 'Sample ID'
+          headers:
+              Sample_name:
+                title: 'Sample Name'
+                scale: false
+                placement: 2000
+              Number_of_reads:
+                title: 'Total Reads'
+                scale: 'YlGnBu'
+                format: '{:,.0f}'
+                placement: 3000
+              Percent_Barcoded:
+                title: 'Barcoded (%)'
+                min: 0
+                max: 100
+                scale: 'RdYlGn'
+                suffix: '%'
+                format: '{:,.1f}'
+                placement: 4000
+              Percent_Aligned:
+                title: 'Aligned (%)'
+                min: 0
+                max: 100
+                scale: 'RdYlGn'
+                suffix: '%'
+                format: '{:,.1f}'
+                placement: 5000
+              Percent_Assigned:
+                title: 'Assigned (%)'
+                min: 0
+                max: 100
+                scale: 'RdYlGn'
+                suffix: '%'
+                format: '{:,.1f}'
+                placement: 6000
+              Cell_tot:
+                title: 'Cells tot.'
+                scale: 'YlGnBu'
+                format: '{:,.0f}'
+                placement: 7000
+                
+    summary:
+      file_format: 'csv'
+      section_name: 'Reads repartition'
+      description: ''
+      plot_type: 'bargraph'
+      pconfig:
+        id: 'summary'
+        title: 'Reads repartition'
+    
+  sp:
+   summary:
+      fn: 'table_mqc.stats'
+   
 
 
 table_cond_formatting_rules:
