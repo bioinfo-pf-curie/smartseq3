@@ -545,7 +545,7 @@ process bigWig {
 }
 
 process genebody_coverage {
-    //tag "${bam.baseName - 'Sorted'}"
+    tag "${prefix}"
        publishDir "${params.outdir}/genecov" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
