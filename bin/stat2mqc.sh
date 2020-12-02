@@ -14,7 +14,7 @@ all_samples=$(awk -F, '{print $1}' $splan)
 #Table:
 echo -e "Sample_id, Sample_name, Reads tot., UMIs(%), Aligned(%), Assigned(%), Cells tot." > table_mqc.stats
 #Bargraph:
-#echo -e "Sample_id, Sample_name, Barcoded_Aligned_Assigned , Barcoded_Aligned_NotAssigned " > final_mqc.stats
+echo -e "Sample_id, Sample_name, Aligned_Assigned, Aligned_NotAssigned, NotAligned, NotAligned_NotAssagned" > final_mqc.stats
 
 for sample in $all_samples
 do
@@ -40,14 +40,14 @@ do
     fi
 
     ##### Filtre Count
-    tot_cells=`wc -l $splan`
+    tot_cells=`wc -l < $splan`
     #filtre1=`sed -n 2p countsFiltre/${sample}_countsFiltre.log`
     #filtre2=`sed -n 3p countsFiltre/${sample}_countsFiltre.log`
     #filtreG1=`sed -n 4p countsFiltre/${sample}_countsFiltre.log`
     #filtreG2=`sed -n 5p countsFiltre/${sample}_countsFiltre.log`
 
     echo -e ${sample},${sname},${tot_reads}, ${pUMIs}, ${paligned}, ${paligned_assigned}, ${tot_cells}>> table_mqc.stats
-    #echo -e ${sample},${sname},${barcoded_aligned_assigned}, ${barcoded_aligned_NotAssigned},${barcoded_NOTaligned},${NOTbarcoded_aligned},${NOTbarcoded_NOTaligned} >> final_mqc.stats
+    echo -e ${sample},${sname},${aligned_assigned}, ${aligned_NotAssigned},${NOTaligned},${NotAligned_NotAssigned} >> final_mqc.stats
 
 done
 
