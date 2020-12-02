@@ -13,10 +13,10 @@ This script is based on the nf-core guidelines. See https://nf-co.re/ for more i
 
 /*
 ========================================================================================
-<!-- TODO - Pipeline Name -->
+SmartSeq3
 ========================================================================================
  #### Homepage / Documentation
-<!-- TODO - Pipeline code url -->
+https://gitlab.curie.fr/sc-platform/smartseq3
 ----------------------------------------------------------------------------------------
 */
 
@@ -25,11 +25,12 @@ devMessageFile = file("$baseDir/assets/devMessage.txt")
 
 def helpMessage() {
   if ("${workflow.manifest.version}" =~ /dev/ ){
-     log.info devMessageFile.text
+    devMess = file("$baseDir/assets/devMessage.txt")
+    log.info devMessageFile.text
   }
 
   log.info """
-  v${workflow.manifest.version}
+  SmartSeq3 v${workflow.manifest.version}
   ======================================================================
 
   Usage:
@@ -150,9 +151,18 @@ if (params.gtf) {
   Channel
     .fromPath(params.gtf, checkIfExists: true)
     .into { chGtfSTAR; chGtfFC }
+}else {
+  exit 1, "GTF annotation file not not found: ${params.gtf}"
 }
-else {
-  exit 1, "GTF annotation file not specified!"
+
+params.bed12 = genomeRef ? params.genomes[ genomeRef ].bed12 ?: false : false
+if (params.bed12) {
+  Channel  
+    .fromPath(params.bed12)
+    .ifEmpty { exit 1, "BED12 annotation file not found: ${params.bed12}" }
+    .set { chBedGeneCov } 
+}else {
+  exit 1, "GTF annotation file not not found: ${params.bed12}"
 }
 
 /*----------------*/
@@ -321,8 +331,6 @@ summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
-// TODO - ADD YOUR NEXTFLOW PROCESS HERE
-
 
 /*##########################   STEP 1: MAPPING  ####################################*/
 
@@ -477,7 +485,7 @@ process readsAssignment {
 
   script:
   """	
-  featureCounts \
+  featureCounts  -p \
     -a ${genome} \
     -o ${prefix}_counts \
     -T ${task.cpus} \
@@ -500,7 +508,7 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_getUmis
+  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_GeneCov ,chSortedBAM_getUmis, chSortedBAM_readCounts
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -513,27 +521,56 @@ process sortBam {
 }
 
 process bigWig {
-tag "${prefix}"
-label 'bamCoverage'
-label 'highCpu'
-label 'highMem'
-publishDir "${params.outdir}/bigWig", mode: 'copy'
+  tag "${prefix}"
+  label 'bamCoverage'
+  label 'highCpu'
+  label 'highMem'
+  publishDir "${params.outdir}/bigWig", mode: 'copy'
 
-input:
-set val(prefix), file(assignedBam) from chSortedBAM_bigWig
+  input:
+  set val(prefix), file(assignedBam) from chSortedBAM_bigWig
 
-output:
-set val(prefix), file("*_coverage.bw") into chBigWig
-set val(prefix), file("*_coverage.log") into chBigWigLog
-file("v_bamcoverage.txt") into chBamCoverageVersion
+  output:
+  set val(prefix), file("*_coverage.bw") into chBigWig
+  set val(prefix), file("*_coverage.log") into chBigWigLog
+  file("v_bamcoverage.txt") into chBamCoverageVersion
 
-script:
-"""
-samtools index ${assignedBam}
-bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
+  script:
+  """
+  samtools index ${assignedBam}
+  bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
 
-bamCoverage --version &> v_bamcoverage.txt
-"""
+  bamCoverage --version &> v_bamcoverage.txt
+  """
+}
+
+process genebody_coverage {
+    tag "${bam.baseName - '.sorted'}"
+       publishDir "${params.outdir}/genecov" , mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
+            else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
+            else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
+            else if (filename.indexOf("log.txt") > -1) false
+            else filename
+        }
+
+    input:
+    set val(prefix), file(assignedBam) from chSortedBAM_GeneCov
+    file bed12 from chBedGeneCov.collect()
+
+    output:
+    file "*.{txt,pdf,r}" into chGeneCov_res
+
+    script:
+    """
+    samtools index $bam
+    geneBody_coverage.py \\
+        -i ${assignedBam} \\
+        -o ${bam.baseName}.rseqc \\
+        -r $bed12
+    mv log.txt ${bam.baseName}.rseqc.log.txt
+    """
 }
 
 process getUmiReads {
@@ -581,8 +618,37 @@ process countMatrices {
 
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
-/*
 
+/*##########################   STEP 3: Analysis  ####################################*/
+
+process umiVSreadCounts{
+  tag "${prefix}"
+  publishDir "${params.outdir}/umiVSreadCounts", mode: 'copy'
+
+  input:
+  set val(prefix), file(umiMatrix) from chMatrices
+  set val(prefix), file(featureCountsBam) from chSortedBAM_readCounts
+
+  output:
+  set val(prefix), file("*_UmiReadsCounts.mqc") into chUmiReadsCount
+
+  script:
+  """
+  # dans le sam ayant tous les reads, obtenir une colonne avec le nom du gene et une colonne avec le nombre de reads (lire le sam dans R ?)
+  # Merger (r script) le tableau de reads au tableau d'umis == gene, reads, umis
+
+  samtools view ${featureCountsBam} > ${prefix}_featureCounts.sam => lire dans R
+  samtools view ${featureCountsBam} | grep XT: | cut -f1 | cut -d"_" -f2,3 | sort > ${prefix}XTreads
+
+  cut -d"_" -f1 ${prefix}XTreads | uniq -c > ${prefix}reads_per_cell
+  awk -F " " '{print \$1}' ${prefix}reads_per_cell > ${prefix}readCounts
+  seq \$(wc -l < ${prefix}umis_per_cell) > ${prefix}_IDline
+
+  paste -d "," ${prefix}_IDline ${prefix}readCounts ${prefix}umiCounts > ${prefix}_UmiReadsCounts.mqc
+  """ 
+}
+
+/*
 process filterMatrix {
   tag "${prefix}"
   publishDir "${params.outdir}/filterMatrix", mode: 'copy'
@@ -599,8 +665,6 @@ process filterMatrix {
   filterMatrix.py -i ${sortedCount} -p ${prefix} -m1 ${params.minCountPerCell1} -m2 ${params.minCountPerCell2} -mG1 ${params.minCountPerCellGene1} -mG2 ${params.minCountPerCellGene2}
   """
 }
-
-
 
 process distribUMIs{
   tag "${prefix}"
@@ -763,11 +827,12 @@ process multiqc {
   file ('trimming/*') from chtrimmedReadsLog.collect()
   file ('star/*') from chAlignmentLogs.collect()
   file ('FC/*') from chAssignmentLogs.collect()
+  file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('mergeReads/*') from chCountSummaryExtUMI.collect()
-  file ('coverage/*') from chBigWigLog.collect()
-
+  file ('bigwig/*') from chBigWigLog.collect()
+  file ('umiVSreads/*') from chUmiReadsCount.collect()
 
   output: 
   file splan
@@ -780,13 +845,13 @@ process multiqc {
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   //isPE = params.singleEnd ? "" : "-p"
   designOpts= params.design ? "-d ${params.design}" : ""
-  modules_list = "-m custom_content -m star -m featureCounts -m samtools -m deeptools -m cutadapt"
+  modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
 
   umisFiltre1 = params.minCountPerCell1 ? "--minCountPerCell1 ${params.minCountPerCell1}" : ""
   umisFiltre2 = params.minCountPerCell2 ? "--minCountPerCell2 ${params.minCountPerCell2}" : ""
   umisFiltreGene1 = params.minCountPerCellGene1 ? "--minCountPerCellGene1 ${params.minCountPerCellGene1}" : ""
   umisFiltreGene2 = params.minCountPerCellGene2 ? "--minCountPerCellGene2 ${params.minCountPerCellGene2}" : ""
-  
+
   """
   stat2mqc.sh ${splan} ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
