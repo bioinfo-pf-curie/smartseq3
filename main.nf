@@ -569,7 +569,7 @@ process genebody_coverage {
         -i ${assignedBam} \\
         -o ${prefix}.rseqc \\
         -r $bed12
-    mv log.txt ${bam.baseName}.rseqc.log.txt
+    mv log.txt ${prefix}.rseqc.log.txt
     """
 }
 
