@@ -546,14 +546,18 @@ process bigWig {
 
 process genebody_coverage {
     tag "${prefix}"
-       publishDir "${params.outdir}/genecov" , mode: 'copy',
-        saveAs: {filename ->
-            if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
-            else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
-            else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
-            else if (filename.indexOf("log.txt") > -1) false
-            else filename
-        }
+    label 'rseqc'
+    label 'highCpu'
+    label 'highMem'
+    
+    publishDir "${params.outdir}/genecov" , mode: 'copy',
+    saveAs: {filename ->
+        if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
+        else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
+        else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
+        else if (filename.indexOf("log.txt") > -1) false
+        else filename
+    }
 
     input:
     set val(prefix), file(assignedBam) from chSortedBAM_GeneCov
