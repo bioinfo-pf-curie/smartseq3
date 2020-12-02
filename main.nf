@@ -621,7 +621,7 @@ process countMatrices {
 
 /*##########################   STEP 3: Analysis  ####################################*/
 
-process umiVSreadCounts{
+/*process umiVSreadCounts{
   tag "${prefix}"
   publishDir "${params.outdir}/umiVSreadCounts", mode: 'copy'
 
@@ -646,7 +646,7 @@ process umiVSreadCounts{
 
   paste -d "," ${prefix}_IDline ${prefix}readCounts ${prefix}umiCounts > ${prefix}_UmiReadsCounts.mqc
   """ 
-}
+}*/
 
 /*
 process filterMatrix {
