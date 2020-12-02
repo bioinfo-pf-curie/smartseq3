@@ -545,7 +545,7 @@ process bigWig {
 }
 
 process genebody_coverage {
-    tag "${bam.baseName - 'Sorted'}"
+    //tag "${bam.baseName - 'Sorted'}"
        publishDir "${params.outdir}/genecov" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -567,7 +567,7 @@ process genebody_coverage {
     samtools index $bam
     geneBody_coverage.py \\
         -i ${assignedBam} \\
-        -o ${bam.baseName}.rseqc \\
+        -o ${prefix}.rseqc \\
         -r $bed12
     mv log.txt ${bam.baseName}.rseqc.log.txt
     """
