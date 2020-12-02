@@ -564,7 +564,7 @@ process genebody_coverage {
 
     script:
     """
-    samtools index $bam
+    samtools index ${assignedBam}
     geneBody_coverage.py \\
         -i ${assignedBam} \\
         -o ${prefix}.rseqc \\
