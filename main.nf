@@ -832,7 +832,7 @@ process multiqc {
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('mergeReads/*') from chCountSummaryExtUMI.collect()
   file ('bigwig/*') from chBigWigLog.collect()
-  file ('umiVSreads/*') from chUmiReadsCount.collect()
+  //file ('umiVSreads/*') from chUmiReadsCount.collect()
 
   output: 
   file splan
