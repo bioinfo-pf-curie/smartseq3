@@ -571,13 +571,13 @@ process separateReads {
   samtools view ${assignedBam} > assignedAll.sam
 
   # save header and extract umi reads 
-  samtools view -H ${alignedBam} > ${prefix}_assignedUMIs.sam
+  samtools view -H ${assignedBam} > ${prefix}_assignedUMIs.sam
   fgrep -f ${umisReadsIDs} assignedAll.sam >> ${prefix}_assignedUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
 
   # save header and extract non umi reads 
-  samtools view -H ${alignedBam} > ${prefix}_assignedNonUMIs.sam
+  samtools view -H ${assignedBam} > ${prefix}_assignedNonUMIs.sam
   fgrep -f ${nonUmisReadsIDs} assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
