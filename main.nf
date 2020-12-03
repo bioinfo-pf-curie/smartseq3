@@ -384,8 +384,8 @@ process mergeReads {
   seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}_umisReadsIDs.txt
 
   # Extract non umis reads
-  seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Get non UMI reads IDs
   seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq | cut -f1 -d_ > ${prefix}_NonUmisReadsIDs.txt
