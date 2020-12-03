@@ -587,7 +587,7 @@ process separateReads {
   """
 }
 
-chUmiBam.view()
+//chUmiBam.view()
 
 
 process genebody_coverage {
