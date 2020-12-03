@@ -557,7 +557,7 @@ process separateReads {
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chSortedBAM_sepReads
+  set val(prefix), file(assignedBam) from chSortedBAM_sepReads
   set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
   set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
