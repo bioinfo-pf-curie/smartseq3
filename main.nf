@@ -160,7 +160,7 @@ if (params.bed12) {
   Channel  
     .fromPath(params.bed12)
     .ifEmpty { exit 1, "BED12 annotation file not found: ${params.bed12}" }
-    .set { chBedGeneCov } 
+    .into { chBedGeneCov_Umi; chBedGeneCov_NonUmi } 
 }else {
   exit 1, "GTF annotation file not not found: ${params.bed12}"
 }
@@ -373,17 +373,22 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
+  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
+  set val(prefix), file("*_NonUmisReadsIDs.txt") into chNonUmiReadsIDs
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   file("v_seqkit.txt") into chSeqkitVersion
 
   script:
   """
-  # Get UMI reads
-  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}_umisReadsIDs
+  # Get UMI reads IDs
+  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}_umisReadsIDs.txt
 
   # Extract non umis reads
   seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
   seqkit grep -v -f ${prefix}_umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+
+  # Get non UMI reads IDs
+  seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq | cut -f1 -d_ > ${prefix}_NonUmisReadsIDs.txt
 
   # Merge non umis reads + umi reads (with umi in read names)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
@@ -508,7 +513,7 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_GeneCov ,chSortedBAM_getUmis, chSortedBAM_readCounts
+  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -544,6 +549,44 @@ process bigWig {
   """
 }
 
+process separateReads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medhCpu'
+  label 'medMem'
+  publishDir "${params.outDir}/separateReads", mode: 'copy'
+
+  input :
+  set val(prefix), file(alignedBam) from chSortedBAM_sepReads
+  set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
+  set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
+
+  output:
+  set val(prefix), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
+  set val(prefix), file("*_assignedNonUMIs.bam") into chNonUmiBam
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${assignedBam} > assignedAll.sam
+
+  # save header and extract umi reads 
+  samtools view -H ${alignedBam} > ${prefix}_assignedUMIs.sam
+  fgrep -f ${umisReadsIDs} assignedAll.sam >> ${prefix}_assignedUMIs.sam
+  # sam to bam
+  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
+
+  # save header and extract non umi reads 
+  samtools view -H ${alignedBam} > ${prefix}_assignedNonUMIs.sam
+  fgrep -f ${nonUmisReadsIDs} assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  # sam to bam
+  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
+
+  #-h Include the header in the output.
+  #-H Output the header only.
+  """
+}
+
 process genebody_coverage {
     tag "${prefix}"
     label 'rseqc'
@@ -560,43 +603,33 @@ process genebody_coverage {
     }
 
     input:
-    set val(prefix), file(assignedBam) from chSortedBAM_GeneCov
-    file bed12 from chBedGeneCov.collect()
+    set val(prefix), file(umiBam) from chUmiBam
+    set val(prefix), file(nonUmiBam) from chNonUmiBam
+    file bed12_Umi from chBedGeneCov_Umi.collect()
+    file bed12_NonUmi from chBedGeneCov_NonUmi.collect()
 
     output:
     file "*.{txt,pdf,r}" into chGeneCov_res
 
     script:
     """
-    samtools index ${assignedBam}
+    samtools index ${umiBam}
     geneBody_coverage.py \\
-        -i ${assignedBam} \\
-        -o ${prefix}.rseqc \\
-        -r $bed12
-    mv log.txt ${prefix}.rseqc.log.txt
+        -i ${umiBam} \\
+        -o ${prefix}_umi.rseqc \\
+        -r $bed12_Umi
+    mv log.txt ${prefix}_umi.rseqc.log.txt
+
+    samtools index ${nonUmiBam}
+    geneBody_coverage.py \\
+        -i ${nonUmiBam} \\
+        -o ${prefix}_nonUmi.rseqc \\
+        -r $bed12_NonUmi
+    mv log.txt ${prefix}_nonUmi.rseqc.log.txt
     """
 }
 
-process getUmiReads {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medhCpu'
-  label 'medMem'
-  publishDir "${params.outDir}/getUmiReads", mode: 'copy'
 
-  input :
-  set val(prefix), file(alignedBam) from chSortedBAM_getUmis
-
-  output:
-  set val(prefix), file("*_UMIs.featureCounts.bam") into chUmiBam
-
-  script:  
-  """
-  samtools view -H ${alignedBam} > ${prefix}_UMIs.featureCounts.sam
-  samtools view ${alignedBam} | awk '/[0-9]_/ {print \$0}' >> ${prefix}_UMIs.featureCounts.sam
-  samtools view -bh ${prefix}_UMIs.featureCounts.sam > ${prefix}_UMIs.featureCounts.bam
-  """
-}
 
 process countMatrices {
   tag "${prefix}"
@@ -606,7 +639,7 @@ process countMatrices {
   publishDir "${params.outdir}/countMatrices", mode: 'copy'
 
   input:
-  set val(prefix), file(umiBam) from chUmiBam
+  set val(prefix), file(umiBam) from chUmiBam_countMtx
 
   output:
   set val(prefix), file("*_Counts.tsv.gz") into chMatrices
