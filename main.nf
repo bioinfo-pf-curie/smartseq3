@@ -160,7 +160,7 @@ if (params.bed12) {
   Channel  
     .fromPath(params.bed12)
     .ifEmpty { exit 1, "BED12 annotation file not found: ${params.bed12}" }
-    .into { chBedGeneCov_Umi; chBedGeneCov_NonUmi } 
+    .set { chBedGeneCov } 
 }else {
   exit 1, "GTF annotation file not not found: ${params.bed12}"
 }
@@ -562,8 +562,8 @@ process separateReads {
   set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
   output:
-  set val(prefix), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
-  set val(prefix), file("*_assignedNonUMIs.bam") into chNonUmiBam
+  set val("${prefix}_umi"), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.bam") into chNonUmiBam
 
   script:  
   """
@@ -587,6 +587,9 @@ process separateReads {
   """
 }
 
+chUmiBam.view()
+
+
 process genebody_coverage {
     tag "${prefix}"
     label 'rseqc'
@@ -603,29 +606,21 @@ process genebody_coverage {
     }
 
     input:
-    set val(prefix), file(umiBam) from chUmiBam
-    set val(prefix), file(nonUmiBam) from chNonUmiBam
-    file bed12_Umi from chBedGeneCov_Umi.collect()
-    file bed12_NonUmi from chBedGeneCov_NonUmi.collect()
+    set val(prefix), file(bam) from chUmiBam.concat(chNonUmiBam)
+    //set val(prefix), file(nonUmiBam) from chNonUmiBam
+    file bed12 from chBedGeneCov.collect()
 
     output:
     file "*.{txt,pdf,r}" into chGeneCov_res
 
     script:
     """
-    samtools index ${umiBam}
+    samtools index ${bam}
     geneBody_coverage.py \\
-        -i ${umiBam} \\
-        -o ${prefix}_umi.rseqc \\
-        -r $bed12_Umi
-    mv log.txt ${prefix}_umi.rseqc.log.txt
-
-    samtools index ${nonUmiBam}
-    geneBody_coverage.py \\
-        -i ${nonUmiBam} \\
-        -o ${prefix}_nonUmi.rseqc \\
-        -r $bed12_NonUmi
-    mv log.txt ${prefix}_nonUmi.rseqc.log.txt
+        -i ${bam} \\
+        -o ${prefix}.rseqc \\
+        -r $bed12
+    mv log.txt ${prefix}.rseqc.log.txt
     """
 }
 
