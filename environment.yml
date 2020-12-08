@@ -28,5 +28,4 @@ dependencies:
   - conda-forge::r-plotrix=3.7_8
   - conda-forge::r-dplyr=1.0.2
   - conda-forge::r-matrix=1.2_18
-  - conda-forge::r-seurat
-  - conda-forge::r-kernsmooth
+  
