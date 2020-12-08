@@ -596,7 +596,7 @@ process genebody_coverage {
     label 'highCpu'
     label 'highMem'
     
-    publishDir "${params.outdir}/genecov" , mode: 'copy',
+    publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
     saveAs: {filename ->
         if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
         else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
@@ -650,134 +650,24 @@ process countMatrices {
 
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
-
-/*##########################   STEP 3: Analysis  ####################################*/
-
-/*process umiVSreadCounts{
-  tag "${prefix}"
-  publishDir "${params.outdir}/umiVSreadCounts", mode: 'copy'
+process cellAnalysis{
+  publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
-  set val(prefix), file(umiMatrix) from chMatrices
-  set val(prefix), file(featureCountsBam) from chSortedBAM_readCounts
+  file ('matrices/*') from chMatrices.collect()
 
   output:
-  set val(prefix), file("*_UmiReadsCounts.mqc") into chUmiReadsCount
+  file ("10Xoutput/") into ch10X
+  file ("resume.csv") into chResume
+  file ("nbUMIperGene.csv") into chUMIperGene
+  file ("nbUMIperCell.csv") into chUMIperCell
+  file ("nbGenesPerCell.csv") into chGenesPerCell
+  file ("UmiGenePerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
 
   script:
   """
-  # dans le sam ayant tous les reads, obtenir une colonne avec le nom du gene et une colonne avec le nombre de reads (lire le sam dans R ?)
-  # Merger (r script) le tableau de reads au tableau d'umis == gene, reads, umis
-
-  samtools view ${featureCountsBam} > ${prefix}_featureCounts.sam => lire dans R
-  samtools view ${featureCountsBam} | grep XT: | cut -f1 | cut -d"_" -f2,3 | sort > ${prefix}XTreads
-
-  cut -d"_" -f1 ${prefix}XTreads | uniq -c > ${prefix}reads_per_cell
-  awk -F " " '{print \$1}' ${prefix}reads_per_cell > ${prefix}readCounts
-  seq \$(wc -l < ${prefix}umis_per_cell) > ${prefix}_IDline
-
-  paste -d "," ${prefix}_IDline ${prefix}readCounts ${prefix}umiCounts > ${prefix}_UmiReadsCounts.mqc
-  """ 
-}*/
-
-/*
-process filterMatrix {
-  tag "${prefix}"
-  publishDir "${params.outdir}/filterMatrix", mode: 'copy'
-
-  input:
-  set val(prefix), file(sortedCount) from umiMatrixSorted_filterPr
-
-  output:
-  set val(prefix), file("*CountFiltred_UMIs${params.minCountPerCell1}*") ,  file("*CountFiltred_UMIs${params.minCountPerCell2}*") into umiMatrixFiltred, umiMatrixFiltred_10XPr
-  set val(prefix), file("*CountFiltred_Genes${params.minCountPerCellGene1}*"), file("*CountFiltred_Genes${params.minCountPerCellGene2}*") into geneMatrixFiltred, geneMatrixFiltred_10XPr
-
-  script:
-  """
-  filterMatrix.py -i ${sortedCount} -p ${prefix} -m1 ${params.minCountPerCell1} -m2 ${params.minCountPerCell2} -mG1 ${params.minCountPerCellGene1} -mG2 ${params.minCountPerCellGene2}
-  """
-}
-
-process distribUMIs{
-  tag "${prefix}"
-  publishDir "${params.outdir}/distribUMIs", mode: 'copy'
-
-  input:
-  set val(prefix), file(sortedCounts) from chMatrices_distribPr
-
-  output:
-  set val(prefix), file("*distDF.mqc") into mqcDistribUMI
-  set val(prefix), file("*distribution.pdf") into pdfDist
-
-  script:
-  """
-  umisDistribution.r ${sortedCounts} ${prefix}
-  """ 
-}
-
-process umiVSreadCounts{
-  tag "${prefix}"
-  publishDir "${params.outdir}/umiVSreadCounts", mode: 'copy'
-
-  input:
-  set val(prefix), file(featureCountsBam) from sortedBAM_umiVSreads
-
-  output:
-  set val(prefix), file("*_UmiReadsCounts.mqc") into umiReadsCount
-
-  script:
-  """
-  samtools view ${featureCountsBam} | grep XT: | cut -f1 | cut -d"_" -f2,3 | sort > ${prefix}XTreads
-
-  uniq ${prefix}XTreads | cut -d"_" -f1 | uniq -c > ${prefix}umis_per_cell
-  awk -F " " '{print \$1}' ${prefix}umis_per_cell > ${prefix}umiCounts
-
-  cut -d"_" -f1 ${prefix}XTreads | uniq -c > ${prefix}reads_per_cell
-  awk -F " " '{print \$1}' ${prefix}reads_per_cell > ${prefix}readCounts
-  awk -F " " '{print \$2}' ${prefix}reads_per_cell > ${prefix}Bc
-  seq \$(wc -l < ${prefix}umis_per_cell) > ${prefix}_IDline
-
-  paste -d "," ${prefix}_IDline ${prefix}readCounts ${prefix}umiCounts > ${prefix}_UmiReadsCounts.mqc
-  """ 
-}
-
-process create10Xoutput{
-  tag "${prefix}"
-  publishDir "${params.outdir}/create10Xoutput", mode: 'copy'
-
-  input:
-  //set val(prefix), file(initialMatrix) from umiMatrixSorted_10XPr
-  //set val(prefix), file(UMIfiltred)  from umiMatrixFiltred_10XPr
-  //set val(prefix), file(GeneFiltred) from geneMatrixFiltred_10XPr
-
-  set val(prefix), file(initialMatrix), file(UMIfiltred1),file(UMIfiltred2), file(GeneFiltred1), file(GeneFiltred2) from umiMatrixSorted_10XPr.join(umiMatrixFiltred_10XPr).join(geneMatrixFiltred_10XPr)
-
-  output:
-  file "*" into out10X
-
-  script:
-  """
-  mkdir ${prefix}
-
-  create10Xoutput.r ${initialMatrix} noFilter/
-  mv noFilter/ ${prefix}/
-
-  filter=\$(basename ${UMIfiltred1} .tsv.gz | grep -Eo UMIs.* )
-  create10Xoutput.r ${UMIfiltred1} \$filter
-  mv \$filter/ ${prefix}/
-
-  filter=\$(basename ${UMIfiltred2} .tsv.gz | grep -Eo UMIs.*)
-  create10Xoutput.r ${UMIfiltred2} \$filter
-  mv \$filter/ ${prefix}/
-
-  filter=\$(basename ${GeneFiltred1} .tsv.gz | grep -Eo Genes.*)
-  create10Xoutput.r ${GeneFiltred1} \$filter
-  mv \$filter/ ${prefix}/
-
-  filter=\$(basename ${GeneFiltred2} .tsv.gz | grep -Eo Genes.*)
-  create10Xoutput.r ${GeneFiltred2} \$filter
-  mv \$filter/ ${prefix}/
-
+  create10Xoutput.r matrices/ 10Xoutput/
   """ 
 }
 
@@ -864,7 +754,15 @@ process multiqc {
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('mergeReads/*') from chCountSummaryExtUMI.collect()
   file ('bigwig/*') from chBigWigLog.collect()
-  //file ('umiVSreads/*') from chUmiReadsCount.collect()
+  file ('resume/*') from chResume.collect()
+  //PLOTS
+  file ("resume.csv") from chResume
+  file ("umiPerGene") from chUMIperGene //nbUMIperGene.csv
+  file ("nbUMIs/") from chUMIperCell //nbUMIperCell.csv
+  file ("nbGenes/") from chGenesPerCell //nbGenesPerCell.csv
+  file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
+  file ("mt/") from chMT // MtGenePerCell.csv
+
 
   output: 
   file splan
