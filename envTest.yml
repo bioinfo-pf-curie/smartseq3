@@ -14,7 +14,7 @@ dependencies:
   - conda-forge::r-seurat
   - conda-forge::r-kernsmooth
 
-  #=> Found::
+  # => Found::
   #  seurat=3.2.2 => ne marche pas 
   #  library(Seurat)
   #    Error: package or namespace load failed for ‘Seurat’ in dyn.load(file, DLLpath = DLLpath, ...):
