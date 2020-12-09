@@ -17,10 +17,10 @@ dependencies:
   - bioconda::biopython=1.70
   - bioconda::python-sortedcontainers=2.1.0
   - bioconda::seqkit=0.14.0
-  - conda-forge::numpy=1.19.4
-  - bioconda::multiqc=1.9
-  - bioconda::deeptools=3.5.0
-  - bioconda::rseqc=4.0.0
+  - conda-forge::numpy
+  - bioconda::multiqc
+  - bioconda::deeptools
+  - bioconda::rseqc
   # R-packages
   - conda-forge::r-base=3.6.3
   - r::r-stringi=1.4.3
