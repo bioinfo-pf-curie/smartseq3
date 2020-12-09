@@ -6,9 +6,9 @@ channels:
 dependencies:
   - conda-forge::python=3.6.10
   - conda-forge::pymdown-extensions=8.0.1
-  - conda-forge::numpy=1.12.1
-  #- bioconda::rseqc
-  - bioconda::multiqc=1.8
+  - conda-forge::numpy
+  - bioconda::rseqc
+  - bioconda::multiqc=1.9
   - bioconda::deeptools=3.5.0
   - bioconda::subread=1.6.2
   - bioconda::samtools=1.10
@@ -22,7 +22,7 @@ dependencies:
   - bioconda::python-sortedcontainers=2.1.0
   - bioconda::seqkit=0.14.0
   # R-packages
-  - conda-forge::r-base=3.6.3
+  - conda-forge::r-base=3.6.1
   - r::r-stringi=1.4.3
   - conda-forge::r-reshape2=1.4.4
   - bioconda::bioconductor-dropletutils=1.6.1
