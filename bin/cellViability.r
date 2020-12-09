@@ -1,11 +1,9 @@
 #!/usr/bin/env Rscript
 
+.libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
 
-#dir_matrices<- as.character(commandArgs(TRUE)[1])
-#dir_res_10X= as.character(commandArgs(TRUE)[2])
-
-#setwd("~/Documents/Curie/SC_platform/Analysis/scRNAseq/1.Demultiplexing/smartSeq3/tests/create10X")
-#data<-read.csv("toy_L384T27_umi_Counts.tsv.gz", sep = '\t', header = F)
+dir_matrices<- as.character(commandArgs(TRUE)[1])
+dir_res_10X= as.character(commandArgs(TRUE)[2])
 
 ##### Merge Matrices
 ####----------------------------------------
