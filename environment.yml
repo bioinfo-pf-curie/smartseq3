@@ -7,7 +7,7 @@ dependencies:
   - conda-forge::python=3.6.10
   - conda-forge::pymdown-extensions=8.0.1
   - conda-forge::numpy
-  - bioconda::rseqc
+  #- bioconda::rseqc
   - bioconda::multiqc=1.9
   - bioconda::deeptools
   - bioconda::subread=1.6.2
