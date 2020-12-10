@@ -543,7 +543,8 @@ process bigWig {
   script:
   """
   samtools index ${assignedBam}
-  bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
+  #bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
+  bamCoverage -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=5 > ${prefix}_coverage.log
 
   bamCoverage --version &> v_bamcoverage.txt
   """
@@ -661,6 +662,7 @@ process cellAnalysis{
   file ("nbGenesPerCell.csv") into chGenesPerCell
   file ("UmiGenePerCell.csv") into chUmiGeneRatio
   file ("MtGenePerCell.csv") into chMT
+  file ("")
   file ("weightedHistUMI.csv") into chWeightedHist
 
   script:
