@@ -670,7 +670,7 @@ process cellAnalysis{
 
   script:
   """
-  Rscript cellViability.r matrices/ 10Xoutput/
+  cellViability.r matrices/ 10Xoutput/
   """ 
 }
 
