@@ -527,7 +527,7 @@ process sortBam {
 
 process bigWig {
   tag "${prefix}"
-  label 'bamCoverage'
+  label 'deeptools'
   label 'highCpu'
   label 'highMem'
   publishDir "${params.outdir}/bigWig", mode: 'copy'
@@ -649,6 +649,10 @@ process countMatrices {
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
 process cellAnalysis{
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'extraMem'
   publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
@@ -662,7 +666,6 @@ process cellAnalysis{
   file ("nbGenesPerCell.csv") into chGenesPerCell
   file ("UmiGenePerCell.csv") into chUmiGeneRatio
   file ("MtGenePerCell.csv") into chMT
-  file ("")
   file ("weightedHistUMI.csv") into chWeightedHist
 
   script:
