@@ -2,8 +2,8 @@
 
 .libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
 
-dir_matrices<- as.character(commandArgs(TRUE)[1])
-dir_res_10X= as.character(commandArgs(TRUE)[2])
+dir_matrices<-as.character(commandArgs(TRUE)[1])
+dir_res_10X<-as.character(commandArgs(TRUE)[2])
 
 ##### Merge Matrices
 ####----------------------------------------
@@ -43,8 +43,8 @@ normData<-data.frame(NormalizeData(matrixFinal, normalization.method="RC" , scal
 # log transformation
 normLogData<-log10(normData + 1)
 # transform into long format
-normLongMatx<-melt(as.matrix(normLogData))
-#normLongMatx<-normLongMatx[which(normLogData$value>0),]
+normLogDataLong<-melt(as.matrix(normLogData))
+normLogDataLong<-normLogDataLong[which(normLogDataLong$value>0),]
 
 # Make resume data 
 samples<-colnames(matrixFinal)
@@ -87,10 +87,14 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 
 ### Counts
 #------------
-normLongMatx<-melt(normLogData)
-hist_nbUMIperGene<-hist(normLongMatx$value, xlab = "# UMIs (Log10Normalized)", ylab = "# Genes", main = "Number of UMIs per genes")
+hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10Normalized)", ylab = "# Genes", main = "Number of UMIs per genes")
 hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10Normalized)", ylab = "# Cell")
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
+wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs,
+              w=resume$NormLog_nb_UMIs, 
+              main="Weighted distribution of umis per barcodes",
+              xlab="#UMIs per cell (log10)",
+              ylab="#UMIs", breaks = 5)
 
 create_df<-function(list){
     df<-data.frame(list$breaks)
@@ -103,12 +107,12 @@ create_df<-function(list){
 nbUMIperGene<-create_df(hist_nbUMIperGene)
 nbUMIperCell<-create_df(hist_nbUMIperCell)
 nbGenesPerCell<-create_df(hist_nbGenesPerCell)
+whUMI<-create_df(wh_UMI)
 
-
-write.csv(nbUMIperGene, "nbUMIperGene.csv")
-write.csv(nbUMIperCell, "nbUMIperCell.csv")
-write.csv(nbGenesPerCell, "nbGenesPerCell.csv")
-
+write.csv(nbUMIperGene, "HistUMIperGene.csv")
+write.csv(nbUMIperCell, "HistUMIperCell.csv")
+write.csv(nbGenesPerCell, "HistGenesPerCell.csv")
+write.csv(wh_UMI, "weightedHistUMI.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
