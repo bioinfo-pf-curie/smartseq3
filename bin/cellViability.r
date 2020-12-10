@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+.libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
+
 library(plotrix)
 library(plyr)
 library(dplyr)
@@ -7,9 +9,7 @@ library(Seurat)
 library(tibble)
 library(reshape2)
 library(ggplot2)
-.libPaths()
-.libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
-.libPaths()
+
 dir_matrices<-as.character(commandArgs(TRUE)[1])
 dir_res_10X<-as.character(commandArgs(TRUE)[2])
 
