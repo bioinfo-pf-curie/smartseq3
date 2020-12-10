@@ -589,7 +589,6 @@ process separateReads {
 
 //chUmiBam.view()
 
-
 process genebody_coverage {
     tag "${prefix}"
     label 'rseqc'
@@ -624,8 +623,6 @@ process genebody_coverage {
     """
 }
 
-
-
 process countMatrices {
   tag "${prefix}"
   label 'umiTools'
@@ -659,15 +656,16 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume.csv") into chResume
-  //file ("nbUMIperGene.csv") into chUMIperGene
-  //file ("nbUMIperCell.csv") into chUMIperCell
-  //file ("nbGenesPerCell.csv") into chGenesPerCell
-  //file ("UmiGenePerCell.csv") into chUmiGeneRatio
-  //file ("MtGenePerCell.csv") into chMT
+  file ("nbUMIperGene.csv") into chUMIperGene
+  file ("nbUMIperCell.csv") into chUMIperCell
+  file ("nbGenesPerCell.csv") into chGenesPerCell
+  file ("UmiGenePerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
+  file ("weightedHistUMI.csv") into chWeightedHist
 
   script:
   """
-  create10Xoutput.r matrices/ 10Xoutput/
+  cellViability.r matrices/ 10Xoutput/
   """ 
 }
 
