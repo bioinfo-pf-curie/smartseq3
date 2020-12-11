@@ -1,10 +1,10 @@
 #!/bin/bash
 
 splan=$1
-filtreUmi1=$3
-filtreUmi2=$5
-filtreGene1=$7
-filtreGene2=$9
+#filtreUmi1=$3
+#filtreUmi2=$5
+#filtreGene1=$7
+#filtreGene2=$9
 
 ## Catch sample names
 all_samples=$(awk -F, '{print $1}' $splan)
