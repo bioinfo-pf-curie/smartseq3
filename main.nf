@@ -593,43 +593,41 @@ process bigWig {
 //chUmiBam.view()
 
 process genebody_coverage {
-    tag "${prefix}"
-    label 'rseqc'
-    label 'highCpu'
-    label 'extraMem'
-    
-    publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
-    saveAs: {filename ->
-        if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
-        else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
-        else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
-        else if (filename.indexOf("log.txt") > -1) false
-        else filename
-    }
+  tag "${prefix}"
+  label 'rseqc'
+  label 'highCpu'
+  label 'extraMem'
+  
+  publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
+  saveAs: {filename ->
+      if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
+      else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
+      else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
+      else if (filename.indexOf("log.txt") > -1) false
+      else filename
+  }
 
-    input:
-    //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
-    set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
-    file bed12 from chBedGeneCov.collect()
-    // channel = pile
-    // quand site tous les fichiers => c'est que commandes differentes sur les deux
-    // To create new channel from one, those == spikego in 1 
-    // chAlignReads.choice( chAlignSpike, chAlignRef ){ it -> it[1] =~ 'spike' ? 1 : 0 }
+  input:
+  //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+  set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
+  file bed12 from chBedGeneCov.collect()
+  // channel = pile
+  // quand site tous les fichiers => c'est que commandes differentes sur les deux
+  // To create new channel from one, those == spikego in 1 
+  // chAlignReads.choice( chAlignSpike, chAlignRef ){ it -> it[1] =~ 'spike' ? 1 : 0 }
 
-    output:
-    file "*.{txt,pdf,r}" into chGeneCov_res
+  output:
+  file "*.{txt,pdf,r}" into chGeneCov_res
 
-    script:
-    """
-    #samtools index ${bigWigs}
-    geneBody_coverage2.py \\
-        -i ${bigWigs} \\
-        -o ${prefix}.rseqc \\
-        -r $bed12
-    mv log.txt ${prefix}.rseqc.log.txt
-    print("tutu")
-
-    """
+  script:
+  """
+  #samtools index ${bigWigs}
+  geneBody_coverage2.py \\
+      -i ${bigWigs} \\
+      -o ${prefix}.rseqc \\
+      -r $bed12
+  mv log.txt ${prefix}.rseqc.log.txt
+  """
 }
 
 //chBigWig.view()
