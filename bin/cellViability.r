@@ -104,9 +104,9 @@ wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs, w=resume$NormLog_nb_UMIs,
               ylab="#UMIs", breaks = 5)
 
 create_df<-function(list_hist, list_names){
-    df<-data.frame(list$breaks)
+    df<-data.frame(list_hist$breaks)
     df<-df[-1,]
-    df<-cbind(list_names, df, list$counts)
+    df<-cbind(list_names, df, list_hist$counts)
     #colnames(df)<-c("sample", "breaks.x", "counts.y")
     return(df)
 }
