@@ -538,7 +538,7 @@ process bigWig {
   output:
   set val(prefix), file("*_coverage.bw") into chBigWig
   set val(prefix), file("*_coverage.log") into chBigWigLog
-  file("v_bamcoverage.txt") into chBamCoverageVersion
+  file("v_deeptools.txt") into chBamCoverageVersion
 
   script:
   """
@@ -663,15 +663,16 @@ process cellAnalysis{
   file ("resume.csv") into chResume
   file ("HistUMIperGene.csv") into chUMIperGene
   file ("HistUMIperCell.csv") into chUMIperCell
-  file ("HistGenesPerCell.csv") into chGenesPerCell
+  file ("HistGenePerCell.csv") into chGenesPerCell
   file ("UmiGenePerCell.csv") into chUmiGeneRatio
   file ("MtGenePerCell.csv") into chMT
   file ("weightedHistUMI.csv") into chWeightedHist
+  file ("v_R.txt") into chRversion
 
   script:
   """
   cellViability.r matrices/ 10Xoutput/
-  """ 
+  R --version &> v_R.txt  """ 
 }
 
 /*-----------------------------------*/
@@ -690,13 +691,14 @@ process getSoftwareVersions{
   !params.skipSoftVersions
 
   input:
-  file 'v_umi_tools.txt' from chUmiToolsVersion.first().ifEmpty([])
+  file("v_umi_tools.txt") from chUmiToolsVersion.first().ifEmpty([])
   file("v_seqkit.txt") from chSeqkitVersion.first().ifEmpty([])
   file("v_cutadapt.txt") from chCutadaptVersion.first().ifEmpty([])
   file("v_star.txt") from chStarVersion.first().ifEmpty([])
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
-  file("v_bamcoverage.txt") from chBamCoverageVersion.first().ifEmpty([])
+  file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
+  file ("v_R.txt") from chRversion
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
@@ -760,11 +762,12 @@ process multiqc {
   file ('resume/*') from chResume.collect()
   //PLOTS
   file ("resume.csv") from chResume
-  file ("umiPerGene") from chUMIperGene //nbUMIperGene.csv
-  file ("nbUMIs/") from chUMIperCell //nbUMIperCell.csv
-  file ("nbGenes/") from chGenesPerCell //nbGenesPerCell.csv
+  file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
+  file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
+  file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
   file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
   file ("mt/") from chMT // MtGenePerCell.csv
+  file ("wh/") into chWeightedHist // weightedHistUMI.csv
 
 
   output: 
@@ -780,13 +783,14 @@ process multiqc {
   designOpts= params.design ? "-d ${params.design}" : ""
   modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
 
-  umisFiltre1 = params.minCountPerCell1 ? "--minCountPerCell1 ${params.minCountPerCell1}" : ""
-  umisFiltre2 = params.minCountPerCell2 ? "--minCountPerCell2 ${params.minCountPerCell2}" : ""
-  umisFiltreGene1 = params.minCountPerCellGene1 ? "--minCountPerCellGene1 ${params.minCountPerCellGene1}" : ""
-  umisFiltreGene2 = params.minCountPerCellGene2 ? "--minCountPerCellGene2 ${params.minCountPerCellGene2}" : ""
+  //umisFiltre1 = params.minCountPerCell1 ? "--minCountPerCell1 ${params.minCountPerCell1}" : ""
+  //umisFiltre2 = params.minCountPerCell2 ? "--minCountPerCell2 ${params.minCountPerCell2}" : ""
+  //umisFiltreGene1 = params.minCountPerCellGene1 ? "--minCountPerCellGene1 ${params.minCountPerCellGene1}" : ""
+  //umisFiltreGene2 = params.minCountPerCellGene2 ? "--minCountPerCellGene2 ${params.minCountPerCellGene2}" : ""
 
   """
-  stat2mqc.sh ${splan} ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
+  stat2mqc.sh ${splan} 
+  # ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """

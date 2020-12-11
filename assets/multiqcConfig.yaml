@@ -78,11 +78,30 @@ custom_data:
         id: 'final'
         title: 'Mapping summary'
 
+        file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
+        file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
+        file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
+        file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
+        file ("mt/") from chMT // MtGenePerCell.csv
+        file ("wh/") into chWeightedHist // weightedHistUMI.csv
+
+    umiPerGene: 
+      file_format: 'csv'
+      section_name: 'Number of UMIs per Genes'
+      description: ''
+      plot_type: 'bargraph'
+      pconfig:
+        id: 'umiPerGene'
+        title: 'Number of UMIs per Genes'
+
 sp:
   stats:
       fn: 'table_mqc.stats'
   final:
       fn: 'final_mqc.stats'
+  umiPerGene:
+      fn: 'HistUMIperGene.csv'
+  
 
 
 ###############################
@@ -99,38 +118,22 @@ module_order:
   - deeptools
   - rseqc
 
-custom_plot_config:
-   rseqc_read_distribution_plot:
-     cds_exons_tag_count:
-        color: '#8dd3c7'
-     5_utr_exons_tag_count:
-        color: '#ffffb3'
-     3_utr_exons_tag_count:
-        color: '#bebada'
-     introns_tag_count:
-        color: '#fb8072'
-     tss_up_1kb_tag_count:
-        color: '#80b1d3'
-     tss_up_5kb_tag_count:
-        color: '#fdb462'
-     tss_up_10kb_tag_count:
-        color: '#b3dde69'
-     tes_down_1kb_tag_count:
-        color: '#fccde5'
-     tes_down_5kb_tag_count:
-        color: '#d9d9d9'
-     tes_down_10kb_tag_count:
-        color: '#bc80bd'
-     other_intergenic_tag_count:
-        color: '#ccebc5'
-
-
 #############################
 ## Display
 
 report_section_order:
   stats:
     order: 100
+  cutadapt:
+    order: 90
+  star:
+    order: 80
+  featureCounts:
+    order: 70
+  deeptools:
+    order: 60
+  rseqc:
+    order: 50
   software_versions:
     order: -1000
   summary:
