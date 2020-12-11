@@ -89,7 +89,7 @@ custom_data:
       file_format: 'csv'
       section_name: 'Number of UMIs per Genes'
       description: ''
-      plot_type: 'bargraph'
+      plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
         title: 'Number of UMIs per Genes'
@@ -123,6 +123,8 @@ module_order:
 
 report_section_order:
   stats:
+    order: 110
+  final:
     order: 100
   cutadapt:
     order: 90
