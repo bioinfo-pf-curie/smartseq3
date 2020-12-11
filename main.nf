@@ -698,7 +698,7 @@ process getSoftwareVersions{
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
-  file ("v_R.txt") from chRversion
+  file ("v_R.txt") from chRversion.first().ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
@@ -761,13 +761,12 @@ process multiqc {
   file ('bigwig/*') from chBigWigLog.collect()
   file ('resume/*') from chResume.collect()
   //PLOTS
-  file ("resume.csv") from chResume
-  file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
-  file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
-  file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
-  file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
-  file ("mt/") from chMT // MtGenePerCell.csv
-  file ("wh/") into chWeightedHist // weightedHistUMI.csv
+  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.csv
+  file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell.csv
+  file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell.csv
+  file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell.csv
+  file ("mt/*") from chMT.collect() // MtGenePerCell.csv
+  //file ("wh/*") into chWeightedHist.collect() // weightedHistUMI.csv
 
 
   output: 
