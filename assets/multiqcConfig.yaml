@@ -78,12 +78,12 @@ custom_data:
         id: 'final'
         title: 'Mapping summary'
 
-        file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
-        file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
-        file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
-        file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
-        file ("mt/") from chMT // MtGenePerCell.csv
-        file ("wh/") into chWeightedHist // weightedHistUMI.csv
+        #file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
+        #file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
+        #file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
+        #file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
+        #file ("mt/") from chMT // MtGenePerCell.csv
+        #file ("wh/") into chWeightedHist // weightedHistUMI.csv
 
     umiPerGene: 
       file_format: 'csv'
