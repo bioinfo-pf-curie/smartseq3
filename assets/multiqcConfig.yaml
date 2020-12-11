@@ -87,7 +87,7 @@ custom_data:
 
     umiPerGene: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per Gene'
+      section_name: ''
       description: ''
       plot_type: 'linegraph'
       pconfig:
@@ -96,12 +96,51 @@ custom_data:
 
     umiPerCell: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per Cell'
+      section_name: ''
       description: ''
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerCell'
         title: 'Number of UMIs per Cell'
+    
+    wh: 
+      file_format: 'csv'
+      section_name: ''
+      description: ''
+      plot_type: 'linegraph'
+      pconfig:
+        id: 'wh'
+        title: 'Weighted histogram of the number of UMIs per cell'
+    
+    genePerCell: 
+      file_format: 'csv'
+      section_name: ''
+      description: ''
+      plot_type: 'linegraph'
+      pconfig:
+        id: 'genePerCell'
+        title: 'Number of Genes per Cell'
+    
+    ratio: 
+      file_format: 'csv'
+      section_name: ''
+      description: ''
+      plot_type: 'linegraph'
+      pconfig:
+        id: 'ratio'
+        title: 'Number of UMIs and Genes per Cell'
+    
+    mt: 
+      file_format: 'csv'
+      section_name: 'The percentage of mitochondrial is a cell viability marker. Under 5%, cell are concidered non dead.'
+      description: ''
+      plot_type: 'linegraph'
+      pconfig:
+        id: 'mt'
+        title: 'Percentage of mitochondrial genes per Cell'
+  
+
+    
 
 sp:
   stats:
@@ -112,6 +151,16 @@ sp:
       fn: 'HistUMIperGene.csv'
   umiPerCell:
       fn: 'HistUMIperCell.csv'
+  wh:
+      fn: 'weightedHistUMI.csv'
+  genePerCell:
+      fn: 'HistGenePerCell.csv'
+  ratio:
+      fn: 'UmiGenePerCell.csv'
+  mt:
+      fn: 'MtGenePerCell.csv'
+  
+  
   
 
 

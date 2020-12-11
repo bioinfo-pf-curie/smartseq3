@@ -525,31 +525,6 @@ process sortBam {
   """
 }
 
-process bigWig {
-  tag "${prefix}"
-  label 'deeptools'
-  label 'highCpu'
-  label 'highMem'
-  publishDir "${params.outdir}/bigWig", mode: 'copy'
-
-  input:
-  set val(prefix), file(assignedBam) from chSortedBAM_bigWig
-
-  output:
-  set val(prefix), file("*_coverage.bw") into chBigWig
-  set val(prefix), file("*_coverage.log") into chBigWigLog
-  file("v_deeptools.txt") into chBamCoverageVersion
-
-  script:
-  """
-  samtools index ${assignedBam}
-  #bamCoverage --normalizeUsing CPM -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
-  bamCoverage -b ${assignedBam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=5 > ${prefix}_coverage.log
-
-  bamCoverage --version &> v_deeptools.txt
-  """
-}
-
 process separateReads {
   tag "${prefix}"
   label 'samtools'
@@ -588,6 +563,33 @@ process separateReads {
   """
 }
 
+process bigWig {
+  tag "${prefix}"
+  label 'deeptools'
+  label 'highCpu'
+  label 'highMem'
+  publishDir "${params.outdir}/bigWig", mode: 'copy'
+
+  input:
+  //set val(prefix), file(assignedBam) from chSortedBAM_bigWig
+  set val(prefix), file(bam) from chSortedBAM_bigWig.concat(chUmiBam).concat(chNonUmiBam) //  _NonUmi_assignedNonUMIs.bam _umi_assignedNonUMIs.bam
+
+  output:
+  set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+  set val(prefix), file("*_coverage.log") into chBigWigLog
+  file("v_deeptools.txt") into chBamCoverageVersion
+
+  script:
+  """
+  ## Create bigWig files
+  samtools index ${bam}
+  #bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
+  bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=5 > ${prefix}_coverage.log
+
+  bamCoverage --version &> v_deeptools.txt
+  """
+}
+
 //chUmiBam.view()
 
 process genebody_coverage {
@@ -606,8 +608,7 @@ process genebody_coverage {
     }
 
     input:
-    set val(prefix), file(bam) from chUmiBam.concat(chNonUmiBam)
-    //set val(prefix), file(nonUmiBam) from chNonUmiBam
+    file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
     file bed12 from chBedGeneCov.collect()
 
     output:
@@ -615,9 +616,9 @@ process genebody_coverage {
 
     script:
     """
-    samtools index ${bam}
-    geneBody_coverage.py \\
-        -i ${bam} \\
+    samtools index ${bigWig}
+    geneBody_coverage2.py \\
+        -i ${bigWig} \\
         -o ${prefix}.rseqc \\
         -r $bed12
     mv log.txt ${prefix}.rseqc.log.txt
@@ -734,7 +735,6 @@ process workflowSummaryMqc {
   """.stripIndent()
 }
 
-
 process multiqc {
   label 'multiqc'
   label 'lowCpu'
@@ -767,7 +767,7 @@ process multiqc {
   file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell.csv
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell.csv
-  //file ("wh/*") into chWeightedHist.collect() // weightedHistUMI.csv
+file ("wh/*") into chWeightedHist.collect() // weightedHistUMI.csv
 
   output: 
   file splan
