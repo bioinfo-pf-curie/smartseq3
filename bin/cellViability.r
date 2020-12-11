@@ -27,7 +27,7 @@ for (file in listFile ){
         # If repeated gene names (different chr (often Y_RNA))
         matrix<-aggregate(matrix$count ~ matrix$gene, FUN=sum)
         
-        sample<-strsplit(x = file ,split = "ID") [[1]][1]
+        sample<-strsplit(x = file ,split = "_") [[1]][1]
         colnames(matrix)<-c("gene", sample)
         if(i==1){
             matrixFinal<-matrix
@@ -95,26 +95,30 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 
 ### Counts
 #------------
-hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10Normalized)", ylab = "# Genes", main = "Number of UMIs per genes")
-hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10Normalized)", ylab = "# Cell")
+hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
+hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10)", ylab = "# Cell")
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
 wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs, w=resume$NormLog_nb_UMIs, 
               main="Weighted distribution of umis per barcodes",
               xlab="#UMIs per cell (log10)",
               ylab="#UMIs", breaks = 5)
 
-create_df<-function(list){
+create_df<-function(list_hist, list_names){
     df<-data.frame(list$breaks)
     df<-df[-1,]
-    df<-cbind(df, list$counts)
-    colnames(df)<-c("breaks.x", "counts.y")
+    df<-cbind(list_names, df, list$counts)
+    #colnames(df)<-c("sample", "breaks.x", "counts.y")
     return(df)
 }
 
-nbUMIperGene<-create_df(hist_nbUMIperGene)
-nbUMIperCell<-create_df(hist_nbUMIperCell)
-nbGenesPerCell<-create_df(hist_nbGenesPerCell)
-whUMI<-create_df(wh_UMI)
+nbUMIperGene<-create_df(hist_nbUMIperGene, samples)
+colnames(df)<-c("sample", "# UMIs (log10)", "# Genes")
+nbUMIperCell<-create_df(hist_nbUMIperCell, samples)
+colnames(df)<-c("sample", "# UMIs (log10)", "# Cell")
+nbGenesPerCell<-create_df(hist_nbGenesPerCell, samples)
+colnames(df)<-c("sample", "# Genes", "# Cell")
+whUMI<-create_df(wh_UMI, samples)
+colnames(df)<-c("sample", "#UMIs per cell (log10)", "# UMIs")
 
 write.csv(nbUMIperGene, "HistUMIperGene.csv")
 write.csv(nbUMIperCell, "HistUMIperCell.csv")
@@ -130,13 +134,13 @@ umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
 plotRatio<-FeatureScatter(umiMatrix, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 Ratio<-data.frame(plotRatio[["data"]][["nFeature_RNA"]])
 Ratio$umi<-plotRatio[["data"]][["nCount_RNA"]]
-colnames(Ratio)<-c("#Genes", "#UMIs")
+colnames(Ratio)<-c("# Genes", "# UMIs")
 write.csv(Ratio, "UmiGenePerCell.csv")
 
 plotMT<-FeatureScatter(umiMatrix, feature1 = "nFeature_RNA", feature2 = "percent.mt")
 MT<-data.frame(plotMT[["data"]][["nFeature_RNA"]])
 MT$mt<-plotMT[["data"]][["percent.mt"]]
-colnames(MT)<-c("#Genes", "%MT")
+colnames(MT)<-c("# Genes", "%MT")
 write.csv(MT, "MtGenePerCell.csv")
 
 
