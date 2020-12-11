@@ -659,7 +659,7 @@ process cellAnalysis{
   file ('matrices/*') from chMatrices.collect()
 
   output:
-  file ("10Xoutput/*.tsv") into ch10X
+  file ("10Xoutput/") into ch10X
   file ("resume.csv") into chResume
   file ("nbUMIperGene.csv") into chUMIperGene
   file ("nbUMIperCell.csv") into chUMIperCell
