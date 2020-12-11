@@ -87,12 +87,21 @@ custom_data:
 
     umiPerGene: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per Genes'
+      section_name: 'Number of UMIs per Gene'
       description: ''
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
-        title: 'Number of UMIs per Genes'
+        title: 'Number of UMIs per Gene'
+
+    umiPerCell: 
+      file_format: 'csv'
+      section_name: 'Number of UMIs per Cell'
+      description: ''
+      plot_type: 'linegraph'
+      pconfig:
+        id: 'umiPerCell'
+        title: 'Number of UMIs per Cell'
 
 sp:
   stats:
@@ -101,6 +110,8 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: 'HistUMIperGene.csv'
+  umiPerCell:
+      fn: 'HistUMIperCell.csv'
   
 
 

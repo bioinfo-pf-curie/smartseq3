@@ -594,7 +594,7 @@ process genebody_coverage {
     tag "${prefix}"
     label 'rseqc'
     label 'highCpu'
-    label 'highMem'
+    label 'extraMem'
     
     publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
     saveAs: {filename ->
@@ -643,6 +643,7 @@ process countMatrices {
   # Count UMIs per gene per cell
   samtools index ${umiBam}
   umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
+  
   """
 }
 
