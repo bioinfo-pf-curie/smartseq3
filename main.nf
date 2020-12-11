@@ -767,7 +767,7 @@ process multiqc {
   file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell.csv
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell.csv
-  file ("wh/*") into chWeightedHist.collect() // weightedHistUMI.csv
+  //file ("wh/*") into chWeightedHist.collect() //weightedHistUMI.csv
 
   output: 
   file splan
