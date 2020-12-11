@@ -608,7 +608,7 @@ process genebody_coverage {
     }
 
     input:
-    file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+    set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
     file bed12 from chBedGeneCov.collect()
 
     output:
@@ -658,7 +658,7 @@ process cellAnalysis{
   publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
-  file ('matrices/*') from chMatrices.collect()
+  file ("matrices/${prefix}*") from chMatrices.collect()
 
   output:
   file ("10Xoutput/") into ch10X
