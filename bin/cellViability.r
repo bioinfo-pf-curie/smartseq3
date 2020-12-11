@@ -119,7 +119,7 @@ whUMI<-create_df(wh_UMI)
 write.csv(nbUMIperGene, "HistUMIperGene.csv")
 write.csv(nbUMIperCell, "HistUMIperCell.csv")
 write.csv(nbGenesPerCell, "HistGenesPerCell.csv")
-write.csv(wh_UMI, "weightedHistUMI.csv")
+write.csv(whUMI, "weightedHistUMI.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
