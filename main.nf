@@ -627,6 +627,8 @@ process genebody_coverage {
         -o ${prefix}.rseqc \\
         -r $bed12
     mv log.txt ${prefix}.rseqc.log.txt
+    print("tutu")
+
     """
 }
 
