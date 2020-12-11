@@ -8,7 +8,6 @@ regexes = {
     'Pipeline': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
 	'umi_tools': ['v_umi_tools.txt', r"(\S+)"],
-    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
 	'STAR': ['v_star.txt', r"STAR(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
 	'deeptools': ['v_deeptools.txt', r"plotFingerprint (\S+)"],
@@ -19,7 +18,6 @@ regexes = {
 results = OrderedDict()
 results['Pipeline'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
-results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 results['STAR'] = '<span style="color:#999999;\">N/A</span>'
 results['samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['deeptools'] = '<span style="color:#999999;\">N/A</span>'
