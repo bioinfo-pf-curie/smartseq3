@@ -608,8 +608,13 @@ process genebody_coverage {
     }
 
     input:
-    set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+    //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+    set val(prefix), file (bigwig) from chBigWig.filter{ it[0] =~ ".*mi" }
     file bed12 from chBedGeneCov.collect()
+    // channel = pile
+    // quand site tous les fichiers => c'est que commandes differentes sur les deux
+    // To create new channel from one, those == spikego in 1 
+    // chAlignReads.choice( chAlignSpike, chAlignRef ){ it -> it[1] =~ 'spike' ? 1 : 0 }
 
     output:
     file "*.{txt,pdf,r}" into chGeneCov_res
@@ -624,6 +629,8 @@ process genebody_coverage {
     mv log.txt ${prefix}.rseqc.log.txt
     """
 }
+
+//chBigWig.view()
 
 process countMatrices {
   tag "${prefix}"
