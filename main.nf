@@ -661,9 +661,9 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume.csv") into chResume
-  file ("nbUMIperGene.csv") into chUMIperGene
-  file ("nbUMIperCell.csv") into chUMIperCell
-  file ("nbGenesPerCell.csv") into chGenesPerCell
+  file ("HistUMIperGene.csv") into chUMIperGene
+  file ("HistUMIperCell.csv") into chUMIperCell
+  file ("HistGenesPerCell.csv") into chGenesPerCell
   file ("UmiGenePerCell.csv") into chUmiGeneRatio
   file ("MtGenePerCell.csv") into chMT
   file ("weightedHistUMI.csv") into chWeightedHist
