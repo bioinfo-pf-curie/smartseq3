@@ -768,7 +768,6 @@ process multiqc {
   file ("mt/*") from chMT.collect() // MtGenePerCell.csv
   //file ("wh/*") into chWeightedHist.collect() // weightedHistUMI.csv
 
-
   output: 
   file splan
   file "*report.html" into multiqc_report
