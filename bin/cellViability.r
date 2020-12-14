@@ -113,13 +113,13 @@ create_df<-function(list_hist){
     return(df)
 }
 
-nbUMIperGene<-create_df(hist_nbUMIperGene, samples)
+nbUMIperGene<-create_df(hist_nbUMIperGene)
 colnames(nbUMIperGene)<-c("lines", "# UMIs (log10)", "# Genes")
-nbUMIperCell<-create_df(hist_nbUMIperCell, samples)
+nbUMIperCell<-create_df(hist_nbUMIperCell)
 colnames(nbUMIperCell)<-c("lines", "# UMIs (log10)", "# Cell")
-nbGenesPerCell<-create_df(hist_nbGenesPerCell, samples)
+nbGenesPerCell<-create_df(hist_nbGenesPerCell)
 colnames(nbGenesPerCell)<-c("lines", "# Genes", "# Cell")
-whUMI<-create_df(wh_UMI, samples)
+whUMI<-create_df(wh_UMI)
 colnames(whUMI)<-c("lines", "#UMIs per cell (log10)", "# UMIs")
 
 write.csv(nbUMIperGene, "HistUMIperGene.csv")
