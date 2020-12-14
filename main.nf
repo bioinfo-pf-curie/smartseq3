@@ -610,7 +610,7 @@ process genebody_coverage {
   input:
   //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
   //set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
-  set val(prefix), file (bigwigs) from chBigWig.filter{ it[0] =~ /.*mi/ }
+  set val(prefix), file (bg) from chBigWig.filter{ it[0]~/.*mi/ }
   file bed12 from chBedGeneCov.collect()
   // channel = pile
   // quand site tous les fichiers => c'est que commandes differentes sur les deux
@@ -622,9 +622,9 @@ process genebody_coverage {
 
   script:
   """
-  #samtools index ${bigWigs}
+  #samtools index ${bg}
   geneBody_coverage2.py \\
-      -i ${bigWigs} \\
+      -i ${bg} \\
       -o ${prefix}.rseqc \\
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
