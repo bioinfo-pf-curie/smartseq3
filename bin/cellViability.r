@@ -98,27 +98,29 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
 hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10)", ylab = "# Cell")
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
+
+
 wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs, w=resume$NormLog_nb_UMIs, 
               main="Weighted distribution of umis per barcodes",
               xlab="#UMIs per cell (log10)",
-              ylab="#UMIs", breaks = 5)
+              ylab="#UMIs")
 
-create_df<-function(list_hist, list_names){
+create_df<-function(list_hist){
     df<-data.frame(list_hist$breaks)
     df<-df[-1,]
-    df<-cbind(list_names, df, list_hist$counts)
-    #colnames(df)<-c("sample", "breaks.x", "counts.y")
+    lines<-seq(1,length(list_hist$breaks))
+    df<-cbind(lines, df, list_hist$counts)
     return(df)
 }
 
 nbUMIperGene<-create_df(hist_nbUMIperGene, samples)
-colnames(nbUMIperGene)<-c("sample", "# UMIs (log10)", "# Genes")
+colnames(nbUMIperGene)<-c("lines", "# UMIs (log10)", "# Genes")
 nbUMIperCell<-create_df(hist_nbUMIperCell, samples)
-colnames(nbUMIperCell)<-c("sample", "# UMIs (log10)", "# Cell")
+colnames(nbUMIperCell)<-c("lines", "# UMIs (log10)", "# Cell")
 nbGenesPerCell<-create_df(hist_nbGenesPerCell, samples)
-colnames(nbGenesPerCell)<-c("sample", "# Genes", "# Cell")
+colnames(nbGenesPerCell)<-c("lines", "# Genes", "# Cell")
 whUMI<-create_df(wh_UMI, samples)
-colnames(whUMI)<-c("sample", "#UMIs per cell (log10)", "# UMIs")
+colnames(whUMI)<-c("lines", "#UMIs per cell (log10)", "# UMIs")
 
 write.csv(nbUMIperGene, "HistUMIperGene.csv")
 write.csv(nbUMIperCell, "HistUMIperCell.csv")
