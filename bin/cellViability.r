@@ -98,8 +98,6 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
 hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10)", ylab = "# Cell")
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
-
-
 wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs, w=resume$NormLog_nb_UMIs, 
               main="Weighted distribution of umis per barcodes",
               xlab="#UMIs per cell (log10)",
@@ -108,7 +106,7 @@ wh_UMI<-weighted.hist(resume$NormLog_nb_UMIs, w=resume$NormLog_nb_UMIs,
 create_df<-function(list_hist){
     df<-data.frame(list_hist$breaks)
     df<-df[-1,]
-    lines<-seq(1,length(list_hist$breaks))
+    lines<-seq(1,length(list_hist$counts))
     df<-cbind(lines, df, list_hist$counts)
     return(df)
 }
