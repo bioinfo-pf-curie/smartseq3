@@ -436,7 +436,7 @@ process trimReads{
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
-  label 'highCpu'
+  label 'extraCpu'
   label 'extraMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
@@ -595,7 +595,7 @@ process bigWig {
 process genebody_coverage {
   tag "${prefix}"
   label 'rseqc'
-  label 'highCpu'
+  label 'extraCpu'
   label 'extraMem'
   
   publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
@@ -627,7 +627,7 @@ process genebody_coverage {
       -i ${bg} \\
       -o ${prefix}.rseqc \\
       -r $bed12
-  mv log.txt ${prefix}.rseqc.log.txt
+  #mv log.txt ${prefix}.rseqc.log.txt
   """
 }
 
