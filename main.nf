@@ -676,7 +676,7 @@ process cellAnalysis{
   file ("HistGenePerCell.csv") into chGenesPerCell
   file ("UmiGenePerCell.csv") into chUmiGeneRatio
   file ("MtGenePerCell.csv") into chMT
-  file ("weightedHistUMI.csv") into chWeightedHist
+  //file ("weightedHistUMI.csv") into chWeightedHist
   file ("v_R.txt") into chRversion
 
   script:
