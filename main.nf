@@ -513,12 +513,12 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
+  set val(prefix), file("*_sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
   """
-  samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}Aligned.sortedByCoord.out.bam
+  samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}_sorted.bam
 
   samtools --version &> v_samtools.txt
   """
