@@ -460,9 +460,9 @@ process readAlignment {
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
-    --clip3pAdapterSeq CTGTCTCTTATACACATCT \
-    --limitSjdbInsertNsj 2000000 \
-    --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
+    --clip3pAdapterSeq CTGTCTCTTATACACATCT 
+    #--limitSjdbInsertNsj 2000000 \
+    #--outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
     # clip3pAdapterSeq = coupe l'adaptater 3' des R2 (~2%) 
     # limitSjdbInsertNsj = augmente le nombre de splice junctions à inserer
