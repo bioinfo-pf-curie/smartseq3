@@ -62,7 +62,7 @@ for(samp in samples){
 }
 
 resume<-data.frame(nb_UMIs = colSums(matrixFinal), Norm_nb_UMIs = round(colSums(normData)) , nb_Genes=genes)
-write.csv(resume, "resume.csv", row.names = T)
+write.csv(resume, "resume_mqc.csv", row.names = T)
 
 
 #####  Long to sparse matrix:
@@ -135,10 +135,10 @@ colnames(nbGenesPerCell)<-c("lines", "# Genes", "# Cell")
 # whUMI<-create_df(wh_UMI)
 # colnames(whUMI)<-c("lines", "#UMIs per cell", " ")
 
-write.csv(nbUMIperGene, "HistUMIperGene.csv")
-write.csv(nbUMIperCell, "HistUMIperCell.csv")
-write.csv(nbGenesPerCell, "HistGenePerCell.csv")
-#write.csv(whUMI, "weightedHistUMI.csv")
+write.csv(nbUMIperGene, "HistUMIperGene_mqc.csv")
+write.csv(nbUMIperCell, "HistUMIperCell_mqc.csv")
+write.csv(nbGenesPerCell, "HistGenePerCell_mqc.csv")
+#write.csv(whUMI, "weightedHistUMI_mqc.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
@@ -150,12 +150,12 @@ plotRatio<-FeatureScatter(umiMatrix, feature1 = "nCount_RNA", feature2 = "nFeatu
 Ratio<-data.frame(plotRatio[["data"]][["nFeature_RNA"]])
 Ratio$umi<-plotRatio[["data"]][["nCount_RNA"]]
 colnames(Ratio)<-c("# Genes", "# UMIs")
-write.csv(Ratio, "UmiGenePerCell.csv")
+write.csv(Ratio, "UmiGenePerCell_mqc_mqc.csv")
 
 plotMT<-FeatureScatter(umiMatrix, feature1 = "nFeature_RNA", feature2 = "percent.mt")
 MT<-data.frame(plotMT[["data"]][["nFeature_RNA"]])
 MT$mt<-plotMT[["data"]][["percent.mt"]]
 colnames(MT)<-c("# Genes", "%MT")
-write.csv(MT, "MtGenePerCell.csv")
+write_mqc_mqc.csv(MT, "MtGenePerCell_mqc_mqc.csv")
 
 

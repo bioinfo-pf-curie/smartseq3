@@ -78,12 +78,12 @@ custom_data:
         id: 'final'
         title: 'Mapping summary'
 
-        #file ("umiPerGene") from chUMIperGene //HistUMIperGene.csv
-        #file ("nbUMI/") from chUMIperCell //HistUMIperCell.csv
-        #file ("nbGene/") from chGenesPerCell //HistGenePerCell.csv
-        #file ("ratio/") from chUmiGeneRatio // UmiGenePerCell.csv
-        #file ("mt/") from chMT // MtGenePerCell.csv
-        #file ("wh/") into chWeightedHist // weightedHistUMI.csv
+        #file ("umiPerGene") from chUMIperGene //HistUMIperGene_mqc.csv
+        #file ("nbUMI/") from chUMIperCell //HistUMIperCell_mqc.csv
+        #file ("nbGene/") from chGenesPerCell //HistGenePerCell_mqc.csv
+        #file ("ratio/") from chUmiGeneRatio // UmiGenePerCell_mqc.csv
+        #file ("mt/") from chMT // MtGenePerCell_mqc.csv
+        #file ("wh/") into chWeightedHist // weightedHistUMI_mqc.csv
 
     umiPerGene: 
       file_format: 'csv'
@@ -134,7 +134,7 @@ custom_data:
       file_format: 'csv'
       section_name: 'The percentage of mitochondrial is a cell viability marker. Under 5%, cell are concidered non dead.'
       description: ''
-      plot_type: 'linegraph'
+      plot_type: 'scatter'
       pconfig:
         id: 'mt'
         title: 'Percentage of mitochondrial genes per Cell'
@@ -148,17 +148,17 @@ sp:
   final:
       fn: 'final_mqc.stats'
   umiPerGene:
-      fn: 'HistUMIperGene.csv'
+      fn: 'HistUMIperGene_mqc.csv'
   umiPerCell:
-      fn: 'HistUMIperCell.csv'
+      fn: 'HistUMIperCell_mqc.csv'
   #wh:
-  #    fn: 'weightedHistUMI.csv'
+  #    fn: 'weightedHistUMI_mqc.csv'
   genePerCell:
-      fn: 'HistGenePerCell.csv'
+      fn: 'HistGenePerCell_mqc.csv'
   ratio:
-      fn: 'UmiGenePerCell.csv'
+      fn: 'UmiGenePerCell_mqc.csv'
   mt:
-      fn: 'MtGenePerCell.csv'
+      fn: 'MtGenePerCell_mqc.csv'
   
   
   
