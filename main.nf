@@ -456,7 +456,7 @@ process readAlignment {
     --genomeDir $genomeIndex \
     --sjdbGTFfile $genomeGtf \
     --readFilesIn ${trimmedR1},${trimmedR2} \
-    --runThreadN 8 \
+    --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
