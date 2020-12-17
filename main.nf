@@ -456,7 +456,7 @@ process readAlignment {
     --genomeDir $genomeIndex \
     --sjdbGTFfile $genomeGtf \
     --readFilesIn ${trimmedR1},${trimmedR2} \
-    --runThreadN ${task.cpus} \
+    --runThreadN 8 \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
@@ -499,7 +499,7 @@ process readsAssignment {
     ${alignedBam}
 
   featureCounts -v &> v_featurecounts.txt
-    """
+  """
 }
 
 process sortBam {
@@ -528,7 +528,7 @@ process sortBam {
 process separateReads {
   tag "${prefix}"
   label 'samtools'
-  label 'medhCpu'
+  label 'medCpu'
   label 'medMem'
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
@@ -560,6 +560,29 @@ process separateReads {
 
   #-h Include the header in the output.
   #-H Output the header only.
+  """
+}
+
+process countMatrices {
+  tag "${prefix}"
+  label 'umiTools'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outdir}/countMatrices", mode: 'copy'
+
+  input:
+  set val(prefix), file(umiBam) from chUmiBam_countMtx
+
+  output:
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices
+  set val(prefix), file("*_UmiCounts.log") into chMatricesLog
+
+  script:
+  """
+  # Count UMIs per gene per cell
+  samtools index ${umiBam}
+  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
+  
   """
 }
 
@@ -633,28 +656,6 @@ process genebody_coverage {
 
 //chBigWig.view()
 
-process countMatrices {
-  tag "${prefix}"
-  label 'umiTools'
-  label 'medCpu'
-  label 'medMem'
-  publishDir "${params.outdir}/countMatrices", mode: 'copy'
-
-  input:
-  set val(prefix), file(umiBam) from chUmiBam_countMtx
-
-  output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices
-  set val(prefix), file("*_UmiCounts.log") into chMatricesLog
-
-  script:
-  """
-  # Count UMIs per gene per cell
-  samtools index ${umiBam}
-  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
-  
-  """
-}
 
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
