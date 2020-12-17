@@ -517,9 +517,8 @@ process sortBam {
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
-  oname = assignBam.toString() - ~/(.bam)?$/
   """
-  samtools sort -@ ${task.cpus} ${assignBam} -o ${oname}Sorted.bam
+  samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}Aligned.sortedByCoord.out.bam
 
   samtools --version &> v_samtools.txt
   """
