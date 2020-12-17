@@ -532,7 +532,7 @@ process separateReads {
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(assignedBam) from chSortedBAM_sepReads
+  set val(prefix), file(sortedBam) from chSortedBAM_sepReads
   set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
   set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
@@ -543,16 +543,16 @@ process separateReads {
   script:  
   """
   # Separate umi and non umi reads
-  samtools view ${assignedBam} > assignedAll.sam
+  samtools view ${sortedBam} > assignedAll.sam
 
   # save header and extract umi reads 
-  samtools view -H ${assignedBam} > ${prefix}_assignedUMIs.sam
+  samtools view -H ${sortedBam} > ${prefix}_assignedUMIs.sam
   fgrep -f ${umisReadsIDs} assignedAll.sam >> ${prefix}_assignedUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
 
   # save header and extract non umi reads 
-  samtools view -H ${assignedBam} > ${prefix}_assignedNonUMIs.sam
+  samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
   fgrep -f ${nonUmisReadsIDs} assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
