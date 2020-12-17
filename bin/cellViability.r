@@ -112,12 +112,6 @@ hist_nbUMIperCell<-hist(resume$nb_UMIs, xlab = "# UMIs", ylab = "# Cell")
 # nature peinture: best
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
 
-# nature + weighted by normlog counts => pas valable pour le smartseq3
-# wh_UMI<-weighted.hist(resume$nb_UMIs, w=log10(resume$Norm_nb_UMIs), 
-#                       main="Weighted distribution of umis per barcodes",
-#                       xlab="#UMIs per cell",
-#                       ylab="")
-
 create_df<-function(list_hist){
     df<-data.frame(list_hist$breaks)
     df<-df[-1,]
@@ -132,13 +126,10 @@ nbUMIperCell<-create_df(hist_nbUMIperCell)
 colnames(nbUMIperCell)<-c("lines", "# UMIs", "# Cell")
 nbGenesPerCell<-create_df(hist_nbGenesPerCell)
 colnames(nbGenesPerCell)<-c("lines", "# Genes", "# Cell")
-# whUMI<-create_df(wh_UMI)
-# colnames(whUMI)<-c("lines", "#UMIs per cell", " ")
 
 write.csv(nbUMIperGene, "HistUMIperGene_mqc.csv")
 write.csv(nbUMIperCell, "HistUMIperCell_mqc.csv")
 write.csv(nbGenesPerCell, "HistGenePerCell_mqc.csv")
-#write.csv(whUMI, "weightedHistUMI_mqc.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
