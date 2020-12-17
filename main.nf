@@ -676,7 +676,6 @@ process cellAnalysis{
   file ("HistGenePerCell_mqc.csv") into chGenesPerCell
   file ("UmiGenePerCell_mqc.csv") into chUmiGeneRatio
   file ("MtGenePerCell_mqc.csv") into chMT
-  //file ("weightedHistUMI_mqc.csv") into chWeightedHist
   file ("v_R.txt") into chRversion
 
   script:
@@ -776,7 +775,6 @@ process multiqc {
   file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
-  //file ("wh/*") into chWeightedHist.collect() //weightedHistUMI_mqc.csv
 
   output: 
   file splan

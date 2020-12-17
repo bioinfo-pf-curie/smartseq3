@@ -103,15 +103,6 @@ custom_data:
         id: 'umiPerCell'
         title: 'Number of UMIs per Cell'
     
-    #wh: 
-    #  file_format: 'csv'
-    #  section_name: ''
-    #  description: ''
-    # plot_type: 'linegraph'
-    #  pconfig:
-    #    id: 'wh'
-    #    title: 'Weighted histogram of the number of UMIs per cell'
-    
     genePerCell: 
       file_format: 'csv'
       section_name: ''
@@ -151,8 +142,6 @@ sp:
       fn: 'HistUMIperGene_mqc.csv'
   umiPerCell:
       fn: 'HistUMIperCell_mqc.csv'
-  #wh:
-  #    fn: 'weightedHistUMI_mqc.csv'
   genePerCell:
       fn: 'HistGenePerCell_mqc.csv'
   ratio:
