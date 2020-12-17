@@ -459,8 +459,8 @@ process readAlignment {
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
-    --outSAMtype BAM SortedByCoordinate \
-    --clip3pAdapterSeq CTGTCTCTTATACACATCT 
+    --outSAMtype BAM SortedByCoordinate 
+    #--clip3pAdapterSeq CTGTCTCTTATACACATCT \
     #--limitSjdbInsertNsj 2000000 \
     #--outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
@@ -543,17 +543,17 @@ process separateReads {
   script:  
   """
   # Separate umi and non umi reads
-  samtools view ${sortedBam} > assignedAll.sam
+  samtools view ${sortedBam} > ${prefix}assignedAll.sam
 
   # save header and extract umi reads 
   samtools view -H ${sortedBam} > ${prefix}_assignedUMIs.sam
-  fgrep -f ${umisReadsIDs} assignedAll.sam >> ${prefix}_assignedUMIs.sam
+  fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
-  fgrep -f ${nonUmisReadsIDs} assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
 
