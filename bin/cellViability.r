@@ -97,10 +97,14 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 #----------------------------
 
 # norm + log10
-# hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
+#hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
 # pas norm + log10 (sans c'est moche)
 hist(log10(longMatx$value), xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
 
+=> par cellules (cumulative dist) mais pas de zéro (col1=sample; col2 = counts; col3=gene name )
+
+-----------------
+    Jitter sur le même graphe avec médiane (image fixe)
 
 # normalisé + log10
 #hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10)", ylab = "# Cell")
@@ -111,6 +115,9 @@ hist_nbUMIperCell<-hist(resume$nb_UMIs, xlab = "# UMIs", ylab = "# Cell")
 
 # nature peinture: best
 hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
+
+---------------
+    
 
 create_df<-function(list_hist){
     df<-data.frame(list_hist$breaks)
@@ -133,6 +140,8 @@ write.csv(nbGenesPerCell, "HistGenePerCell_mqc.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
+
+#scatter en renommant les axes:
 
 umiMatrix <- CreateSeuratObject(counts = sparseMtx, project = "smartSeq3", min.features = 0)
 umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
