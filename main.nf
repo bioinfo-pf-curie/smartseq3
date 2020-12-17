@@ -513,7 +513,7 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
+  set val(prefix), file("*_Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
