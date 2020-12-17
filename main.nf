@@ -609,8 +609,8 @@ process genebody_coverage {
 
   input:
   //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
-  //set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
-  set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_.*/ )
+  set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
+  //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_.*/ )
   file bed12 from chBedGeneCov.collect()
   // channel = pile
   // quand site tous les fichiers => c'est que commandes differentes sur les deux
@@ -670,13 +670,13 @@ process cellAnalysis{
 
   output:
   file ("10Xoutput/") into ch10X
-  file ("resume.csv") into chResume
-  file ("HistUMIperGene.csv") into chUMIperGene
-  file ("HistUMIperCell.csv") into chUMIperCell
-  file ("HistGenePerCell.csv") into chGenesPerCell
-  file ("UmiGenePerCell.csv") into chUmiGeneRatio
-  file ("MtGenePerCell.csv") into chMT
-  //file ("weightedHistUMI.csv") into chWeightedHist
+  file ("resume_mqc.csv") into chResume
+  file ("HistUMIperGene_mqc.csv") into chUMIperGene
+  file ("HistUMIperCell_mqc.csv") into chUMIperCell
+  file ("HistGenePerCell_mqc.csv") into chGenesPerCell
+  file ("UmiGenePerCell_mqc.csv") into chUmiGeneRatio
+  file ("MtGenePerCell_mqc.csv") into chMT
+  //file ("weightedHistUMI_mqc.csv") into chWeightedHist
   file ("v_R.txt") into chRversion
 
   script:
@@ -771,12 +771,12 @@ process multiqc {
   file ('bigwig/*') from chBigWigLog.collect()
   file ('resume/*') from chResume.collect()
   //PLOTS
-  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.csv
-  file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell.csv
-  file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell.csv
-  file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell.csv
-  file ("mt/*") from chMT.collect() // MtGenePerCell.csv
-  //file ("wh/*") into chWeightedHist.collect() //weightedHistUMI.csv
+  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene_mqc.csv
+  file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
+  file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
+  file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
+  file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
+  //file ("wh/*") into chWeightedHist.collect() //weightedHistUMI_mqc.csv
 
   output: 
   file splan
