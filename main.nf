@@ -518,7 +518,7 @@ process sortBam {
 
   script :
   """
-  samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}_sorted.bam
+  samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}_Sorted.bam
 
   samtools --version &> v_samtools.txt
   """
