@@ -87,12 +87,12 @@ custom_data:
         id: 'umiPerGene'
         title: 'Number of UMIs per Gene'
 
-    umiGenePerCell: 
+    jitter: 
       file_format: 'jpeg'
       section_name: ''
       description: ''
       pconfig:
-        id: 'umiGenePerCell'
+        id: 'jitter'
         title: 'Number of UMIs and Genes per Cell'
 
     ratio: 
@@ -120,7 +120,7 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: 'HistUMIperGene_mqc.csv'
-  umiGenePerCell:
+  jitter:
       fn: 'jitter_nbUMI_nbGenes.jpeg'
   ratio:
       fn: 'RatioPerCell_mqc.csv'
@@ -152,7 +152,7 @@ report_section_order:
     order: 140
   umiPerGene:
     order: 130
-  umiGenePerCell:
+  jitter:
     order: 120
   ratio:
     order: 110

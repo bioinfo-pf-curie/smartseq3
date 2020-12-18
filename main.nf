@@ -62,7 +62,7 @@ def helpMessage() {
   --starIndex [dir]                  Index for STAR aligner
 
   Other options:
-    --outDir [file]               The output directory where the results will be saved
+    --outdir [file]               The output directory where the results will be saved
     -name [str]                   Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
  
   =======================================================
@@ -326,7 +326,7 @@ summary['Current home']   = "$HOME"
 summary['Current user']   = "$USER"
 summary['Current path']   = "$PWD"
 summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outDir
+summary['Output dir']     = params.outdir
 summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
@@ -339,7 +339,7 @@ process umiExtraction {
   label 'umiTools'
   label 'highCpu'
   label 'highMem'
-  publishDir "${params.outDir}/umiExtraction", mode: 'copy'
+  publishDir "${params.outdir}/umiExtraction", mode: 'copy'
 
   input: 
   set val(prefix), file(reads) from rawReadsFastqc
@@ -365,7 +365,7 @@ process mergeReads {
   label 'seqkit'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outDir}/mergeReads", mode: 'copy'
+  publishDir "${params.outdir}/mergeReads", mode: 'copy'
 
   input:
   set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2) from chMergeReadsFastq.join(chUmiExtracted)
@@ -415,7 +415,7 @@ process trimReads{
   label 'cutadapt'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outDir}/trimReads", mode: 'copy'
+  publishDir "${params.outdir}/trimReads", mode: 'copy'
 
   input:
   set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
@@ -438,7 +438,7 @@ process readAlignment {
   label 'STAR'
   label 'extraCpu'
   label 'extraMem'
-  publishDir "${params.outDir}/readAlignment", mode: 'copy'
+  publishDir "${params.outdir}/readAlignment", mode: 'copy'
 
   input :
   file genomeIndex from chStar.collect()
@@ -529,7 +529,7 @@ process separateReads {
   label 'samtools'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outDir}/separateReads", mode: 'copy'
+  publishDir "${params.outdir}/separateReads", mode: 'copy'
 
   input :
   set val(prefix), file(sortedBam), file(umisReadsIDs), file(nonUmisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs).join(chNonUmiReadsIDs)
@@ -700,7 +700,7 @@ process getSoftwareVersions{
   label 'python'
   label 'lowCpu'
   label 'lowMem'
-  publishDir path: "${params.outDir}/software_versions", mode: "copy"
+  publishDir path: "${params.outdir}/software_versions", mode: "copy"
 
   when:
   !params.skipSoftVersions
@@ -752,7 +752,7 @@ process multiqc {
   label 'multiqc'
   label 'lowCpu'
   label 'lowMem'
-  publishDir "${params.outDir}/MultiQC", mode: 'copy'
+  publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
   when:
   !params.skipMultiQC
@@ -817,7 +817,7 @@ process outputDocumentation {
   label 'lowCpu'
   label 'lowMem'
 
-  publishDir "${params.outDir}/pipeline_info", mode: 'copy'
+  publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
   input:
   file output_docs from chOutputDocs
@@ -877,7 +877,7 @@ workflow.onComplete {
   outputTxtFile.withWriter { w -> w << reportTxt }
 
   // onComplete file
-  File woc = new File("${params.outDir}/onComplete.txt")
+  File woc = new File("${params.outdir}/onComplete.txt")
   Map endSummary = [:]
   endSummary['Completed on'] = workflow.complete
   endSummary['Duration']     = workflow.duration
