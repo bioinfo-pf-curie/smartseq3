@@ -368,8 +368,8 @@ process mergeReads {
   publishDir "${params.outDir}/mergeReads", mode: 'copy'
 
   input:
-  set val(prefix), file(reads) from chMergeReadsFastq
-  set val(prefix), file(umiReads_R1), file(umiReads_R2) from chUmiExtracted
+  set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2) from chMergeReadsFastq.join(chUmiExtracted)
+  //set val(prefix), file(umiReads_R1), file(umiReads_R2) from chUmiExtracted
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
@@ -532,9 +532,9 @@ process separateReads {
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam) from chSortedBAM_sepReads
-  set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
-  set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
+  set val(prefix), file(sortedBam), file(umisReadsIDs), file(nonUmisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs).join(chNonUmiReadsIDs)
+  //set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
+  //set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
