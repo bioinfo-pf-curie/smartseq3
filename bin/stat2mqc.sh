@@ -12,7 +12,7 @@ all_samples=$(awk -F, '{print $1}' $splan)
 
 ## Header
 #Table:
-echo -e "Sample_id, Sample_name, Reads tot., UMIs(%), Aligned(%), Assigned(%)" > table_mqc.stats
+echo -e "Sample_id, Sample_name, Reads tot., UMIs(%), Aligned(%), Assigned(%), #Genes, #UMIs" > table_mqc.stats
 #Bargraph:
 echo -e "Sample_id, Sample_name, Aligned_Assigned, Aligned_NotAssigned, NotAligned, NotAligned_NotAssagned" > final_mqc.stats
 
@@ -32,7 +32,6 @@ do
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
     NotAligned_NotAssigned=`echo $(( $tot_reads - $aligned_assigned ))`
 
-
     if [ $aligned_assigned != 0 ]; then  
         paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/$tot_reads)" | bc -l)
     else
@@ -46,7 +45,10 @@ do
     #filtreG1=`sed -n 4p countsFiltre/${sample}_countsFiltre.log`
     #filtreG2=`sed -n 5p countsFiltre/${sample}_countsFiltre.log`
 
-    echo -e ${sample},${sname},${tot_reads}, ${pUMIs}, ${paligned}, ${paligned_assigned}>> table_mqc.stats
+    nbGenes=$(grep ${sample} resume/resume_mqc.csv | cut -d, -f3)
+    nbUMIs=$(grep ${sample} resume/resume_mqc.csv | cut -d, -f2)
+
+    echo -e ${sample},${sname},${tot_reads}, ${pUMIs}, ${paligned}, ${paligned_assigned},${nbGenes}, ${nbUMIs}>> table_mqc.stats
     echo -e ${sample},${sname},${aligned_assigned}, ${aligned_NotAssigned},${NotAligned},${NotAligned_NotAssigned} >> final_mqc.stats
 
 done

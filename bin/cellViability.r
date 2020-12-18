@@ -47,7 +47,7 @@ longMatx<-longMatx[which(longMatx$value>0),]
 matrixFinal<-column_to_rownames(matrixFinal, var = "gene")
 
 # Normalize each count by the total number of umis per cell *10^5
-normData<-data.frame(NormalizeData(matrixFinal, normalization.method="RC" , scale.factor = 100000))
+#normData<-data.frame(NormalizeData(matrixFinal, normalization.method="RC" , scale.factor = 100000))
 # log transformation
 #normLogData<-log10(normData + 1)
 # transform into long format
@@ -55,11 +55,10 @@ normData<-data.frame(NormalizeData(matrixFinal, normalization.method="RC" , scal
 #normLogDataLong<-normLogDataLong[which(normLogDataLong$value>0),]
 
 # Make resume data 
-resume<-data.frame(nb_UMIs = colSums(matrixFinal), Norm_nb_UMIs = round(colSums(normData)))
+resume<-data.frame(nb_UMIs = colSums(matrixFinal))
 resume$nb_Genes<-apply(matrixFinal, 2,  function(x) length(which(x>0)))
 
-write.csv(resume, "resume_mqc.csv", row.names = T)
-
+write.table(Ratio, "resume_mqc.csv", sep=',', row.names=TRUE, col.names=FALSE)
 
 #####  Long to sparse matrix:
 ####-----------------------------------------
@@ -114,7 +113,7 @@ write.table(nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=FALSE, col.
 # Jitter sur le même graphe avec médiane (image fixe)
 
 # Les 2 sur le même mais en log10
-long_resume<-melt(as.matrix(resume[,-2]))
+long_resume<-melt(as.matrix(resume))
 colnames(long_resume)<-c("Samples", "Var2", "value")
 jpeg(file="jitter_nbUMI_nbGenes.jpeg")
 ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
@@ -131,9 +130,10 @@ dev.off()
 #------------
 #=> scatter en renommant les axes:
 
-Ratio<-cbind(rownames(resume), resume[,-2])
+Ratio<-cbind(rownames(resume), resume)
 colnames(Ratio)<-c("Samples", "Number of genes", "Number of UMIs")
 #write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
+# => donne un graphe still heatmap 
 
 write.table(Ratio, "RatioPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
@@ -142,6 +142,8 @@ umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
 umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
 MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$`Number of genes`, umiMatrix[["percent.mt"]])
 colnames(MT)<-c("Samples", "Number of genes", "% Mitochondrial genes")
-write.csv(MT, "MtGenePerCell_mqc.csv", row.names = FALSE )
+#write.csv(MT, "MtGenePerCell_mqc.csv", row.names = FALSE )
+
+write.table(MT, "MtGenePerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 
