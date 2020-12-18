@@ -97,8 +97,8 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 # sans log10
 longMatx2<-select(longMatx, -gene)
 nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
-#names(nbUMIs_perGene)[[1]]<-"x axis"
-nbUMIs_perGene<-nbUMIs_perGene[,-1]
+names(nbUMIs_perGene)[[1]]<-"x axis"
+#nbUMIs_perGene<-nbUMIs_perGene[,-1]
 # si test avec log10
 #nbUMIs_perGene$log10<-log10(nbUMIs_perGene$`longMatx2$value`)
 
