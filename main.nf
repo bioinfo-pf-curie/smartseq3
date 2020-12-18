@@ -675,7 +675,7 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume_mqc.csv") into chResume
-  file ("HistUMIperGene_mqc.csv") into chUMIperGene
+  file ("HistUMIperGene.mqc") into chUMIperGene
   file("jitter_nbUMI_nbGenes.jpeg") into chUMI_Gene_perCell
   //file ("HistUMIperCell_mqc.csv") into chUMIperCell
   //file ("HistGenePerCell_mqc.csv") into chGenesPerCell
@@ -775,7 +775,7 @@ process multiqc {
   file ('bigwig/*') from chBigWigLog.collect()
   file ('resume/*') from chResume.collect()
   //PLOTS
-  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene_mqc.csv
+  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.mqc
   //file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
   //file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
   file ("jitter/*") from chUMI_Gene_perCell.collect() // jitter_nbUMI_nbGenes.tiff

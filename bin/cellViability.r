@@ -105,7 +105,7 @@ names(nbUMIs_perGene)[[1]]<-"x axis"
 # si test avec 
 #nbUMIs_perGene_max50<-nbUMIs_perGene[c(1:100),]
 
-write.csv(nbUMIs_perGene, "HistUMIperGene_mqc.csv", row.names = FALSE )
+write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE )
 
 #--------------------------
 # Nb UMI & Gene per cell
