@@ -41,7 +41,7 @@ for (file in listFile ){
 # Replace NA by 0 (row= genes/columns=sample)
 matrixFinal[is.na(matrixFinal)]<-0
 # Transform into long format
-longMatx<-melt(as.matrix(matrixFinal))
+longMatx<-melt(matrixFinal)
 longMatx<-longMatx[which(longMatx$value>0),]
 
 matrixFinal<-column_to_rownames(matrixFinal, var = "gene")
@@ -55,13 +55,9 @@ normData<-data.frame(NormalizeData(matrixFinal, normalization.method="RC" , scal
 #normLogDataLong<-normLogDataLong[which(normLogDataLong$value>0),]
 
 # Make resume data 
-samples<-colnames(matrixFinal)
-genes<-vector()
-for(samp in samples){
-    genes<-append(genes, nrow(longMatx[which(longMatx$Var2==samp),]) )
-}
+resume<-data.frame(nb_UMIs = colSums(matrixFinal), Norm_nb_UMIs = round(colSums(normData)))
+resume$nb_Genes<-apply(matrixFinal, 2,  function(x) length(which(x>0)))
 
-resume<-data.frame(nb_UMIs = colSums(matrixFinal), Norm_nb_UMIs = round(colSums(normData)) , nb_Genes=genes)
 write.csv(resume, "resume_mqc.csv", row.names = T)
 
 
@@ -93,69 +89,69 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 #### Create Plots
 ####-----------------------------------------
 
-### Counts accross all cells:
-#----------------------------
 
-# norm + log10
-#hist_nbUMIperGene<-hist(normLogDataLong$value, xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
-# pas norm + log10 (sans c'est moche)
-hist(log10(longMatx$value), xlab = "# UMIs (Log10)", ylab = "# Genes", main = "Number of UMIs per genes")
-
+#--------------------------
+# Nb UMI per Gene
 #=> par cellules (cumulative dist) mais pas de zéro (col1=sample; col2 = counts; col3=gene name )
 
------------------
-#    Jitter sur le même graphe avec médiane (image fixe)
+# sans log10
+longMatx2<-select(longMatx, -gene)
+nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
+names(nbUMIs_perGene)[[1]]<-"x axis"
 
-# normalisé + log10
-#hist_nbUMIperCell<-hist(resume$NormLog_nb_UMIs, xlab = "# UMIs (Log10)", ylab = "# Cell")
-# log10
-#hist_nbUMIperCell<-hist(log10(resume$nb_UMIs), xlab = "# UMIs (Log10)", ylab = "# Cell")
-# nature peinture: best
-hist_nbUMIperCell<-hist(resume$nb_UMIs, xlab = "# UMIs", ylab = "# Cell")
+# si test avec log10
+#nbUMIs_perGene$log10<-log10(nbUMIs_perGene$`longMatx2$value`)
 
-# nature peinture: best
-hist_nbGenesPerCell<-hist(resume$nb_Genes, xlab = "# Genes", ylab = "# Cell")
+# si test avec 
+#nbUMIs_perGene_max50<-nbUMIs_perGene[c(1:100),]
+
+write.csv(nbUMIs_perGene, "HistUMIperGene_mqc.csv", row.names = FALSE )
+
+#--------------------------
+# Nb UMI & Gene per cell
+# Jitter sur le même graphe avec médiane (image fixe)
+
+# Les 2 sur le même mais en log10
+long_resume<-melt(as.matrix(resume[,-2]))
+colnames(long_resume)<-c("Samples", "Var2", "value")
+#jpeg(file="jitter_nbUMI_nbGenes.jpeg")
+ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
+        geom_jitter(mapping = aes(colour = Samples), width = .1)  +
+        stat_summary(fun=median, geom="point", shape=18,  size=3) +
+        xlab("") + ylab("Counts (log10)") + 
+        scale_y_log10()
+ggsave("jitter_nbUMI_nbGenes.tiff", units="in", width=5, height=4, dpi=300)
+
+# pas en log10 mais séparés 
+# umis<-long_resumeUMI<-long_resume[long_resume$Var2=="nb_UMIs",]
+# hist_umis<-ggplot(data = umis, aes(x = Var2, y = value)) + theme_bw() +
+#     geom_jitter(mapping = aes(colour = Samples), width = .1 )  +
+#     stat_summary(fun=median, geom="point", shape=18,  size=3) +
+#     xlab("") + labs(fill = "") + ylab("") 
+# genes<-long_resumeGene<-long_resume[long_resume$Var2=="nb_Genes",]
+# hist_genes<-ggplot(data = genes, aes(x = Var2, y = value)) + theme_bw() +
+#     geom_jitter(mapping = aes(colour = Samples), width = .1)  +
+#     stat_summary(fun=median, geom="point", shape=18,  size=3) +
+#     xlab("") + labs(fill = "test") + ylab("Counts")
+# ggarrange(hist_genes, hist_umis, ncol=2, common.legend = TRUE, legend="bottom")
+
+#library(ggpubr)
+#grid.arrange(hist_genes, hist_umis, ncol = 2) 
 
 #---------------
-    
-
-create_df<-function(list_hist){
-    df<-data.frame(list_hist$breaks)
-    df<-df[-1,]
-    lines<-seq(1,length(list_hist$counts))
-    df<-cbind(lines, df, list_hist$counts)
-    return(df)
-}
-
-nbUMIperGene<-create_df(hist_nbUMIperGene)
-colnames(nbUMIperGene)<-c("lines", "# UMIs", "# Genes")
-nbUMIperCell<-create_df(hist_nbUMIperCell)
-colnames(nbUMIperCell)<-c("lines", "# UMIs", "# Cell")
-nbGenesPerCell<-create_df(hist_nbGenesPerCell)
-colnames(nbGenesPerCell)<-c("lines", "# Genes", "# Cell")
-
-write.csv(nbUMIperGene, "HistUMIperGene_mqc.csv")
-write.csv(nbUMIperCell, "HistUMIperCell_mqc.csv")
-write.csv(nbGenesPerCell, "HistGenePerCell_mqc.csv")
 
 ### ratio GeneVSumi & %MT
 #------------
+#=> scatter en renommant les axes:
 
-#scatter en renommant les axes:
+Ratio<-cbind(rownames(resume), resume[,-2])
+colnames(Ratio)<-c("Samples", "Number of genes", "Number of UMIs")
+write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
 
-umiMatrix <- CreateSeuratObject(counts = sparseMtx, project = "smartSeq3", min.features = 0)
+umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
 umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
-
-plotRatio<-FeatureScatter(umiMatrix, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
-Ratio<-data.frame(plotRatio[["data"]][["nFeature_RNA"]])
-Ratio$umi<-plotRatio[["data"]][["nCount_RNA"]]
-colnames(Ratio)<-c("# Genes", "# UMIs")
-write.csv(Ratio, "UmiGenePerCell_mqc_mqc.csv")
-
-plotMT<-FeatureScatter(umiMatrix, feature1 = "nFeature_RNA", feature2 = "percent.mt")
-MT<-data.frame(plotMT[["data"]][["nFeature_RNA"]])
-MT$mt<-plotMT[["data"]][["percent.mt"]]
-colnames(MT)<-c("# Genes", "%MT")
-write_mqc_mqc.csv(MT, "MtGenePerCell_mqc_mqc.csv")
+MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$nb_Genes, umiMatrix[["percent.mt"]])
+colnames(MT)<-c("Samples", "Number of genes", "% Mitochondrial genes")
+write.csv(MT, "MtGenePerCell_mqc.csv", row.names = FALSE )
 
 
