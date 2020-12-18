@@ -672,9 +672,10 @@ process cellAnalysis{
   file ("10Xoutput/") into ch10X
   file ("resume_mqc.csv") into chResume
   file ("HistUMIperGene_mqc.csv") into chUMIperGene
-  file ("HistUMIperCell_mqc.csv") into chUMIperCell
-  file ("HistGenePerCell_mqc.csv") into chGenesPerCell
-  file ("UmiGenePerCell_mqc.csv") into chUmiGeneRatio
+  file("jitter_nbUMI_nbGenes.tiff") into chUMI_Gene_perCell
+  //file ("HistUMIperCell_mqc.csv") into chUMIperCell
+  //file ("HistGenePerCell_mqc.csv") into chGenesPerCell
+  file ("RatioPerCell_mqc.csv") into chUmiGeneRatio
   file ("MtGenePerCell_mqc.csv") into chMT
   file ("v_R.txt") into chRversion
 
@@ -771,8 +772,9 @@ process multiqc {
   file ('resume/*') from chResume.collect()
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene_mqc.csv
-  file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
-  file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
+  //file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
+  //file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
+  file ("jitter/*") from chUMI_Gene_perCell.collect() // jitter_nbUMI_nbGenes.tiff
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
