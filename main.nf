@@ -337,8 +337,8 @@ log.info "========================================="
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
-  label 'medCpu'
-  label 'medMem'
+  label 'highCpu'
+  label 'highMem'
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
   input: 
@@ -436,8 +436,8 @@ process trimReads{
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
-  label 'highCpu'
-  label 'highMem'
+  label 'extraCpu'
+  label 'extraMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
@@ -581,15 +581,14 @@ process countMatrices {
   # Count UMIs per gene per cell
   samtools index ${umiBam}
   umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
-  
   """
 }
 
 process bigWig {
   tag "${prefix}"
   label 'deeptools'
-  label 'highCpu'
-  label 'highMem'
+  label 'extraCpu'
+  label 'extraMem'
   publishDir "${params.outdir}/bigWig", mode: 'copy'
 
   input:
@@ -649,6 +648,11 @@ process genebody_coverage {
       -i ${bg} \\
       -o ${prefix}.rseqc \\
       -r $bed12
+
+  #geneBody_coverage.py \\
+  #    -i ${bam} \\
+  #    -o ${prefix}.rseqc \\
+  #    -r $bed12
   #mv log.txt ${prefix}.rseqc.log.txt
   """
 }
