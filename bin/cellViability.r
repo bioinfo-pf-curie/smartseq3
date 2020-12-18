@@ -150,7 +150,7 @@ write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
 
 umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
 umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
-MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$nb_Genes, umiMatrix[["percent.mt"]])
+MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$`Number of genes`, umiMatrix[["percent.mt"]])
 colnames(MT)<-c("Samples", "Number of genes", "% Mitochondrial genes")
 write.csv(MT, "MtGenePerCell_mqc.csv", row.names = FALSE )
 
