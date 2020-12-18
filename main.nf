@@ -436,8 +436,8 @@ process trimReads{
 process readAlignment {
   tag "${prefix}"
   label 'STAR'
-  label 'extraCpu'
-  label 'extraMem'
+  label 'highCpu'
+  label 'highMem'
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
@@ -631,7 +631,7 @@ process genebody_coverage {
 
   input:
   //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
-  set val(prefix), file (bigwigs) from chBigWig.filter( ~/.*mi_*/ )
+  set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_*/ )
   //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_.*/ )
   file bed12 from chBedGeneCov.collect()
   // channel = pile
