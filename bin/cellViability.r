@@ -105,7 +105,9 @@ names(nbUMIs_perGene)[[1]]<-"x axis"
 # si test avec 
 #nbUMIs_perGene_max50<-nbUMIs_perGene[c(1:100),]
 
-write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE )
+#write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE)
+
+write.table(nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=FALSE, col.names=FALSE)
 
 #--------------------------
 # Nb UMI & Gene per cell
@@ -131,7 +133,10 @@ dev.off()
 
 Ratio<-cbind(rownames(resume), resume[,-2])
 colnames(Ratio)<-c("Samples", "Number of genes", "Number of UMIs")
-write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
+#write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
+
+write.table(Ratio, "RatioPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
+
 
 umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
 umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
