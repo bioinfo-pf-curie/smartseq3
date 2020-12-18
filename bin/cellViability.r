@@ -97,8 +97,8 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 # sans log10
 longMatx2<-select(longMatx, -gene)
 nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
-names(nbUMIs_perGene)[[1]]<-"x axis"
-
+#names(nbUMIs_perGene)[[1]]<-"x axis"
+nbUMIs_perGene<-nbUMIs_perGene[,-1]
 # si test avec log10
 #nbUMIs_perGene$log10<-log10(nbUMIs_perGene$`longMatx2$value`)
 
@@ -114,29 +114,14 @@ write.csv(nbUMIs_perGene, "HistUMIperGene_mqc.csv", row.names = FALSE )
 # Les 2 sur le même mais en log10
 long_resume<-melt(as.matrix(resume[,-2]))
 colnames(long_resume)<-c("Samples", "Var2", "value")
-#jpeg(file="jitter_nbUMI_nbGenes.jpeg")
+jpeg(file="jitter_nbUMI_nbGenes.jpeg")
 ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
         geom_jitter(mapping = aes(colour = Samples), width = .1)  +
         stat_summary(fun=median, geom="point", shape=18,  size=3) +
         xlab("") + ylab("Counts (log10)") + 
         scale_y_log10()
-ggsave("jitter_nbUMI_nbGenes.tiff", units="in", width=5, height=4, dpi=300)
-
-# pas en log10 mais séparés 
-# umis<-long_resumeUMI<-long_resume[long_resume$Var2=="nb_UMIs",]
-# hist_umis<-ggplot(data = umis, aes(x = Var2, y = value)) + theme_bw() +
-#     geom_jitter(mapping = aes(colour = Samples), width = .1 )  +
-#     stat_summary(fun=median, geom="point", shape=18,  size=3) +
-#     xlab("") + labs(fill = "") + ylab("") 
-# genes<-long_resumeGene<-long_resume[long_resume$Var2=="nb_Genes",]
-# hist_genes<-ggplot(data = genes, aes(x = Var2, y = value)) + theme_bw() +
-#     geom_jitter(mapping = aes(colour = Samples), width = .1)  +
-#     stat_summary(fun=median, geom="point", shape=18,  size=3) +
-#     xlab("") + labs(fill = "test") + ylab("Counts")
-# ggarrange(hist_genes, hist_umis, ncol=2, common.legend = TRUE, legend="bottom")
-
-#library(ggpubr)
-#grid.arrange(hist_genes, hist_umis, ncol = 2) 
+dev.off()
+#ggsave("jitter_nbUMI_nbGenes.tiff", units="in", width=5, height=4, dpi=300)
 
 #---------------
 
