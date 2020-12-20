@@ -9,9 +9,15 @@ prefix = as.character(commandArgs(TRUE)[2])
 matrix<-read.table(umiMatrix, header=TRUE)
 
 nbGenes<-nrow(matrix)
-write.table(nbGenes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
-       sep=',', row.names=FALSE, col.names=FALSE)
+# write.table(nbGenes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
+#        sep=',', row.names=FALSE, col.names=FALSE)
 
 nbUmis<-sum(matrix[2])
-write.table(nbUmis, paste0(as.character(prefix), "_nbUMIPerCell_mqc.csv"),
-            sep=',', row.names=TRUE, col.names=FALSE)
+
+countUMIGene<-cbind(prefix, nbGenes, nbUmis)
+
+colnames(countUMIGene)<-c("Cell", "Number of genes", "Number of UMIs")
+
+write.table(countUMIGene, paste0(as.character(prefix), "_countPerCell_mqc.csv"),
+            sep=',', row.names=FALSE, col.names=TRUE)
+
