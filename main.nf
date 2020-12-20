@@ -698,7 +698,7 @@ process countUMIGenePerCell{
 
   script:
   """
-  umiGenePerCell.r ${matrix} ${prefix}
+  umiGenePerCell.r matrices/
   """ 
 }
 

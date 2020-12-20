@@ -2,13 +2,13 @@
 
 .libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
 
-
-
+library(reshape2)
 
 dir_matrices<-as.character(commandArgs(TRUE)[1])
+
 listFile<-list.files(path = dir_matrices)
 
-dir_matrices<-"matrices/"
+#dir_matrices<-"matrices/"
 i=1
 for (file in listFile ){
     matrix<-read.table(file = paste(dir_matrices, file, sep = ""), header=TRUE)
