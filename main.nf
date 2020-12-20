@@ -455,14 +455,14 @@ process readAlignment {
   STAR \
     --genomeDir $genomeIndex \
     --sjdbGTFfile $genomeGtf \
-    --readFilesIn ${trimmedR1},${trimmedR2} \
+    --readFilesIn ${trimmedR1} ${trimmedR2} \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
-    --outSAMtype BAM SortedByCoordinate 
-    #--clip3pAdapterSeq CTGTCTCTTATACACATCT \
-    #--limitSjdbInsertNsj 2000000 \
-    #--outFilterIntronMotifs RemoveNoncanonicalUnannotated 
+    --outSAMtype BAM SortedByCoordinate \
+    --clip3pAdapterSeq CTGTCTCTTATACACATCT \
+    --limitSjdbInsertNsj 2000000 \
+    --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
     # clip3pAdapterSeq = coupe l'adaptater 3' des R2 (~2%) 
     # limitSjdbInsertNsj = augmente le nombre de splice junctions à inserer
@@ -592,8 +592,8 @@ process bigWig {
   publishDir "${params.outdir}/bigWig", mode: 'copy'
 
   input:
-  //set val(prefix), file(assignedBam) from chSortedBAM_bigWig
-  set val(prefix), file(bam) from chSortedBAM_bigWig.concat(chUmiBam).concat(chNonUmiBam) //  _NonUmi_assignedNonUMIs.bam _umi_assignedNonUMIs.bam
+  set val(prefix), file(bam) from chSortedBAM_bigWig
+  //set val(prefix), file(bam) from chSortedBAM_bigWig.concat(chUmiBam).concat(chNonUmiBam) // _Sorted.bam _NonUmi_assignedNonUMIs.bam _umi_assignedNonUMIs.bam
 
   output:
   set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
@@ -605,7 +605,7 @@ process bigWig {
   ## Create bigWig files
   samtools index ${bam}
   #bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
-  bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=5 > ${prefix}_coverage.log
+  bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus} > ${prefix}_coverage.log
 
   bamCoverage --version &> v_deeptools.txt
   """
@@ -629,31 +629,32 @@ process genebody_coverage {
   }
 
   input:
-  //set val(prefix), file (bigwig) from chBigWig.filter( ~/.*mi_coverage.bw/ ) // L386_coverage.bw, L386_umi_coverage.bw, L386_NonUmi_coverage.bw
-  set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_*/ )
+  //dont work
+  //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_*/ )
+  //work
   //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_.*/ )
   file bed12 from chBedGeneCov.collect()
+  set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
+
   // channel = pile
   // quand site tous les fichiers => c'est que commandes differentes sur les deux
-  // To create new channel from one, those == spikego in 1 
-  // chAlignReads.choice( chAlignSpike, chAlignRef ){ it -> it[1] =~ 'spike' ? 1 : 0 }
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
 
   script:
   """
-  #samtools index ${bg}
-  geneBody_coverage2.py \\
-      -i ${bg} \\
+  # geneBody_coverage2.py \\
+  #     -i ${bg} \\
+  #     -o ${prefix}.rseqc \\
+  #     -r $bed12
+
+  samtools index ${bm}
+  geneBody_coverage.py \\
+      -i ${bm} \\
       -o ${prefix}.rseqc \\
       -r $bed12
-
-  #geneBody_coverage.py \\
-  #    -i ${bam} \\
-  #    -o ${prefix}.rseqc \\
-  #    -r $bed12
-  #mv log.txt ${prefix}.rseqc.log.txt
+  mv log.txt ${prefix}.rseqc.log.txt
   """
 }
 
