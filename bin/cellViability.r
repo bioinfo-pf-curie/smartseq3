@@ -58,7 +58,7 @@ matrixFinal<-column_to_rownames(matrixFinal, var = "gene")
 resume<-data.frame(nb_UMIs = colSums(matrixFinal))
 resume$nb_Genes<-apply(matrixFinal, 2,  function(x) length(which(x>0)))
 
-write.table(resume, "resume_mqc.csv", sep=',', row.names=TRUE, col.names=FALSE)
+write.table(resume, "resume.txt", sep=',', row.names=TRUE, col.names=FALSE)
 
 #####  Long to sparse matrix:
 ####-----------------------------------------

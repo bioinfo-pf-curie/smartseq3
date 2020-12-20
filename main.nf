@@ -693,7 +693,7 @@ process cellAnalysis{
 
   output:
   file ("10Xoutput/") into ch10X
-  file ("resume_mqc.csv") into chResume
+  file ("resume.txt") into chResume
   //file ("HistUMIperGene.mqc") into chUMIperGene
   file("jitter_nbUMI_nbGenes.jpeg") into chUMI_Gene_perCell
   //file ("HistUMIperCell_mqc.csv") into chUMIperCell
@@ -769,8 +769,8 @@ process workflowSummaryMqc {
 
 process multiqc {
   label 'multiqc'
-  label 'lowCpu'
-  label 'lowMem'
+  label 'medCpu'
+  label 'medMem'
   publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
   when:
@@ -792,7 +792,7 @@ process multiqc {
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('mergeReads/*') from chCountSummaryExtUMI.collect()
   file ('bigwig/*') from chBigWigLog.collect()
-  file ('resume/*') from chResume.collect()
+  file (resume) from chResume
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.mqc
   //file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
