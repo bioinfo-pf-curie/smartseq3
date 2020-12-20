@@ -694,6 +694,7 @@ process countUMIGenePerCell{
   output:
   set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
   set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
+  set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
 
   script:
   """
@@ -815,9 +816,9 @@ process multiqc {
   file (resume) from chResume
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
-  file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
-  file ("nbGene/*") from chGenePerCell.collect() // bargraph 
-  //file (umi_Gene_perCell) from chUMI_Gene_perCell //
+  //file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
+  //file ("nbGene/*") from chGenePerCell.collect() // bargraph 
+  file (umi_Gene_perCell) from chUMI_Gene_perCell //
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
