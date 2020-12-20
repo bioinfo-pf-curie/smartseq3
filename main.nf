@@ -689,12 +689,12 @@ process countUMIGenePerCell{
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
 
   input:
-  set val(prefix), file(matrix) from chMatrices_counts
+  file ("matrices/${prefix}*") from chMatrices_counts.collect()
 
   output:
-  //set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
-  //set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
-  set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
+  file ("nbGenePerCell_mqc.csv") into chGenePerCell
+  file ("nbUMIPerCell_mqc.csv") into chUmiPerCell
+  //set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
 
   script:
   """
@@ -715,10 +715,6 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume.txt") into chResume
-  //file ("HistUMIperGene.mqc") into chUMIperGene
-  //file("UMIGenesPerCell_mqc.csv") into chUMI_Gene_perCell
-  //file ("HistUMIperCell_mqc.csv") into chUMIperCell
-  //file ("HistGenePerCell_mqc.csv") into chGenesPerCell
   file ("RatioPerCell_mqc.csv") into chUmiGeneRatio
   file ("MtGenePerCell_mqc.csv") into chMT
   file ("v_R.txt") into chRversion
@@ -816,9 +812,9 @@ process multiqc {
   file (resume) from chResume
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
-  //file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
-  //file ("nbGene/*") from chGenePerCell.collect() // bargraph 
-  file ("counts/*") from chUMI_Gene_perCell.collect() //
+  file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
+  file ("nbGene/*") from chGenePerCell.collect() // bargraph 
+  //file ("counts/*") from chUMI_Gene_perCell.collect() //
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
