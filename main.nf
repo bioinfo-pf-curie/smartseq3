@@ -692,7 +692,7 @@ process countUMIGenePerCell{
 
   input:
   //file ("matrices/${prefix}*") from chMatrices_counts.collect()
-  set val(prefix), file(matrices) from chMatrices_counts.collect()
+  file(matrices) from chMatrices_counts.collect()
 
   output:
   file ("nbGenePerCell.csv") into chGenePerCell
