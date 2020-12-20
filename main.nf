@@ -692,8 +692,8 @@ process countUMIGenePerCell{
   file ("matrices/${prefix}*") from chMatrices_counts.collect()
 
   output:
-  file ("nbGenePerCell_mqc.csv") into chGenePerCell
-  file ("nbUMIPerCell_mqc.csv") into chUmiPerCell
+  file ("nbGenePerCell.csv") into chGenePerCell
+  file ("nbUMIPerCell.csv") into chUmiPerCell
   //set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
 
   script:
