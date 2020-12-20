@@ -131,7 +131,7 @@ long_resume<-melt(as.matrix(resume))
 long_resume$sample<-apply(select(long_resume, c("Var1", "Var2")) , 1 , paste , collapse = "_" )
 long_resume<-select(long_resume, c(sample, value))
 
-write.table(Ratio, "UMIGenesPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
+write.table(long_resume, "UMIGenesPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 #---------------
 

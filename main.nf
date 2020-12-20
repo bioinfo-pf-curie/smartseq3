@@ -685,7 +685,7 @@ process cellAnalysis{
   tag "${prefix}"
   label 'R'
   label 'highCpu'
-  label 'extraMem'
+  label 'highMem'
   publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
