@@ -692,8 +692,8 @@ process countUMIGenePerCell{
   set val(prefix), file(matrix) from chMatrices_counts
 
   output:
-  set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
-  set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
+  //set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
+  //set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
   set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
 
   script:
