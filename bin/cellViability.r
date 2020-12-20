@@ -57,6 +57,7 @@ matrixFinal<-column_to_rownames(matrixFinal, var = "gene")
 # Make resume data 
 resume<-data.frame(nb_UMIs = colSums(matrixFinal))
 resume$nb_Genes<-apply(matrixFinal, 2,  function(x) length(which(x>0)))
+colnames(resume)<-c("UMI_counts", "Gene_counts")
 
 write.table(resume, "resume.txt", sep=',', row.names=TRUE, col.names=FALSE)
 
@@ -106,25 +107,31 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 # si test avec 
 #nbUMIs_perGene_max50<-nbUMIs_perGene[c(1:100),]
 
-#write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE)
 
-#write.table(t_nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=TRUE, col.names=FALSE)
+#write.table(nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=TRUE, col.names=FALSE)
 
 #--------------------------
 # Nb UMI & Gene per cell
 # Jitter sur le même graphe avec médiane (image fixe)
 
 # Les 2 sur le même mais en log10
-long_resume<-melt(as.matrix(resume))
-colnames(long_resume)<-c("Samples", "Var2", "value")
-jpeg(file="jitter_nbUMI_nbGenes_mqc.jpeg")
-ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
-        geom_jitter(mapping = aes(colour = Samples), width = .1)  +
-        stat_summary(fun=median, geom="point", shape=18,  size=3) +
-        xlab("") + ylab("Counts (log10)") + 
-        scale_y_log10()
-dev.off()
+# long_resume<-melt(as.matrix(resume))
+# colnames(long_resume)<-c("Samples", "Var2", "value")
+# jpeg(file="jitter_nbUMI_nbGenes_mqc.jpeg")
+# ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
+#         geom_jitter(mapping = aes(colour = Samples), width = .1)  +
+#         stat_summary(fun=median, geom="point", shape=18,  size=3) +
+#         xlab("") + ylab("Counts (log10)") + 
+#         scale_y_log10()
+# dev.off()
 #ggsave("jitter_nbUMI_nbGenes.tiff", units="in", width=5, height=4, dpi=300)
+
+
+long_resume<-melt(as.matrix(resume))
+long_resume$sample<-apply(select(long_resume, c("Var1", "Var2")) , 1 , paste , collapse = "_" )
+long_resume<-select(long_resume, c(sample, value))
+
+write.table(Ratio, "UMIGenesPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 #---------------
 

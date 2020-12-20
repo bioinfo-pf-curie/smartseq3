@@ -87,18 +87,19 @@ custom_data:
         id: 'umiPerGene'
         title: 'Distribution of the number of UMI per gene'
 
-    jitter_nbUMI_nbGenes: 
-      file_format: 'jpeg'
+    nbUmiGene_perCell: 
+      file_format: 'csv'
       section_name: 'Number of UMIs and Genes per Cell'
-      description: 'Each dot is a cell and the black diamond represent the median.'
+      description: ''
+      plot_type: 'bargraph'
       pconfig:
-        id: 'jitter_nbUMI_nbGenes'
-        title: 'Dotplot of UMIs and Genes per Cell'
+        id: 'nbUmiGene_perCell'
+        title: 'Number of UMIs and Genes per Cell'
 
     ratio: 
       file_format: 'csv'
-      section_name: ''
-      description: ''
+      section_name: 'Number of UMIs and Genes per Cell'
+      description: 'Highligth the ratio of genes and umis per cell.'
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
@@ -106,8 +107,8 @@ custom_data:
     
     mt: 
       file_format: 'csv'
-      section_name: 'The percentage of mitochondrial is a cell viability marker.'
-      description: ''
+      section_name: 'Percentage of mitochondrial genes per cell'
+      description: 'The percentage of mitochondrial is a cell viability marker.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
@@ -120,8 +121,8 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
-  jitter_nbUMI_nbGenes:
-      fn: 'jitter_nbUMI_nbGenes_mqc.jpeg'
+  nbUmiGene_perCell:
+      fn: 'UMIGenesPerCell_mqc.csv'
   ratio:
       fn: 'RatioPerCell_mqc.csv'
   mt:
