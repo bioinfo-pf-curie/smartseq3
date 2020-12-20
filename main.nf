@@ -797,7 +797,7 @@ process multiqc {
   file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.mqc
   //file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
   //file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
-  file ("jitter/*") from chUMI_Gene_perCell.collect() // jitter_nbUMI_nbGenes.tiff
+  file (jitter) from chUMI_Gene_perCell // jitter_nbUMI_nbGenes_mqc.jpeg
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
