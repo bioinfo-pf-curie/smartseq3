@@ -98,6 +98,7 @@ longMatx2<-select(longMatx, -gene)
 nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
 names(nbUMIs_perGene)[[1]]<-"x axis"
 nbUMIs_perGene<-nbUMIs_perGene[,-1]
+t_nbUMIs_perGene<-t(nbUMIs_perGene)
 # si test avec log10
 #nbUMIs_perGene$log10<-log10(nbUMIs_perGene$`longMatx2$value`)
 
@@ -106,7 +107,7 @@ nbUMIs_perGene<-nbUMIs_perGene[,-1]
 
 #write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE)
 
-write.table(nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=FALSE, col.names=FALSE)
+write.table(t_nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=TRUE, col.names=FALSE)
 
 #--------------------------
 # Nb UMI & Gene per cell
