@@ -818,7 +818,7 @@ process multiqc {
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
   //file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
   //file ("nbGene/*") from chGenePerCell.collect() // bargraph 
-  file ("counts/*") from chUMI_Gene_perCell //
+  file ("counts/*") from chUMI_Gene_perCell.collect() //
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
