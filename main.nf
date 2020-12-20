@@ -573,7 +573,7 @@ process countMatrices {
   set val(prefix), file(umiBam) from chUmiBam_countMtx
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -681,6 +681,27 @@ process umiPerGeneDist{
   """ 
 }
 
+process countUMIGenePerCell{
+  tag "${prefix}"
+  label 'R'
+  label 'lowCpu'
+  label 'lowMem'
+  publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
+
+  input:
+  set val(prefix), file(matrix) from chMatrices_counts
+
+  output:
+  set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
+  set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
+
+
+  script:
+  """
+  umiGenePerCell.r ${matrix} ${prefix}
+  """ 
+}
+
 process cellAnalysis{
   tag "${prefix}"
   label 'R'
@@ -695,7 +716,7 @@ process cellAnalysis{
   file ("10Xoutput/") into ch10X
   file ("resume.txt") into chResume
   //file ("HistUMIperGene.mqc") into chUMIperGene
-  file("UMIGenesPerCell_mqc.csv") into chUMI_Gene_perCell
+  //file("UMIGenesPerCell_mqc.csv") into chUMI_Gene_perCell
   //file ("HistUMIperCell_mqc.csv") into chUMIperCell
   //file ("HistGenePerCell_mqc.csv") into chGenesPerCell
   file ("RatioPerCell_mqc.csv") into chUmiGeneRatio
@@ -794,10 +815,10 @@ process multiqc {
   file ('bigwig/*') from chBigWigLog.collect()
   file (resume) from chResume
   //PLOTS
-  file ("umiPerGene/*") from chUMIperGene.collect() //HistUMIperGene.mqc
-  //file ("nbUMI/*") from chUMIperCell.collect() //HistUMIperCell_mqc.csv
-  //file ("nbGene/*") from chGenesPerCell.collect() //HistGenePerCell_mqc.csv
-  file (uMI_Gene_perCell) from chUMI_Gene_perCell // jitter_nbUMI_nbGenes_mqc.jpeg
+  file ("umiPerGene/*") from chUMIperGene.collect() 
+  file ("nbUMI/*") from chUmiPerCell.collect() 
+  file ("nbGene/*") from chGenePerCell.collect() 
+  file (umi_Gene_perCell) from chUMI_Gene_perCell  
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 

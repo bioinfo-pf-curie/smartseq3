@@ -86,15 +86,24 @@ custom_data:
       pconfig:
         id: 'umiPerGene'
         title: 'Distribution of the number of UMI per gene'
-
-    nbUmiGene_perCell: 
+    
+    nbGene_perCell: 
       file_format: 'csv'
-      section_name: 'Number of UMIs and Genes per Cell'
+      section_name: 'Number of genes (detected with UMIs) per Cell'
       description: ''
       plot_type: 'bargraph'
       pconfig:
-        id: 'nbUmiGene_perCell'
-        title: 'Number of UMIs and Genes per Cell'
+        id: 'nbGene_perCell'
+        title: 'Number of genes per Cell'
+
+    nbUmi_perCell: 
+      file_format: 'csv'
+      section_name: 'Total number of UMIs per Cell'
+      description: ''
+      plot_type: 'bargraph'
+      pconfig:
+        id: 'nbUmi_perCell'
+        title: 'Number of UMIs per Cell'
 
     ratio: 
       file_format: 'csv'
@@ -121,8 +130,10 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
-  nbUmiGene_perCell:
-      fn: 'UMIGenesPerCell_mqc.csv'
+  nbGene_perCell:
+      fn: '*_nbGenePerCell_mqc.csv'
+  nbUmi_perCell:
+      fn: '*_nbUMIPerCell_mqc.csv'
   ratio:
       fn: 'RatioPerCell_mqc.csv'
   mt:
