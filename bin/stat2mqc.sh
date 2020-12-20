@@ -45,8 +45,8 @@ do
     #filtreG1=`sed -n 4p countsFiltre/${sample}_countsFiltre.log`
     #filtreG2=`sed -n 5p countsFiltre/${sample}_countsFiltre.log`
 
-    nbGenes=$(grep ${sample} resume/resume_mqc.csv | cut -d, -f3)
-    nbUMIs=$(grep ${sample} resume/resume_mqc.csv | cut -d, -f2)
+    nbGenes=$(grep ${sample} resume.txt | cut -d, -f3)
+    nbUMIs=$(grep ${sample} resume.txt | cut -d, -f2)
 
     echo -e ${sample},${sname},${tot_reads}, ${pUMIs}, ${paligned}, ${paligned_assigned},${nbGenes}, ${nbUMIs}>> table_mqc.stats
     echo -e ${sample},${sname},${aligned_assigned}, ${aligned_NotAssigned},${NotAligned},${NotAligned_NotAssigned} >> final_mqc.stats
