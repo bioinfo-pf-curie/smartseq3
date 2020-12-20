@@ -87,32 +87,32 @@ custom_data:
         id: 'umiPerGene'
         title: 'Distribution of the number of UMI per gene'
     
-    # nbGene_perCell: 
-    #   file_format: 'csv'
-    #   section_name: 'Number of genes (detected with UMIs) per Cell'
-    #   description: ''
-    #   plot_type: 'bargraph'
-    #   pconfig:
-    #     id: 'nbGene_perCell'
-    #     title: 'Number of genes per Cell'
-
-    # nbUmi_perCell: 
-    #   file_format: 'csv'
-    #   section_name: 'Total number of UMIs per Cell'
-    #   description: ''
-    #   plot_type: 'bargraph'
-    #   pconfig:
-    #     id: 'nbUmi_perCell'
-    #     title: 'Number of UMIs per Cell'
-
-    counts:
+    nbGene_perCell: 
       file_format: 'csv'
-      section_name: 'Number of genes and UMIs per Cell'
+      section_name: 'Number of genes (detected with UMIs) per Cell'
       description: ''
       plot_type: 'bargraph'
       pconfig:
         id: 'nbGene_perCell'
-        title: 'Number of genes and UMIs per Cell'
+        title: 'Number of genes per Cell'
+
+    nbUmi_perCell: 
+      file_format: 'csv'
+      section_name: 'Total number of UMIs per Cell'
+      description: ''
+      plot_type: 'bargraph'
+      pconfig:
+        id: 'nbUmi_perCell'
+        title: 'Number of UMIs per Cell'
+
+    # counts:
+    #   file_format: 'csv'
+    #   section_name: 'Number of genes and UMIs per Cell'
+    #   description: ''
+    #   plot_type: 'bargraph'
+    #   pconfig:
+    #     id: 'nbGene_perCell'
+    #     title: 'Number of genes and UMIs per Cell'
         
     ratio: 
       file_format: 'csv'
@@ -139,12 +139,12 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
-  #nbGene_perCell:
-  #    fn: '*_nbGenePerCell_mqc.csv'
-  #nbUmi_perCell:
-  #    fn: '*_nbUMIPerCell_mqc.csv'
-  counts:
-      fn: '*_countPerCell_mqc.csv'
+  nbGene_perCell:
+      fn: 'nbGenePerCell_mqc.csv'
+  nbUmi_perCell:
+      fn: 'nbUMIPerCell_mqc.csv'
+  #counts:
+  #    fn: '*_countPerCell_mqc.csv'
   ratio:
       fn: 'RatioPerCell_mqc.csv'
   mt:

@@ -3,21 +3,67 @@
 .libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
 
 
-umiMatrix<- as.character(commandArgs(TRUE)[1])
-prefix = as.character(commandArgs(TRUE)[2])
 
-matrix<-read.table(umiMatrix, header=TRUE)
 
-nbGenes<-nrow(matrix)
-# write.table(nbGenes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
-#        sep=',', row.names=FALSE, col.names=FALSE)
+dir_matrices<-as.character(commandArgs(TRUE)[1])
+listFile<-list.files(path = dir_matrices)
 
-nbUmis<-sum(matrix[2])
+dir_matrices<-"matrices/"
+i=1
+for (file in listFile ){
+    matrix<-read.table(file = paste(dir_matrices, file, sep = ""), header=TRUE)
+    if( nrow(matrix)!=0 ){
+        # If repeated gene names (different chr (often Y_RNA))
+        matrix<-aggregate(matrix$count ~ matrix$gene, FUN=sum)
+        
+        sample<-strsplit(x = file ,split = "_") [[1]][1]
+        colnames(matrix)<-c("gene", sample)
+        if(i==1){
+            matrixFinal<-matrix
+        }else{
+            matrixFinal<-merge(matrixFinal, matrix, by = "gene", all= TRUE)
+        }
+        i=2
+    }
+}
 
-countUMIGene<-cbind(prefix, nbGenes, nbUmis)
 
-colnames(countUMIGene)<-c("Cell", "Number of genes", "Number of UMIs")
+# Replace NA by 0 (row= genes/columns=sample)
+matrixFinal[is.na(matrixFinal)]<-0
 
-write.table(countUMIGene, paste0(as.character(prefix), "_countPerCell_mqc.csv"),
-            sep=',', row.names=FALSE, col.names=FALSE)
+nbUMIs<-colSums(matrixFinal[,-1])
+lg_nbUMIs<-melt(nbUMIs)
+write.table(lg_nbUMIs, "nbUMIPerCell_mqc.csv",
+           sep=',', row.names=TRUE, col.names=FALSE)
 
+
+nbGenes<-apply(matrixFinal[,-1], 2, function(x) length(which(x>0)))
+lg_nbGenes<-melt(nbGenes)
+write.table(lg_nbGenes, "nbGenePerCell_mqc.csv",
+            sep=',', row.names=TRUE, col.names=FALSE)
+
+
+#################
+# si matrice une à une:
+
+# umiMatrix<- as.character(commandArgs(TRUE)[1])
+# prefix = as.character(commandArgs(TRUE)[2])
+#matrix<-read.table(umiMatrix, header=TRUE)
+
+#nbGenes<-nrow(matrix)
+#colnames(nbGenes)<-c("Cell", "Number of genes")
+#write.table(nbGenes, paste0(as.character(prefix), "nbGenePerCell_mqc.csv", collapse = "_"),
+#            sep=',', row.names=FALSE, col.names=TRUE)
+
+
+# nbUmis<-sum(matrix[2])
+# colnames(nbUmis)<-c("Cell", "Number of UMIs")
+# write.table(nbUmis, paste0(as.character(prefix), "nbUMIPerCell_mqc.csv", collapse = "_"),
+#              sep=',', row.names=FALSE, col.names=TRUE)
+
+#countUMIGene<-cbind(prefix, nbGenes, nbUmis)
+#colnames(countUMIGene)<-c("Cell", "Number of genes", "Number of UMIs")
+#
+# write.table(countUMIGene, paste0(as.character(prefix), "_countPerCell_mqc.csv"),
+#             sep=',', row.names=FALSE, col.names=FALSE)
+# 
