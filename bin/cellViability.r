@@ -127,11 +127,11 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 #ggsave("jitter_nbUMI_nbGenes.tiff", units="in", width=5, height=4, dpi=300)
 
 
-long_resume<-melt(as.matrix(resume))
-long_resume$sample<-apply(select(long_resume, c("Var1", "Var2")) , 1 , paste , collapse = "_" )
-long_resume<-select(long_resume, c(sample, value))
-
-write.table(long_resume, "UMIGenesPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
+# long_resume<-melt(as.matrix(resume))
+# long_resume$sample<-apply(select(long_resume, c("Var1", "Var2")) , 1 , paste , collapse = "_" )
+# long_resume<-select(long_resume, c(sample, value))
+# 
+# write.table(long_resume, "UMIGenesPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 #---------------
 
@@ -144,7 +144,7 @@ colnames(Ratio)<-c("Samples", "Number of genes", "Number of UMIs")
 #write.csv(Ratio, "RatioPerCell_mqc.csv", row.names = FALSE )
 # => donne un graphe still heatmap 
 
-write.table(Ratio, "RatioPerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
+write.table(Ratio, "RatioPerCell.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 
 umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
@@ -153,6 +153,6 @@ MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$`Number of genes`, umiMatri
 colnames(MT)<-c("Samples", "Number of genes", "% Mitochondrial genes")
 #write.csv(MT, "MtGenePerCell_mqc.csv", row.names = FALSE )
 
-write.table(MT, "MtGenePerCell_mqc.csv", sep=',', row.names=FALSE, col.names=FALSE)
+write.table(MT, "MtGenePerCell.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 
