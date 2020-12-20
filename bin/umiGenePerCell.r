@@ -9,7 +9,7 @@ prefix = as.character(commandArgs(TRUE)[2])
 matrix<-read.table(umiMatrix, header=TRUE)
 
 nbGenes<-nrow(matrix)
-write.table(nb_Genes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
+write.table(nbGenes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
        sep=',', row.names=FALSE, col.names=FALSE)
 
 nbUmis<-sum(matrix[2])
