@@ -87,7 +87,7 @@ custom_data:
         id: 'umiPerGene'
         title: 'Distribution of the number of UMI per gene'
 
-    jitter: 
+    jitter_nbUMI_nbGenes: 
       file_format: 'jpeg'
       section_name: 'Number of UMIs and Genes per Cell'
       description: 'Each dot is a cell and the black diamond represent the median.'
@@ -120,7 +120,7 @@ sp:
       fn: 'final_mqc.stats'
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
-  jitter:
+  jitter_nbUMI_nbGenes:
       fn: 'jitter_nbUMI_nbGenes_mqc.jpeg'
   ratio:
       fn: 'RatioPerCell_mqc.csv'
