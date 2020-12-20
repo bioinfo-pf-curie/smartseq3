@@ -117,7 +117,7 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 # Les 2 sur le même mais en log10
 long_resume<-melt(as.matrix(resume))
 colnames(long_resume)<-c("Samples", "Var2", "value")
-jpeg(file="jitter_nbUMI_nbGenes.jpeg")
+jpeg(file="jitter_nbUMI_nbGenes_mqc.jpeg")
 ggplot(data = long_resume, aes(x = Var2, y = value)) + theme_bw() +
         geom_jitter(mapping = aes(colour = Samples), width = .1)  +
         stat_summary(fun=median, geom="point", shape=18,  size=3) +

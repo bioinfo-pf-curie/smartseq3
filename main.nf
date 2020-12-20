@@ -695,7 +695,7 @@ process cellAnalysis{
   file ("10Xoutput/") into ch10X
   file ("resume.txt") into chResume
   //file ("HistUMIperGene.mqc") into chUMIperGene
-  file("jitter_nbUMI_nbGenes.jpeg") into chUMI_Gene_perCell
+  file("jitter_nbUMI_nbGenes_mqc.jpeg") into chUMI_Gene_perCell
   //file ("HistUMIperCell_mqc.csv") into chUMIperCell
   //file ("HistGenePerCell_mqc.csv") into chGenesPerCell
   file ("RatioPerCell_mqc.csv") into chUmiGeneRatio
