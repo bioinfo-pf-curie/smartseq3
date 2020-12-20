@@ -638,7 +638,7 @@ process genebody_coverage {
 
   // channel = pile
   // quand site tous les fichiers => c'est que commandes differentes sur les deux
-
+  // ===> Plus rapide avec genebody1: 40 min 1 bam (petit)
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
 
@@ -691,7 +691,8 @@ process countUMIGenePerCell{
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
 
   input:
-  file ("matrices/${prefix}*") from chMatrices_counts.collect()
+  //file ("matrices/${prefix}*") from chMatrices_counts.collect()
+  set val(prefix), file(matrices) from chMatrices_counts.collect()
 
   output:
   file ("nbGenePerCell.csv") into chGenePerCell
@@ -700,7 +701,7 @@ process countUMIGenePerCell{
 
   script:
   """
-  umiGenePerCell.r matrices/
+  umiGenePerCell.r
   """ 
 }
 
@@ -832,12 +833,6 @@ process multiqc {
   //isPE = params.singleEnd ? "" : "-p"
   designOpts= params.design ? "-d ${params.design}" : ""
   modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
-
-  //umisFiltre1 = params.minCountPerCell1 ? "--minCountPerCell1 ${params.minCountPerCell1}" : ""
-  //umisFiltre2 = params.minCountPerCell2 ? "--minCountPerCell2 ${params.minCountPerCell2}" : ""
-  //umisFiltreGene1 = params.minCountPerCellGene1 ? "--minCountPerCellGene1 ${params.minCountPerCellGene1}" : ""
-  //umisFiltreGene2 = params.minCountPerCellGene2 ? "--minCountPerCellGene2 ${params.minCountPerCellGene2}" : ""
-  // ${umisFiltre1} ${umisFiltre2} ${umisFiltreGene1} ${umisFiltreGene2}
 
   """
   stat2mqc.sh ${splan} 
