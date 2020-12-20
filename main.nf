@@ -715,8 +715,8 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume.txt") into chResume
-  file ("RatioPerCell_mqc.csv") into chUmiGeneRatio
-  file ("MtGenePerCell_mqc.csv") into chMT
+  file ("RatioPerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
   file ("v_R.txt") into chRversion
 
   script:

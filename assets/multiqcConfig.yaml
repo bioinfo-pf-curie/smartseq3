@@ -146,9 +146,9 @@ sp:
   #counts:
   #    fn: '*_countPerCell_mqc.csv'
   ratio:
-      fn: 'RatioPerCell_mqc.csv'
+      fn: 'RatioPerCell.csv'
   mt:
-      fn: 'MtGenePerCell_mqc.csv'
+      fn: 'MtGenePerCell.csv'
 
 
 ###############################
