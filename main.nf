@@ -815,10 +815,10 @@ process multiqc {
   file ('bigwig/*') from chBigWigLog.collect()
   file (resume) from chResume
   //PLOTS
-  file ("umiPerGene/*") from chUMIperGene.collect() 
-  file ("nbUMI/*") from chUmiPerCell.collect() 
-  file ("nbGene/*") from chGenePerCell.collect() 
-  file (umi_Gene_perCell) from chUMI_Gene_perCell  
+  file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
+  file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
+  file ("nbGene/*") from chGenePerCell.collect() // bargraph 
+  //file (umi_Gene_perCell) from chUMI_Gene_perCell //
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 
