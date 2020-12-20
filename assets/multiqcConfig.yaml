@@ -89,8 +89,8 @@ custom_data:
     
     nbGene_perCell: 
       file_format: 'csv'
-      section_name: 'Number of genes (detected with UMIs) per Cell'
-      description: ''
+      section_name: 'Number of genes per Cell'
+      description: 'Genes are those found in umi matrices.'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbGene_perCell'
@@ -98,30 +98,21 @@ custom_data:
 
     nbUmi_perCell: 
       file_format: 'csv'
-      section_name: 'Total number of UMIs per Cell'
+      section_name: 'Number of UMIs per Cell'
       description: ''
       plot_type: 'bargraph'
       pconfig:
         id: 'nbUmi_perCell'
         title: 'Number of UMIs per Cell'
-
-    # counts:
-    #   file_format: 'csv'
-    #   section_name: 'Number of genes and UMIs per Cell'
-    #   description: ''
-    #   plot_type: 'bargraph'
-    #   pconfig:
-    #     id: 'nbGene_perCell'
-    #     title: 'Number of genes and UMIs per Cell'
         
     ratio: 
       file_format: 'csv'
-      section_name: 'Number of UMIs and Genes per Cell'
-      description: 'Highligth the ratio of genes and umis per cell.'
+      section_name: 'Ratio of the number of genes and UMIs per Cell'
+      description: ''
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
-        title: 'Number of UMIs and Genes per Cell'
+        title: 'Number of genes and UMIs per Cell'
     
     mt: 
       file_format: 'csv'
@@ -143,8 +134,6 @@ sp:
       fn: 'nbGenePerCell.csv'
   nbUmi_perCell:
       fn: 'nbUMIPerCell.csv'
-  #counts:
-  #    fn: '*_countPerCell_mqc.csv'
   ratio:
       fn: 'RatioPerCell.csv'
   mt:
@@ -170,28 +159,28 @@ module_order:
 
 report_section_order:
   stats:
-    order: 150
+    order: 500
   final:
-    order: 140
+    order: 450
   umiPerGene:
-    order: 130
+    order: 400
   ratio:
-    order: 110
+    order: 350
   mt:
-    order: 100
+    order: 300
   cutadapt:
-    order: 90
+    order: 250
   star:
-    order: 80
+    order: 200
   featureCounts:
-    order: 70
+    order: 150
   deeptools:
-    order: 60
+    order: 100
   rseqc:
     order: 50
   software_versions:
-    order: -1000
+    order: -1500
   summary:
-    order: -1100
+    order: -2000
 
 plots_force_interactive: True
