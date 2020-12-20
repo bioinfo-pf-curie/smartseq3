@@ -4,19 +4,18 @@
 
 library(reshape2)
 
-dir_matrices<-as.character(commandArgs(TRUE)[1])
+#dir_matrices<-as.character(commandArgs(TRUE)[1])
 
-listFile<-list.files(path = dir_matrices)
+listFile<-list.files(path = ".", pattern= "*.tsv.gz")
 
-#dir_matrices<-"matrices/"
 i=1
 for (file in listFile ){
-    matrix<-read.table(file = paste(dir_matrices, file, sep = ""), header=TRUE)
+    matrix<-read.table(file, header=TRUE)
     if( nrow(matrix)!=0 ){
         # If repeated gene names (different chr (often Y_RNA))
         matrix<-aggregate(matrix$count ~ matrix$gene, FUN=sum)
         
-        sample<-strsplit(x = file ,split = "_") [[1]][1]
+        sample<-strsplit(x = file ,split = "_umi") [[1]][1]
         colnames(matrix)<-c("gene", sample)
         if(i==1){
             matrixFinal<-matrix
@@ -26,7 +25,6 @@ for (file in listFile ){
         i=2
     }
 }
-
 
 # Replace NA by 0 (row= genes/columns=sample)
 matrixFinal[is.na(matrixFinal)]<-0
