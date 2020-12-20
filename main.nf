@@ -642,12 +642,13 @@ process genebody_coverage {
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
 
+  // # geneBody_coverage2.py \\
+  // #     -i ${bg} \\
+  // #     -o ${prefix}.rseqc \\
+  // #     -r $bed12
+
   script:
   """
-  # geneBody_coverage2.py \\
-  #     -i ${bg} \\
-  #     -o ${prefix}.rseqc \\
-  #     -r $bed12
 
   samtools index ${bm}
   geneBody_coverage.py \\
