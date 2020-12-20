@@ -19,5 +19,5 @@ countUMIGene<-cbind(prefix, nbGenes, nbUmis)
 colnames(countUMIGene)<-c("Cell", "Number of genes", "Number of UMIs")
 
 write.table(countUMIGene, paste0(as.character(prefix), "_countPerCell_mqc.csv"),
-            sep=',', row.names=FALSE, col.names=TRUE)
+            sep=',', row.names=FALSE, col.names=FALSE)
 
