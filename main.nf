@@ -673,7 +673,7 @@ process umiPerGeneDist{
   set val(prefix), file(matrix) from chMatrices_dist
 
   output:
-  set val(prefix), file ("*_HistUMIperGene.mqc") into chUMIperGene
+  set val(prefix), file ("*_HistUMIperGene_mqc.csv") into chUMIperGene
 
   script:
   """
