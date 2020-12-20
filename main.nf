@@ -713,7 +713,7 @@ process cellAnalysis{
   publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
-  file ("matrices/${prefix}*") from chMatrices.collect()
+  file (matrices) from chMatrices.collect()
 
   output:
   file ("10Xoutput/") into ch10X
@@ -724,7 +724,7 @@ process cellAnalysis{
 
   script:
   """
-  cellViability.r matrices/ 10Xoutput/
+  cellViability.r 10Xoutput/
   R --version &> v_R.txt  
   """ 
 }
