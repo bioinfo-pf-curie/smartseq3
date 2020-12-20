@@ -158,26 +158,33 @@ module_order:
 ## Display
 
 report_section_order:
+  # summary table
   stats:
-    order: 500
+    order: 850
+  # mapping:
   final:
-    order: 450
+    order: 800
+  star:
+    order: 750
+  featureCounts:
+    order: 700
+  cutadapt:
+    order: 650
+  deeptools:
+    order: 600
+  rseqc:
+    order: 550
+  # cell analysis
   umiPerGene:
+    order: 500
+  nbGene_perCell:
+    order: 450
+  nbUmi_perCell:
     order: 400
   ratio:
     order: 350
   mt:
     order: 300
-  cutadapt:
-    order: 250
-  star:
-    order: 200
-  featureCounts:
-    order: 150
-  deeptools:
-    order: 100
-  rseqc:
-    order: 50
   software_versions:
     order: -1500
   summary:
