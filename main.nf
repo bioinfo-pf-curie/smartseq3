@@ -573,7 +573,7 @@ process countMatrices {
   set val(prefix), file(umiBam) from chUmiBam_countMtx
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -662,6 +662,25 @@ process genebody_coverage {
 
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
+process umiPerGeneDist{
+  tag "${prefix}"
+  label 'R'
+  label 'lowCpu'
+  label 'lowMem'
+  publishDir "${params.outdir}/umiPerGeneDist", mode: 'copy'
+
+  input:
+  set val(prefix), file(matrix) from chMatrices_dist
+
+  output:
+  set val(prefix), file ("*_HistUMIperGene.mqc") into chUMIperGene
+
+  script:
+  """
+  umiPerGene_dist.r ${matrix} ${prefix}
+  """ 
+}
+
 process cellAnalysis{
   tag "${prefix}"
   label 'R'
@@ -675,7 +694,7 @@ process cellAnalysis{
   output:
   file ("10Xoutput/") into ch10X
   file ("resume_mqc.csv") into chResume
-  file ("HistUMIperGene.mqc") into chUMIperGene
+  //file ("HistUMIperGene.mqc") into chUMIperGene
   file("jitter_nbUMI_nbGenes.jpeg") into chUMI_Gene_perCell
   //file ("HistUMIperCell_mqc.csv") into chUMIperCell
   //file ("HistGenePerCell_mqc.csv") into chGenesPerCell

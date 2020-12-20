@@ -119,7 +119,7 @@ sp:
   final:
       fn: 'final_mqc.stats'
   umiPerGene:
-      fn: 'HistUMIperGene.mqc'
+      fn: '*_HistUMIperGene.mqc'
   jitter:
       fn: 'jitter_nbUMI_nbGenes.jpeg'
   ratio:

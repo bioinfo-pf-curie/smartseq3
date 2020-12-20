@@ -93,12 +93,13 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
 # Nb UMI per Gene
 #=> par cellules (cumulative dist) mais pas de zéro (col1=sample; col2 = counts; col3=gene name )
 
+#nbUMIs_perGene<-dcast(longMatx, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
+
 # sans log10
-longMatx2<-select(longMatx, -gene)
-nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
-names(nbUMIs_perGene)[[1]]<-"x axis"
-nbUMIs_perGene<-nbUMIs_perGene[,-1]
-t_nbUMIs_perGene<-t(nbUMIs_perGene)
+#longMatx2<-select(longMatx, -gene)
+#nbUMIs_perGene<-dcast(longMatx2, formula = longMatx2$value~longMatx2$variable, value.var = "value", fun.aggregate = length)
+#names(nbUMIs_perGene)[[1]]<-"x axis"
+#nbUMIs_perGene<-nbUMIs_perGene[,-1]
 # si test avec log10
 #nbUMIs_perGene$log10<-log10(nbUMIs_perGene$`longMatx2$value`)
 
@@ -107,7 +108,7 @@ t_nbUMIs_perGene<-t(nbUMIs_perGene)
 
 #write.csv(nbUMIs_perGene, "HistUMIperGene.mqc", row.names = FALSE)
 
-write.table(t_nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=TRUE, col.names=FALSE)
+#write.table(t_nbUMIs_perGene, "HistUMIperGene.mqc", sep=',', row.names=TRUE, col.names=FALSE)
 
 #--------------------------
 # Nb UMI & Gene per cell
