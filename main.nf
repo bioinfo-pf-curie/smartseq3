@@ -695,7 +695,6 @@ process countUMIGenePerCell{
   set val(prefix), file ("*_nbGenePerCell_mqc.csv") into chGenePerCell
   set val(prefix), file ("*_nbUMIPerCell_mqc.csv") into chUmiPerCell
 
-
   script:
   """
   umiGenePerCell.r ${matrix} ${prefix}

@@ -14,4 +14,4 @@ write.table(nbGenes, paste0(as.character(prefix), "_nbGenePerCell_mqc.csv"),
 
 nbUmis<-sum(matrix[2])
 write.table(nbUmis, paste0(as.character(prefix), "_nbUMIPerCell_mqc.csv"),
-            sep=',', row.names=FALSE, col.names=FALSE)
+            sep=',', row.names=TRUE, col.names=FALSE)
