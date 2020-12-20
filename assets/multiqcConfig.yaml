@@ -92,7 +92,7 @@ custom_data:
       section_name: 'Number of UMIs and Genes per Cell'
       description: 'Each dot is a cell and the black diamond represent the median.'
       pconfig:
-        id: 'jitter'
+        id: 'jitter_nbUMI_nbGenes'
         title: 'Dotplot of UMIs and Genes per Cell'
 
     ratio: 
