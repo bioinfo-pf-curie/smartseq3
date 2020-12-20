@@ -164,8 +164,6 @@ report_section_order:
     order: 140
   umiPerGene:
     order: 130
-  jitter:
-    order: 120
   ratio:
     order: 110
   mt:

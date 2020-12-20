@@ -38,13 +38,6 @@ do
 	    paligned_assigned=0
     fi
 
-    ##### Filtre Count
-    #tot_cells=`wc -l < $splan`
-    #filtre1=`sed -n 2p countsFiltre/${sample}_countsFiltre.log`
-    #filtre2=`sed -n 3p countsFiltre/${sample}_countsFiltre.log`
-    #filtreG1=`sed -n 4p countsFiltre/${sample}_countsFiltre.log`
-    #filtreG2=`sed -n 5p countsFiltre/${sample}_countsFiltre.log`
-
     nbGenes=$(grep ${sample} resume.txt | cut -d, -f3)
     nbUMIs=$(grep ${sample} resume.txt | cut -d, -f2)
 
