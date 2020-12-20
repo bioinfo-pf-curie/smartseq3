@@ -140,9 +140,9 @@ sp:
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
   nbGene_perCell:
-      fn: 'nbGenePerCell_mqc.csv'
+      fn: 'nbGenePerCell.csv'
   nbUmi_perCell:
-      fn: 'nbUMIPerCell_mqc.csv'
+      fn: 'nbUMIPerCell.csv'
   #counts:
   #    fn: '*_countPerCell_mqc.csv'
   ratio:
