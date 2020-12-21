@@ -7,10 +7,12 @@ import re
 regexes = {
     'Pipeline': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-	'umi_tools': ['v_umi_tools.txt', r"(\S+)"],
+    'seqkit': ['v_seqkit.txt', r"Version: (\S+)"],
+	'umi_tools': ['v_umi_tools.txt', r"UMI-tools version: (\S+)"],
 	'STAR': ['v_star.txt', r"(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
-	'deeptools': ['v_deeptools.txt', r"plotFingerprint (\S+)"],
+	'deeptools': ['v_deeptools.txt', r"deeptools (\S+)"],
+    'Rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
 	'R': ['v_R.txt', r"R version (\S+)"],
 }
 
@@ -21,6 +23,7 @@ results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['STAR'] = '<span style="color:#999999;\">N/A</span>'
 results['samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['deeptools'] = '<span style="color:#999999;\">N/A</span>'
+results['Rseqc'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex

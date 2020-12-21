@@ -1,5 +1,5 @@
 #
-# RNA-seq config for MultiQC
+# SmartSeq3 config for MultiQC
 #
 #################################################################
 
@@ -72,7 +72,7 @@ custom_data:
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: 'Overview of the mapping step. Correct reads are aligned on the genome and assigned to a gene.'
+      description: 'Overview of mapping steps. Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
@@ -80,39 +80,44 @@ custom_data:
 
     umiPerGene: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per Gene'
+      section_name: 'Number of UMIs per gene'
       description: ''
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
-        title: 'Distribution of the number of UMI per gene'
+        title: ''
+        xlab: 'Number of UMIs per gene'
+        ylab: 'Number of genes'
     
     nbGene_perCell: 
       file_format: 'csv'
-      section_name: 'Number of genes per Cell'
+      section_name: 'Number of genes per cell'
       description: 'Genes are those found in umi matrices.'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbGene_perCell'
-        title: 'Number of genes per Cell'
+        title: 'Number of genes per cell'
 
     nbUmi_perCell: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per Cell'
+      section_name: 'Number of UMIs per cell'
       description: ''
       plot_type: 'bargraph'
       pconfig:
         id: 'nbUmi_perCell'
-        title: 'Number of UMIs per Cell'
+        title: 'Number of UMIs per cell'
         
     ratio: 
       file_format: 'csv'
-      section_name: 'Ratio of the number of genes and UMIs per Cell'
+      section_name: 'Ratio of the number of genes and UMIs per cell'
       description: ''
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
         title: 'Number of genes and UMIs per Cell'
+        xlab: 'Number of UMIs'
+        ylab: 'Number of genes'
+
     
     mt: 
       file_format: 'csv'
@@ -122,6 +127,8 @@ custom_data:
       pconfig:
         id: 'mt'
         title: 'Percentage of mitochondrial genes per cell'
+        xlab: 'Number of genes'
+        ylab: '% mitochondrial genes'
 
 sp:
   stats:
