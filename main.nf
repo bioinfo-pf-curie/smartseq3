@@ -47,12 +47,6 @@ def helpMessage() {
     --design [file]               Path to design file for extended analysis  
     --singleEnd [bool]            Specifies that the input is single-end reads
 
-  Options:
-      --minCountPerCell1             First minimum umi counts per cell. Default: 500
-      --minCountPerCell2             Second minimum umi counts per cell. Default: 1000
-      --minCountPerCellGene1         First minimum gene counts per cell. Default: 100
-      --minCountPerCellGene2         Second minimum gene counts per cell. Default: 200
-
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
@@ -304,7 +298,7 @@ def summary = [:]
 /* ADDED -------------*/
 summary['Pipeline Name']  = 'SmartSeq3'
 summary['Pipeline Version'] = workflow.manifest.version
-//summary['Run Name']     = custom_runName ?: workflow.runName
+summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Command Line'] = workflow.commandLine
 if (params.samplePlan) {
    summary['SamplePlan']   = params.samplePlan
@@ -312,10 +306,6 @@ if (params.samplePlan) {
    summary['Reads']        = params.reads
 }
 summary['Genome']       = params.genome
-summary['First min Count umis per Cell']  = params.minCountPerCell1
-summary['Second min Count umis per Cell']  = params.minCountPerCell2
-summary['First min Count genes per Cell']  = params.minCountPerCellGene1
-summary['Second min Count genes per Cell']  = params.minCountPerCellGene2
 /*--------------------------------*/
 summary['Annotation']   = params.genomeAnnotationPath
 summary['Max Memory']     = params.maxMemory
@@ -404,8 +394,7 @@ process mergeReads {
 
   # Get version 
   echo SeqKit > name
-  seqkit --help | grep Version > version
-  paste name version > v_seqkit.txt
+  seqkit --help | grep Version > v_seqkit.txt
   """
 }
 
@@ -640,6 +629,7 @@ process genebody_coverage {
   // ===> Plus rapide avec genebody1: 40 min 1 bam (petit)
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
+  file ("v_rseqc") into chRseqcVersion
 
   // # geneBody_coverage2.py \\
   // #     -i ${bg} \\
@@ -648,13 +638,14 @@ process genebody_coverage {
 
   script:
   """
-
   samtools index ${bm}
   geneBody_coverage.py \\
       -i ${bm} \\
       -o ${prefix}.rseqc \\
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
+
+  geneBody_coverage.py --version &> v_rseqc
   """
 }
 
@@ -752,6 +743,7 @@ process getSoftwareVersions{
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
+  file ("v_rseqc") from chRseqcVersion.ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
@@ -811,12 +803,11 @@ process multiqc {
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('mergeReads/*') from chCountSummaryExtUMI.collect()
   file ('bigwig/*') from chBigWigLog.collect()
-  file (resume) from chResume
+  file (resume) from chResume // general stats 
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
   file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
   file ("nbGene/*") from chGenePerCell.collect() // bargraph 
-  //file ("counts/*") from chUMI_Gene_perCell.collect() //
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
 

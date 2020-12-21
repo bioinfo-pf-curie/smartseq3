@@ -6,7 +6,6 @@
 #  Copyright (c) 2018 - Institut Curie
 #
 #  File author(s):
-#      Dimitri Desvillechabrol <dimitri.desvillechabrol@curie.fr>,
 #      Nicolas Servant <nicolas.servant@curie.fr>
 #
 #  Distributed under the terms of the CeCILL-B license.
