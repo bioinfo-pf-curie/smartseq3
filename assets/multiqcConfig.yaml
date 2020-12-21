@@ -38,7 +38,7 @@ custom_data:
                 title: 'UMIs reads (%)'
                 min: 0
                 max: 100
-                scale: 'YlGnBu'
+                scale: 'Purples'
                 suffix: '%'
                 format: '{:,.1f}'
                 placement: 4000
@@ -46,7 +46,7 @@ custom_data:
                 title: 'Aligned (%)'
                 min: 0
                 max: 100
-                scale: 'RdYlGn'
+                scale: 'Greens'
                 suffix: '%'
                 format: '{:,.1f}'
                 placement: 5000
@@ -54,25 +54,25 @@ custom_data:
                 title: 'Assigned (%)'
                 min: 0
                 max: 100
-                scale: 'RdYlGn'
+                scale: 'YlGn'
                 suffix: '%'
                 format: '{:,.1f}'
                 placement: 6000
               nbUmis:
                 title: '# UMIs'
-                scale: 'YlGnBu'
+                scale: 'Oranges'
                 format: '{:,.0f}'
                 placement: 7000
               nbGenes:
                 title: '# Genes'
-                scale: 'YlGnBu'
+                scale: 'RdPu'
                 format: '{:,.0f}'
                 placement: 8000
     
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: 'Overview of mapping steps. Correct reads are aligned on the genome and assigned to a gene.'
+      description: 'Overview of mapping steps done on all reads (UMI and UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
@@ -87,8 +87,14 @@ custom_data:
         id: 'umiPerGene'
         title: ''
         xlab: 'Number of UMIs per gene'
+        xmax: 50
         ylab: 'Number of genes'
-    
+        #xLog: True
+        #logswitch: True
+        #logswitch_active: True
+        #logswitch_label: 'Log10'
+        #reversedStacks: True
+
     nbGene_perCell: 
       file_format: 'csv'
       section_name: 'Number of genes per cell'
@@ -114,7 +120,7 @@ custom_data:
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
-        title: 'Number of genes and UMIs per Cell'
+        title: 'Number of genes and UMIs per cell'
         xlab: 'Number of UMIs'
         ylab: 'Number of genes'
 
@@ -122,7 +128,7 @@ custom_data:
     mt: 
       file_format: 'csv'
       section_name: 'Percentage of mitochondrial genes per cell'
-      description: 'The percentage of mitochondrial is a cell viability marker.'
+      description: 'Only UMI reads are take into account. The percentage of mitochondrial is a cell viability marker.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
