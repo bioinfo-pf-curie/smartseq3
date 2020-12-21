@@ -369,12 +369,15 @@ process mergeReads {
 
   script:
   """
-  # Get UMI read IDs (without UMIs)
+  # Get UMI read IDs (without UMIs in names)
+  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}umisReadsIDs
+  # Get UMI read IDs (with UMIs in names for separateReads process)
   seqkit seq -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
   # Extract non umis reads
-  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -v -f ${prefix}_umisReadsIDs.txt ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  # input == fastq initiaux donc pas d'umis dedans
+  seqkit grep -v -f ${prefix}umisReadsIDs ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+  seqkit grep -v -f ${prefix}umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Get non UMI reads IDs
   seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq > ${prefix}_NonUmisReadsIDs.txt

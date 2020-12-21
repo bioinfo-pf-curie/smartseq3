@@ -17,7 +17,7 @@ do
     sname=$(awk -F, -v sname=$sample '$1==sname{print $2}' $splan)
 
     # Number of reads:
-    tot_reads=`grep "Number of input reads" star/${sample}Log.final.out | cut -d'|' -f2`
+    tot_reads=`grep "Input Reads: " umiExtract/${sample}_umiExtract.log | cut -d":" -f4`
     pUMIs=`grep "percentUMI:" mergeReads/${sample}_pUMIs.txt | cut -d':' -f2`
     aligned=` grep "Uniquely mapped reads number" star/${sample}Log.final.out | cut -d'|' -f2 `
     paligned=` grep "Uniquely mapped reads %" star/${sample}Log.final.out | cut -d'|' -f2 | cut -d% -f1`
