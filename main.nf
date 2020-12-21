@@ -298,7 +298,7 @@ def summary = [:]
 /* ADDED -------------*/
 summary['Pipeline Name']  = 'SmartSeq3'
 summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name']     = custom_runName ?: workflow.runName
+//summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Command Line'] = workflow.commandLine
 if (params.samplePlan) {
    summary['SamplePlan']   = params.samplePlan
