@@ -16,7 +16,7 @@ custom_data:
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
-      description: ' of sequenced data'
+      description: 'of sequenced data'
       plot_type: 'table'
       pconfig:
           namespace: 'stats'
@@ -72,7 +72,7 @@ custom_data:
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: ''
+      description: 'Overview of the mapping step. Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
@@ -148,7 +148,7 @@ module_order:
   - star:
       name: 'Read alignments'
       info: 'Each read is aligned on a reference genome using the STAR software.'
-  - featureCounts:
+  - featurecounts:
       name: 'Read assignments'
       info: 'Each aligned read is assigned to a gene using the featureCounts software.'
   - deeptools
@@ -166,12 +166,10 @@ report_section_order:
     order: 800
   star:
     order: 750
-  featureCounts:
+  featurecounts:
     order: 700
   cutadapt:
     order: 650
-  deeptools:
-    order: 600
   rseqc:
     order: 550
   # cell analysis
