@@ -8,7 +8,7 @@ regexes = {
     'Pipeline': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
 	'umi_tools': ['v_umi_tools.txt', r"(\S+)"],
-	'STAR': ['v_star.txt', r"STAR(\S+)"],
+	'STAR': ['v_star.txt', r"(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
 	'deeptools': ['v_deeptools.txt', r"plotFingerprint (\S+)"],
 	'R': ['v_R.txt', r"R version (\S+)"],

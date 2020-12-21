@@ -321,7 +321,6 @@ summary['Annotation']   = params.genomeAnnotationPath
 summary['Max Memory']     = params.maxMemory
 summary['Max CPUs']       = params.maxCpus
 summary['Max Time']       = params.maxTime
-summary['Container Engine'] = workflow.containerEngine
 summary['Current home']   = "$HOME"
 summary['Current user']   = "$USER"
 summary['Current path']   = "$PWD"
