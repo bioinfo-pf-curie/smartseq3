@@ -11,7 +11,7 @@ regexes = {
 	'umi_tools': ['v_umi_tools.txt', r"UMI-tools version: (\S+)"],
 	'STAR': ['v_star.txt', r"(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
-	'deeptools': ['v_deeptools.txt', r"deeptools (\S+)"],
+	'deeptools': ['v_deeptools.txt', r"bamCoverage (\S+)"],
     'Rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
 	'R': ['v_R.txt', r"R version (\S+)"],
 }

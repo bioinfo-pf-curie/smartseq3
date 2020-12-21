@@ -7,7 +7,7 @@ all_samples=$(awk -F, '{print $1}' $splan)
 
 ## Header
 #Table:
-echo -e "Sample_id, Sample_name, Reads tot., UMIs(%), Aligned(%), Assigned(%), #Genes, #UMIs" > table_mqc.stats
+echo -e "Sample_id, Sample_name, #Fragments, UMIs(%), Aligned(%), Assigned(%), #Genes, #UMIs" > table_mqc.stats
 #Bargraph:
 echo -e "Sample_id, Sample_name, Aligned_Assigned, Aligned_NotAssigned, NotAligned_NotAssagned" > final_mqc.stats
 
