@@ -12,10 +12,9 @@ regexes = {
 	'STAR': ['v_star.txt', r"(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
 	'deeptools': ['v_deeptools.txt', r"bamCoverage (\S+)"],
-    'Rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
+    'rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
 	'R': ['v_R.txt', r"R version (\S+)"],
 }
-
 
 results = OrderedDict()
 results['Pipeline'] = '<span style="color:#999999;\">N/A</span>'
@@ -23,7 +22,7 @@ results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['STAR'] = '<span style="color:#999999;\">N/A</span>'
 results['samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['deeptools'] = '<span style="color:#999999;\">N/A</span>'
-results['Rseqc'] = '<span style="color:#999999;\">N/A</span>'
+results['rseqc'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
