@@ -735,7 +735,7 @@ process getSoftwareVersions{
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
-  file ("v_R.txt") from chRversion.first().ifEmpty([])
+  file ("v_R.txt") from chRversion.ifEmpty([])
   file ("v_rseqc.txt") from chRseqcVersion.first().ifEmpty([])
 
   output:
