@@ -632,7 +632,7 @@ process genebody_coverage {
   // ===> Plus rapide avec genebody1: 40 min 1 bam (petit)
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
-  file ("v_rseqc") into chRseqcVersion
+  file ("v_rseqc.txt") into chRseqcVersion
 
   // # geneBody_coverage2.py \\
   // #     -i ${bg} \\
@@ -746,7 +746,7 @@ process getSoftwareVersions{
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
-  //file ("v_rseqc") from chRseqcVersion.ifEmpty([])
+  file ("v_rseqc.txt") from chRseqcVersion.ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
