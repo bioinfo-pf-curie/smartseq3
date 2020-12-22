@@ -591,6 +591,7 @@ process bigWig {
   set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
   set val(prefix), file("*_coverage.log") into chBigWigLog
   file("v_deeptools.txt") into chBamCoverageVersion
+  file ("v_rseqc.txt") into chRseqcVersion
 
   script:
   """
@@ -600,6 +601,7 @@ process bigWig {
   bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus} > ${prefix}_coverage.log
 
   bamCoverage --version &> v_deeptools.txt
+  geneBody_coverage.py --version &> v_rseqc.txt
   """
 }
 
@@ -628,7 +630,6 @@ process genebody_coverage {
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
 
   output:
-  file ("v_rseqc.txt") into chRseqcVersion
   file "*.{txt,pdf,r}" into chGeneCov_res
 
   script:
@@ -640,7 +641,6 @@ process genebody_coverage {
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
 
-  geneBody_coverage.py --version &> v_rseqc.txt
   """
 }
 
