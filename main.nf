@@ -746,7 +746,7 @@ process getSoftwareVersions{
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
-  file ("v_rseqc") from chRseqcVersion.ifEmpty([])
+  //file ("v_rseqc") from chRseqcVersion.ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
