@@ -50,7 +50,7 @@ def helpMessage() {
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
-    --skip_genebody_coverage      Skip calculating genebody coverage
+    --skip_genebody_coverage [bool]     Skip calculating genebody coverage
   
   Genomes: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
