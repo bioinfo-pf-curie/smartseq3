@@ -50,6 +50,7 @@ def helpMessage() {
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version
     --skipMultiQC [bool]          Skips MultiQC
+    --skip_genebody_coverage      Skip calculating genebody coverage
   
   Genomes: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
@@ -619,25 +620,16 @@ process genebody_coverage {
       else filename
   }
 
+  when:
+    !params.skip_genebody_coverage
+
   input:
-  //dont work
-  //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_*/ )
-  //work
-  //set val(prefix), file (bg) from chBigWig.filter( ~/.*mi_.*/ )
   file bed12 from chBedGeneCov.collect()
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
 
-  // channel = pile
-  // quand site tous les fichiers => c'est que commandes differentes sur les deux
-  // ===> Plus rapide avec genebody1: 40 min 1 bam (petit)
   output:
-  file "*.{txt,pdf,r}" into chGeneCov_res
   file ("v_rseqc.txt") into chRseqcVersion
-
-  // # geneBody_coverage2.py \\
-  // #     -i ${bg} \\
-  // #     -o ${prefix}.rseqc \\
-  // #     -r $bed12
+  file "*.{txt,pdf,r}" into chGeneCov_res
 
   script:
   """
@@ -648,7 +640,7 @@ process genebody_coverage {
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
 
-  geneBody_coverage.py --version &> v_rseqc
+  geneBody_coverage.py --version &> v_rseqc.txt
   """
 }
 
@@ -684,13 +676,11 @@ process countUMIGenePerCell{
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
 
   input:
-  //file ("matrices/${prefix}*") from chMatrices_counts.collect()
   file(matrices) from chMatrices_counts.collect()
 
   output:
   file ("nbGenePerCell.csv") into chGenePerCell
   file ("nbUMIPerCell.csv") into chUmiPerCell
-  //set val(prefix), file ("*_countPerCell_mqc.csv") into chUMI_Gene_perCell
 
   script:
   """
