@@ -364,7 +364,7 @@ process mergeReads {
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
-  set val(prefix), file("*_NonUmisReadsIDs.txt") into chNonUmiReadsIDs
+  //set val(prefix), file("*_NonUmisReadsIDs.txt") into chNonUmiReadsIDs
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   file("v_seqkit.txt") into chSeqkitVersion
 
@@ -381,7 +381,7 @@ process mergeReads {
   seqkit grep -v -f ${prefix}umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Get non UMI reads IDs
-  seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq > ${prefix}_NonUmisReadsIDs.txt
+  # seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq > ${prefix}_NonUmisReadsIDs.txt
 
   # Merge non umis reads + umi reads (with umi in read names)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
@@ -524,7 +524,7 @@ process separateReads {
   publishDir "${params.outdir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs), file(nonUmisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs).join(chNonUmiReadsIDs)
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs)
   //set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
   //set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
@@ -545,7 +545,8 @@ process separateReads {
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
-  fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  #fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
 
