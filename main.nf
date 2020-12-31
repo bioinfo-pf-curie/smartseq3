@@ -566,7 +566,6 @@ process separateReads {
   # save header and extract non umi reads 
   samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
-  #fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
 
