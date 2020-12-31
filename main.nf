@@ -324,6 +324,33 @@ log.info "========================================="
 
 /*##########################   STEP 1: MAPPING  ####################################*/
 
+process getTaggedSeq{
+  tag "${seqkit}"
+  label 'umiTools'
+  label 'medCpu'
+  label 'medMem'
+
+  publishDir "${params.outdir}/getTaggedSeq", mode: 'copy'
+
+  input: 
+  set val(prefix), file(reads) from rawReadsFastqc
+
+  output:
+  set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
+  set val(prefix), file("*_taggedReadIDs.txt") into chTaggedIDs
+
+  script:
+  """
+    # Get tagged sequences == umi sequences
+    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} > ${prefix}_tagged.R1.fastq
+    # Pour aussi outputer R2
+    # exctract ids
+    seqkit seq -n -i ${prefix}_tagged.R1.fastq > ${prefix}_taggedReadIDs.txt
+    # grep tagged ids
+    seqkit grep -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq
+    """
+}
+
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
@@ -332,7 +359,7 @@ process umiExtraction {
   publishDir "${params.outdir}/umiExtraction", mode: 'copy'
 
   input: 
-  set val(prefix), file(reads) from rawReadsFastqc
+  set val(prefix), file(taggedR1), file(taggedR2) from chTaggedFastq
 
   output:
   set val(prefix), file("*_UMIsExtracted.R1.fastq"), file("*_UMIsExtracted.R2.fastq") into chUmiExtracted
@@ -341,9 +368,9 @@ process umiExtraction {
 
   script:
   length_umi = params.umi_size
-  opts ="--extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' --stdin=${reads[0]} --stdout=${prefix}_UMIsExtracted.R1.fastq --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtracted.R2.fastq "
+  opts ="--extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq "
   """
-  # Extract barcdoes and UMIs and add to read names
+  # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
   umi_tools extract $opts --log=${prefix}_umiExtract.log 
 
   umi_tools --version &> v_umi_tools.txt
@@ -358,39 +385,32 @@ process mergeReads {
   publishDir "${params.outdir}/mergeReads", mode: 'copy'
 
   input:
-  set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2) from chMergeReadsFastq.join(chUmiExtracted)
-  //set val(prefix), file(umiReads_R1), file(umiReads_R2) from chUmiExtracted
+  set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2), file(taggedReadIDs) from chMergeReadsFastq.join(chUmiExtracted).join(chTaggedIDs)
 
   output:
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
-  //set val(prefix), file("*_NonUmisReadsIDs.txt") into chNonUmiReadsIDs
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   file("v_seqkit.txt") into chSeqkitVersion
 
   script:
   """
-  # Get UMI read IDs (without UMIs in names)
-  seqkit seq -n -i ${umiReads_R1} | cut -f1 -d_ > ${prefix}umisReadsIDs
   # Get UMI read IDs (with UMIs in names for separateReads process)
   seqkit seq -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
-  # Extract non umis reads
-  # input == fastq initiaux donc pas d'umis dedans
-  seqkit grep -v -f ${prefix}umisReadsIDs ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -v -f ${prefix}umisReadsIDs ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  # Extract non UMI reads
+  # input == fastq initiaux donc pas d'umis dans le nom + on ne veut pas les séquences taggées
+  seqkit grep -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+  seqkit grep -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
-  # Get non UMI reads IDs
-  # seqkit seq -n -i ${prefix}_nonUMIs.R1.fastq > ${prefix}_NonUmisReadsIDs.txt
-
-  # Merge non umis reads + umi reads (with umi in read names)
+  # Merge non umis reads + correct umi reads (with umi in read names) (do not take into account reads deleted due to a lake of tag+UMI+GGG)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
   cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
 
   cat ${umiReads_R2} > ${prefix}_totReads.R2.fastq
   cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
 
-  ## Save % UMIs reads 
+  ## Save % of correct UMIs reads (do not take into account all tagged sequences but only tag+UMI+GGG)
   nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
   nb_totreads=\$(( \$nb_lines / 4 ))
   nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
