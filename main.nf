@@ -325,8 +325,8 @@ log.info "========================================="
 /*##########################   STEP 1: MAPPING  ####################################*/
 
 process getTaggedSeq{
-  tag "${seqkit}"
-  label 'umiTools'
+  tag "${prefix}"
+  label 'seqkit'
   label 'medCpu'
   label 'medMem'
 
