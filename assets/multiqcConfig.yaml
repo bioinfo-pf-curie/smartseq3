@@ -72,7 +72,7 @@ custom_data:
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: 'Overview of mapping steps done on all reads (UMI and UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
+      description: 'Overview of mapping steps done on all reads (UMI and non UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
@@ -81,13 +81,13 @@ custom_data:
     umiPerGene: 
       file_format: 'csv'
       section_name: 'Number of UMIs per gene'
-      description: ''
+      description: 'Distribution of the number of UMIs per genes in each sample. Genes having more than 70 UMIs (x axis) are not show cause they are too few.'
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
         title: ''
         xlab: 'Number of UMIs per gene'
-        xmax: 50
+        xmax: 70
         ylab: 'Number of genes'
         #xLog: True
         #logswitch: True
@@ -128,7 +128,7 @@ custom_data:
     mt: 
       file_format: 'csv'
       section_name: 'Percentage of mitochondrial genes per cell'
-      description: 'Only UMI reads are take into account. The percentage of mitochondrial is a cell viability marker.'
+      description: 'Percentage of mitochondrial genes is a cell viability marker. Here, only UMI reads are take into account.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
