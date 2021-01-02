@@ -716,7 +716,7 @@ process countUMIGenePerCell{
 }
 
 // Que si NovaSeq == outputs = 1 tableau pour chaque compte (umi/gene) pour créer 1 histogramme de distribution
-process countUMIGenePerCell{
+/* process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
@@ -738,7 +738,7 @@ process countUMIGenePerCell{
   umiGenePerCell.r
   """ 
 }
-
+ */
 
 process cellAnalysis{
   tag "${prefix}"
