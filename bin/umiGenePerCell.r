@@ -36,14 +36,12 @@ colnames(lg_nbUMIs)<-c("Cells", "Number of umis")
 write.table(lg_nbUMIs, "nbUMIPerCell.csv",
            sep=',', row.names=FALSE, col.names=TRUE)
 
-
 nbGenes<-apply(matrixFinal[,-1], 2, function(x) length(which(x>0)))
 lg_nbGenes<-melt(as.matrix(nbGenes))
 lg_nbGenes<-lg_nbGenes[,-2]
 colnames(lg_nbGenes)<-c("Cells", "Number of genes")
 write.table(lg_nbGenes, "nbGenePerCell.csv",
             sep=',', row.names=FALSE, col.names=TRUE)
-
 
 #################
 # si matrice une à une:
