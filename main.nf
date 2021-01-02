@@ -434,12 +434,15 @@ process trimReads{
 
   output:
   set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
-  set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
+  set val(prefix), file("*_trimmed1.log"), file("*_trimmed.log") into chtrimmedReadsLog
   file("v_cutadapt.txt") into chCutadaptVersion
 
   script:
   """
-  cutadapt -G XGCATACGAT{30} --minimum-length=15 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  # delete linker + polyA queue
+  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed1.R1.fastq -p ${prefix}_trimmed1.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed1.log
+  # Some tag+umi+GGG are found in R2 reads (~2%). They have to be remove prior alignment. 
+  cutadapt -G ATTGCGCAATGNNNNNNNNGGG --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${prefix}_trimmed1.R1.fastq ${prefix}_trimmed1.R2.fastq > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
@@ -684,16 +687,20 @@ process umiPerGeneDist{
 
   script:
   """
+  # Get matrix one by one
   umiPerGene_dist.r ${matrix} ${prefix}
   """ 
 }
 
+// Que si MiSeq
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
   label 'lowMem'
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
+
+  // // when: --MiSeq
 
   input:
   file(matrices) from chMatrices_counts.collect()
@@ -707,6 +714,31 @@ process countUMIGenePerCell{
   umiGenePerCell.r
   """ 
 }
+
+// Que si NovaSeq == outputs = 1 tableau pour chaque compte (umi/gene) pour créer 1 histogramme de distribution
+process countUMIGenePerCell{
+  tag "${prefix}"
+  label 'R'
+  label 'lowCpu'
+  label 'lowMem'
+  publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
+
+  // when: --Novaseq
+
+  input:
+  file(matrices) from chMatrices_counts.collect()
+
+  output:
+  file ("nbGenePerCell.csv") into chGenePerCell
+  file ("nbUMIPerCell.csv") into chUmiPerCell
+
+  script:
+  """
+  # Ajouter dans assets/mqc deux parties pour créer hist (seront innexistantes si pas option Novaseq)
+  umiGenePerCell.r
+  """ 
+}
+
 
 process cellAnalysis{
   tag "${prefix}"
@@ -839,6 +871,7 @@ process multiqc {
 
   """
   stat2mqc.sh ${splan} 
+  mean_calculation.r 
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
