@@ -13,60 +13,6 @@ read_count_desc: 'millions'
 
 custom_data:
 
-    stats_means:
-      file_format: 'csv'
-      section_name: 'General Metrics'
-      description: 'of sequenced data'
-      plot_type: 'table'
-      pconfig:
-          namespace: 'stats'
-          id: 'stats'
-          title: 'General Statistics'
-          save_file: true
-          col1_header: 'Sample ID'
-          headers:
-              Sample_name:
-                title: 'Sample Name'
-                scale: false
-                placement: 2000
-              Mean_nb_Reads:
-                title: 'Mean total Reads'
-                scale: 'YlGnBu'
-                format: '{:,.0f}'
-                placement: 3000
-              Mean_prt_UMIs:
-                title: 'Mean percent UMIs'
-                scale: 'YlGnBu'
-                format: '{:,.0f}'
-                placement: 3000
-              Mean_Percent_Aligned:
-                title: 'Mean Aligned (%)'
-                min: 0
-                max: 100
-                scale: 'Greens'
-                suffix: '%'
-                format: '{:,.1f}'
-                placement: 5000
-              Mean_Percent_Assigned:
-                title: 'Mean Assigned (%)'
-                min: 0
-                max: 100
-                scale: 'YlGn'
-                suffix: '%'
-                format: '{:,.1f}'
-                placement: 6000
-              Mean_nbUmis:
-                title: 'Mean # UMIs'
-                scale: 'Oranges'
-                format: '{:,.0f}'
-                placement: 7000
-              Mean_nbGenes:
-                title: 'Mean # Genes'
-                scale: 'RdPu'
-                format: '{:,.0f}'
-                placement: 8000
-
-
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
@@ -191,8 +137,6 @@ custom_data:
         ylab: '% mitochondrial genes'
 
 sp:
-  stats_means:
-    fn: 'mean_table_mqc.stats'
   stats:
       fn: 'table_mqc.stats'
   final:
