@@ -635,10 +635,6 @@ process genebody_coverage {
   label 'rseqc'
   label 'extraCpu'
   label 'extraMem'
-
-  when:
-  !params.skipGeneCov
-  
   publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -649,7 +645,7 @@ process genebody_coverage {
   }
 
   when:
-    !params.skip_genebody_coverage
+  !params.skipGeneCov
 
   input:
   file bed12 from chBedGeneCov.collect()
