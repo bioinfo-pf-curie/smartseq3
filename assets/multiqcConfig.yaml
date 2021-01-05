@@ -142,9 +142,9 @@ sp:
   umiPerGene:
       fn: '*_HistUMIperGene_mqc.csv'
   nbGene_perCell:
-      fn: 'nbGenePerCell.csv' // bargraph 
+      fn: 'nbGenePerCell.csv'
   nbUmi_perCell:
-      fn: 'nbUMIPerCell.csv' // bargraph 
+      fn: 'nbUMIPerCell.csv'
   ratio:
       fn: 'RatioPerCell.csv'
   mt:
