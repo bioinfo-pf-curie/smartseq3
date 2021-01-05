@@ -44,6 +44,7 @@ def helpMessage() {
     -profile [str]                Configuration profile to use. test / conda / multiconda / path / multipath / singularity / docker / cluster (see below)
   
   Inputs:
+    --starIndex [dir]             Index for STAR aligner
     --design [file]               Path to design file for extended analysis  
     --singleEnd [bool]            Specifies that the input is single-end reads
 
