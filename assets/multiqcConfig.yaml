@@ -12,7 +12,6 @@ read_count_desc: 'millions'
 ## Custom content
 
 custom_data:
-
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
@@ -68,7 +67,7 @@ custom_data:
                 scale: 'RdPu'
                 format: '{:,.0f}'
                 placement: 8000
-    
+
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
@@ -124,7 +123,6 @@ custom_data:
         xlab: 'Number of UMIs'
         ylab: 'Number of genes'
 
-    
     mt: 
       file_format: 'csv'
       section_name: 'Percentage of mitochondrial genes per cell'
