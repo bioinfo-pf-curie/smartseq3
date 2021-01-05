@@ -54,7 +54,6 @@ def helpMessage() {
   
   Genomes: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
-  --starIndex [dir]                  Index for STAR aligner
 
   Other options:
     --outdir [file]               The output directory where the results will be saved
