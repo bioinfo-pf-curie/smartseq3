@@ -1,0 +1,9 @@
+name: python
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Add required software dependencies here
+  - conda-forge::python=3.6.10
+  - bioconda::deeptools=3.5.0 #pas mm que dans environment.yml !!! donc ligne de commande diffère selon la version

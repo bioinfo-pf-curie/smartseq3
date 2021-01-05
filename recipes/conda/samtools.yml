@@ -1,0 +1,10 @@
+name: python
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Add required software dependencies here
+  - conda-forge::python=3.6.10
+  - bioconda::samtools=1.10
+
