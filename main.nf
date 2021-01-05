@@ -839,9 +839,9 @@ process multiqc {
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
   //Modules
-  file ('trimming/*') from chtrimmedReadsLog.collect()
-  file ('star/*') from chAlignmentLogs.collect()
-  file ('FC/*') from chAssignmentLogs.collect()
+  file ('trimming/*') from chtrimmedReadsLog.collect().ifEmpty([])
+  file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
+  file ('FC/*') from chAssignmentLogs.collect().ifEmpty([])
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
@@ -870,7 +870,7 @@ process multiqc {
 
   """
   stat2mqc.sh ${splan} 
-  mean_calculation.r 
+  #mean_calculation.r 
   mqc_header.py --splan ${splan} --name "PIPELINE" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
