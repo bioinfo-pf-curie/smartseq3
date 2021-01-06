@@ -1,30 +1,15 @@
 #!/bin/bash
 
-echo $2
-head <(gzip -cd $2)
-
-echo $3
-head <(gzip -cd $3)
-
-fastq_in1=$1
-fastq_in2=$2
-fastq_out1=$3
-txt_out2=$4
-fastq_out3=$5
+fastq1=$1
+fastq2=$3
+fastq_out1=$5
+txt_out2=$7
+fastq_out3=$9
 
 
 # get tagged sequences
-seqkit grep --by-seq --pattern "ATTGCGCAATG" $2 -o $4
+seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 -o $fastq_out1
 # extract ids
-seqkit seq -n -i $4 -o $5
+seqkit seq -n -i $fastq_out1 -o $txt_out2
 # get paired reads
-seqkit grep -f $5 $3 -o $6
-
-echo $4
-head $4
-
-echo $5
-head $5
-
-echo $6
-head $6
+seqkit grep -f $txt_out2 $fastq2 -o $fastq_out3
