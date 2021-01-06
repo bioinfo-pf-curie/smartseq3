@@ -1,10 +1,10 @@
 #!/bin/bash
 
 echo $1
-head $1
+head <(gzip -cd $1)
 
 echo $2
-head $2
+head <(gzip -cd $2)
 
 echo $3
 head $3
