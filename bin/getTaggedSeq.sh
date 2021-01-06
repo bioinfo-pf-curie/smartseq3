@@ -2,9 +2,9 @@
 
 fastq1=$1
 fastq2=$3
-fastq_out1=$5
-txt_out2=$7
-fastq_out3=$9
+fastq_out1="$5"
+txt_out2="$7"
+fastq_out3="$9"
 
 
 # get tagged sequences
