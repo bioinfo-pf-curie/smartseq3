@@ -8,8 +8,8 @@ fastq_out3="$9"
 
 
 # get tagged sequences
-seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 -o $fastq_out1
+seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 -o "$fastq_out1"
 # extract ids
-seqkit seq -n $fastq_out1 -o $txt_out2
+seqkit seq -n $fastq_out1 -o "$txt_out2"
 # get paired reads
-seqkit grep --pattern-file $txt_out2 $fastq2 -o $fastq_out3
+seqkit grep --pattern-file $txt_out2 $fastq2 -o "$fastq_out3"
