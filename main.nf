@@ -336,41 +336,22 @@ process getTaggedSeq{
   set val(prefix), file(R1), file(R2) from rawReadsFastqc
 
   output:
-  //set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
+  set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
   set val(prefix), file("*_taggedReadIDs.txt") into chTaggedIDs
 
 
   script:
   """
-    # Get tagged sequences in R1 == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${R1} > ${prefix}_tagged_inR1.R1.fastq
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq > ${prefix}_taggedReadIDs_inR1.txt
-    # create R2
-    seqkit grep -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_tagged_inR1.R2.fastq
-
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 > $out1
-    # exctract ids
-    seqkit seq -n -i $out1 > $out2
-    # create R2
-    seqkit grep -f $out2 $fastq2 -o $out3
-
+    # 1st: get tags in R1 == umi sequences
     getTaggedSeq.sh ${R1} ${R2} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
 
-    ### Added:
-    # Get left reads
+    # 2nd: get left reads
     seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_rest.R2.fastq
 
+    # 3rd: get tags in R2 of lefted reads 
     getTaggedSeq.sh ${prefix}_rest.R2.fastq ${R1} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt 
 
-    # Get tagged sequences in R2 of lefting reads == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${prefix}_rest.R2.fastq > ${prefix}_tagged_inR2.R2.fastq ${prefix}_tagged_inR2.R1.fastq
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq > ${prefix}_taggedReadIDs_inR2.txt
-    # create R1
-    seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${R1} -o ${prefix}_tagged_inR2.R1.fastq
-
-    # Merge all  
+    # 4th: Merge all files 
     cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
     cat ${prefix}_taggedReadIDs_inR2.txt >> ${prefix}_taggedReadIDs.txt
 
@@ -379,7 +360,6 @@ process getTaggedSeq{
 
     cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
     cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
-
     """
 }
 
@@ -400,10 +380,14 @@ process umiExtraction {
 
   script:
   length_umi = params.umi_size
-  opts ="--extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq "
   """
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
-  umi_tools extract $opts --log=${prefix}_umiExtract.log 
+  umi_tools extract --either-read --extract-method=regex \\
+                    --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
+                    --bc-pattern2='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
+                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq \\
+                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq \\
+                    --log=${prefix}_umiExtract.log 
 
   umi_tools --version &> v_umi_tools.txt
   """
