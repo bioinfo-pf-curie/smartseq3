@@ -333,7 +333,7 @@ process getTaggedSeq{
   publishDir "${params.outdir}/getTaggedSeq", mode: 'copy'
 
   input: 
-  set val(prefix), file(R1), file(R2) from rawReadsFastqc
+  set val(prefix), file(reads) from rawReadsFastqc
 
   output:
   set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
@@ -342,13 +342,13 @@ process getTaggedSeq{
   script:
   """
     # 1st: get tags in R1 == umi sequences
-    getTaggedSeq.sh ${R1} ${R2} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
+    getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
 
     # 2nd: get left reads
-    seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_rest.R2.fastq
+    seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
 
     # 3rd: get tags in R2 of lefted reads 
-    getTaggedSeq.sh ${prefix}_rest.R2.fastq ${R1} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt 
+    getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt 
 
     # 4th: Merge all files 
     cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
