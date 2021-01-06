@@ -125,14 +125,14 @@ custom_data:
 
     mt: 
       file_format: 'csv'
-      section_name: 'Percentage of mitochondrial genes per cell'
-      description: 'Percentage of mitochondrial genes is a cell viability marker. Here, only UMI reads are take into account.'
+      section_name: '% Mitochondrial RNAs per cell'
+      description: 'Percentage of mitochondrial RNAs is a cell viability marker. Here, only UMI reads are take into account.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
-        title: 'Percentage of mitochondrial genes per cell'
+        title: 'Percentage of mitochondrial RNAs per cell'
         xlab: 'Number of genes'
-        ylab: '% mitochondrial genes'
+        ylab: '% mitochondrial RNAs'
 
 sp:
   stats:
