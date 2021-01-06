@@ -341,13 +341,13 @@ process getTaggedSeq{
 
   script:
   """
-    # Get tagged sequences == umi sequences
+    # Get tagged sequences in R1 == umi sequences
     seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} > ${prefix}_tagged.R1.fastq
-    # Pour aussi outputer R2
     # exctract ids
     seqkit seq -n -i ${prefix}_tagged.R1.fastq > ${prefix}_taggedReadIDs.txt
-    # grep tagged ids
+    # create R2
     seqkit grep -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq
+
     """
 }
 
@@ -391,6 +391,7 @@ process mergeReads {
   set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
+  set val(prefix), file("*_totReads.txt") into chTotReads
   file("v_seqkit.txt") into chSeqkitVersion
 
   script:
@@ -415,6 +416,8 @@ process mergeReads {
   nb_totreads=\$(( \$nb_lines / 4 ))
   nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
   echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
+
+  echo "totReads: \$nb_totreads" > ${prefix}_totReads.txt
 
   # Get version 
   echo SeqKit > name
@@ -548,8 +551,6 @@ process separateReads {
 
   input :
   set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs)
-  //set val(prefix), file(umisReadsIDs) from chUmiReadsIDs
-  //set val(prefix), file(nonUmisReadsIDs) from chNonUmiReadsIDs
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
@@ -608,7 +609,6 @@ process bigWig {
 
   input:
   set val(prefix), file(bam) from chSortedBAM_bigWig
-  //set val(prefix), file(bam) from chSortedBAM_bigWig.concat(chUmiBam).concat(chNonUmiBam) // _Sorted.bam _NonUmi_assignedNonUMIs.bam _umi_assignedNonUMIs.bam
 
   output:
   set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
@@ -737,7 +737,7 @@ process countUMIGenePerCell{
   umiGenePerCell.r
   """ 
 }
- */
+*/
 
 process cellAnalysis{
   tag "${prefix}"
@@ -845,7 +845,8 @@ process multiqc {
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
-  file('mergeReads/*') from chCountSummaryExtUMI.collect()
+  file('pUMIs/*') from chCountSummaryExtUMI.collect()
+  file('totReads/*') from chTotReads.collect()
   file ('bigwig/*') from chBigWigLog.collect()
   file (resume) from chResume // general stats 
   //PLOTS
