@@ -343,7 +343,7 @@ process getTaggedSeq{
   script:
   """
     # 1st: get tags in R1 == umi sequences
-    getTaggedSeq.sh ${R1} ${R2} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
+    getTaggedSeq.sh ${R1} ${R2} "${prefix}_tagged_inR1.R1.fastq" "${prefix}_taggedReadIDs_inR1.txt" "${prefix}_tagged_inR1.R2.fastq"
 
     # 2nd: get left reads
     seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_rest.R2.fastq
