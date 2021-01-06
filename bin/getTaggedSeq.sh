@@ -6,6 +6,13 @@ head <(gzip -cd $2)
 echo $3
 head <(gzip -cd $3)
 
+fastq_in1=$1
+fastq_in2=$2
+fastq_out1=$3
+txt_out2=$4
+fastq_out3=$5
+
+
 # get tagged sequences
 seqkit grep --by-seq --pattern "ATTGCGCAATG" $2 -o $4
 # extract ids
