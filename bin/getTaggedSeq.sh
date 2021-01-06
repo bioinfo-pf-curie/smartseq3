@@ -1,14 +1,16 @@
 #!/bin/bash
 
-fastq1=$1
-fastq2=$2
-out1=$3
-out2=$4
-out3=$5
+fastq_in1=$1
+fastq_in2=$2
+fastq_out1=$3
+txt_out2=$4
+fastq_out3=$5
 
 # get tagged sequences
-seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 > $out1
-# exctract ids
-seqkit seq -n -i $out1 > $out2
-# create R2
-seqkit grep -f $out2 $fastq2 -o $out3
+seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq_in1 > $fastq_out1
+echo $fastq_out1
+head $fastq_out1
+# extract ids
+seqkit seq -n -i $fastq_out1 > $txt_out2
+# get paired reads
+seqkit grep -f $txt_out2 $fastq_in2 -o $fastq_out3
