@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo $1
+head $1
+
 echo $2
 head $2
 
@@ -11,9 +14,6 @@ head $4
 
 echo $5
 head $5
-
-echo $6
-head $6
 
 # get tagged sequences
 seqkit grep --by-seq --pattern "ATTGCGCAATG" $2 > $4
