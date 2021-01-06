@@ -351,7 +351,7 @@ process getTaggedSeq{
     #getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt 
 
 
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq
+    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
     # exctract ids
     seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq -o ${prefix}_taggedReadIDs_inR1.txt
     # create R2
@@ -360,9 +360,9 @@ process getTaggedSeq{
     seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
 
     # Get tagged sequences in R2 of lefting reads == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${prefix}_rest.R2.fastq > ${prefix}_tagged_inR2.R2.fastq ${prefix}_tagged_inR2.R1.fastq
+    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${prefix}_rest.R2.fastq -o ${prefix}_tagged_inR2.R2.fastq 
     # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq > ${prefix}_taggedReadIDs_inR2.txt
+    seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq -o ${prefix}_taggedReadIDs_inR2.txt
     # create R1
     seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${reads[0]} -o ${prefix}_tagged_inR2.R1.fastq
 
