@@ -6,6 +6,7 @@ head <(gzip -cd $1)
 echo $2
 head <(gzip -cd $2)
 
+
 echo $3
 head $3
 
