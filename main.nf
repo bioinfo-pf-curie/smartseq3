@@ -378,61 +378,6 @@ process getTaggedSeq{
     cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
     cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
 
-
-
-    input: 
-  set val(prefix), file(reads) from rawReadsFastqc
-  set val(prefix), file(R1), file(R2) from rawReadsFastqc
-
-  output:
-  set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
-  //set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
-  set val(prefix), file("*_taggedReadIDs.txt") into chTaggedIDs
-
-
-  script:
-  """
-    # Get tagged sequences in R1 == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} > ${prefix}_tagged.R1.fastq
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${R1} > ${prefix}_tagged_inR1.R1.fastq
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq > ${prefix}_taggedReadIDs_inR1.txt
-    # create R2
-    seqkit grep -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_tagged_inR1.R2.fastq
-
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" $fastq1 > $out1
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged.R1.fastq > ${prefix}_taggedReadIDs.txt
-    seqkit seq -n -i $out1 > $out2
-    # create R2
-    seqkit grep -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq
-    seqkit grep -f $out2 $fastq2 -o $out3
-
-    getTaggedSeq.sh ${R1} ${R2} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
-
-    ### Added:
-    # Get left reads
-    seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${R2} -o ${prefix}_rest.R2.fastq
-
-    getTaggedSeq.sh ${prefix}_rest.R2.fastq ${R1} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt 
-
-    # Get tagged sequences in R2 of lefting reads == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${prefix}_rest.R2.fastq > ${prefix}_tagged_inR2.R2.fastq ${prefix}_tagged_inR2.R1.fastq
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq > ${prefix}_taggedReadIDs_inR2.txt
-    # create R1
-    seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${R1} -o ${prefix}_tagged_inR2.R1.fastq
-
-    # Merge all  
-    cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
-    cat ${prefix}_taggedReadIDs_inR2.txt >> ${prefix}_taggedReadIDs.txt
-
-    cat ${prefix}_tagged_inR1.R1.fastq > ${prefix}_tagged.R1.fastq
-    cat ${prefix}_tagged_inR2.R1.fastq >> ${prefix}_tagged.R1.fastq
-
-    cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
-    cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
-
     """
 }
 
