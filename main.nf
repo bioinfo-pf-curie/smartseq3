@@ -397,13 +397,16 @@ process umiExtraction {
   length_umi = params.umi_size
   """
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
+
+  # following command bugs cause write incorrect ids for R2 output (write 1:N:0 and not 2:N:0)
   umi_tools extract --either-read --extract-method=regex \\
                     --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
                     --bc-pattern2='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq \\
-                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq \\
+                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted_falseIds.R2.fastq \\
                     --log=${prefix}_umiExtract.log 
-
+  # correct bug
+  sed 's/1:N:0:/2:N:0/g' ${prefix}_UMIsExtracted_falseIds.R2.fastq > ${prefix}_UMIsExtracted.R2.fastq
   umi_tools --version &> v_umi_tools.txt
   """
 }
