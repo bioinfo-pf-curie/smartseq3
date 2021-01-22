@@ -12,25 +12,13 @@ Briefly, its goal is to process <!-- TODO --> data for any protocol, with or wit
 
 The directories listed below will be created in the output directory after the pipeline has finished. 
 
-## Sequencing quality
+## Reads mapping
 
-### FastQC
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
-
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
-
-**Output directory: `fastqc`**
-
-* `sample_fastqc.html`
-  * FastQC report, containing quality metrics for your untrimmed raw fastq files.
-* `zips/sample_fastqc.zip`
-  * zip file containing the FastQC report, tab-delimited data file and plot images.
-
-## Read mapping
+### Mapping summary
 
 ### Alignment
 
-Different tools can be used for read alignment (`STAR`, `BWA-mem`, `Bowtie2`). The mapping statistics (`Total Reads`, `Aligned Reads`, `Unique Reads`, `Multiple Reads`) are also presented in the main summary table.
+`STAR` is used to aligned reads on wanted genome. The mapping statistics (`Total Reads`, `Aligned Reads`, `Unique Reads`, `Multiple Reads`) are also presented in the main summary table.
 
 > **NB:** by default, one alignment is randomly reported in case of multiple mapping sites. If necessary, these reads can be filtered using the `--mapq` option. In addition, in case of paired-end sequencing reads, singleton are discarded from the analysis.
 
@@ -48,7 +36,7 @@ In general, we expect more than 80% of aligned reads. Samples with less than 50%
 
 ![MultiQC - Bowtie2 stats plot](images/bowtie2.png)
 
-### Duplicates
+### Assignment
 
 [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html) is used to mark and remove the duplicates. 
 The results are presented in the `General Metrics` table. Duplicate reads are **removed** by default from the aligned reads to mitigate for fragments in the library that may have been sequenced more than once due to PCR biases. There is an option to keep duplicate reads with the `--keepDups` parameter but it is generally recommended to remove them to avoid the wrong interpretation of the results.	
@@ -62,7 +50,7 @@ The results are presented in the `General Metrics` table. Duplicate reads are **
 
 ![MultiQC - Picard MarkDup stats plot](images/picard_deduplication.png)
 
-## Quality controls
+## Cell viability
 
 From the filtered and aligned read files, the pipeline runs several quality control steps presented below.
 

@@ -478,8 +478,10 @@ process trimReads{
   """
   # delete linker + polyA queue
   cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed1.R1.fastq -p ${prefix}_trimmed1.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed1.log
+
+  # Old cause now I integrate umis found in R2 in getTaggedSeq process:
   # Some tag+umi+GGG are found in R2 reads (~2%). They have to be remove prior alignment. 
-  cutadapt -G ATTGCGCAATGNNNNNNNNGGG --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${prefix}_trimmed1.R1.fastq ${prefix}_trimmed1.R2.fastq > ${prefix}_trimmed.log
+  # cutadapt -G ATTGCGCAATGNNNNNNNNGGG --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${prefix}_trimmed1.R1.fastq ${prefix}_trimmed1.R2.fastq > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
@@ -648,17 +650,16 @@ process bigWig {
   set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
   set val(prefix), file("*_coverage.log") into chBigWigLog
   file("v_deeptools.txt") into chBamCoverageVersion
-  file ("v_rseqc.txt") into chRseqcVersion
 
   script:
   """
   ## Create bigWig files
   samtools index ${bam}
-  #bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw > ${prefix}_coverage.log
-  bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus} > ${prefix}_coverage.log
+  bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus}  > ${prefix}_coverage.log
+  # old version 
+  #bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus} > ${prefix}_coverage.log
 
   bamCoverage --version &> v_deeptools.txt
-  geneBody_coverage.py --version &> v_rseqc.txt
   """
 }
 
@@ -687,6 +688,7 @@ process genebody_coverage {
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
+  file ("v_rseqc") into chRseqcVersion
 
   script:
   """
@@ -697,6 +699,7 @@ process genebody_coverage {
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
 
+  geneBody_coverage.py --version &> v_rseqc
   """
 }
 
@@ -821,7 +824,7 @@ process getSoftwareVersions{
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
-  file ("v_rseqc.txt") from chRseqcVersion.first().ifEmpty([])
+  file ("v_rseqc") from chRseqcVersion.first().ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
