@@ -18,7 +18,7 @@ The directories listed below will be created in the output directory after the p
 
 ### Alignment
 
-`STAR` is used to aligned reads on wanted genome. The mapping statistics (`Total Reads`, `Aligned Reads`, `Unique Reads`, `Multiple Reads`) are also presented in the main summary table.
+`STAR` is used to aligned reads on the genome. The mapping statistics (`Total Reads`, `Aligned Reads`, `Unique Reads`, `Multiple Reads`) are also presented in the main summary table.
 
 > **NB:** by default, one alignment is randomly reported in case of multiple mapping sites. If necessary, these reads can be filtered using the `--mapq` option. In addition, in case of paired-end sequencing reads, singleton are discarded from the analysis.
 
