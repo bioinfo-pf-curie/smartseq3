@@ -471,13 +471,13 @@ process trimReads{
 
   output:
   set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
-  set val(prefix), file("*_trimmed1.log"), file("*_trimmed.log") into chtrimmedReadsLog
+  set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
   file("v_cutadapt.txt") into chCutadaptVersion
 
   script:
   """
   # delete linker + polyA queue
-  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed1.R1.fastq -p ${prefix}_trimmed1.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed1.log
+  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
 
   # Old cause now I integrate umis found in R2 in getTaggedSeq process:
   # Some tag+umi+GGG are found in R2 reads (~2%). They have to be remove prior alignment. 
