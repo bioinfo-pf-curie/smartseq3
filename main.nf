@@ -350,7 +350,7 @@ process getTaggedSeq{
     #[ERRO] open : no such file or directory
     #[ERRO] stat : no such file or directory
 
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
+    seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
     # exctract ids
     seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq -o ${prefix}_taggedReadIDs_inR1.txt
     # create R2
@@ -485,7 +485,6 @@ process trimReads{
   cutadapt --version &> v_cutadapt.txt
   """
 }
-
 
 process readAlignment {
   tag "${prefix}"
@@ -663,7 +662,31 @@ process bigWig {
   """
 }
 
-//chUmiBam.view()
+/*
+ * Subsample the BAM files if necessary
+ */
+/* bam_forSubsamp
+    .filter { it.size() > params.subsampFilesizeThreshold }
+    .map { [it, params.subsampFilesizeThreshold / it.size() ] }
+    .set{ bam_forSubsampFiltered }
+bam_skipSubsamp
+    .filter { it.size() <= params.subsampFilesizeThreshold }
+    .set{ bam_skipSubsampFiltered }
+
+process bam_subsample {
+    tag "${bam.baseName - '.sorted'}"
+
+    input:
+    set file(bam), val(fraction) from bam_forSubsampFiltered
+
+    output:
+    file "*_subsamp.bam" into bam_subsampled
+
+    script:
+    """
+    samtools view -s $fraction -b $bam | samtools sort -o ${bam.baseName}_subsamp.bam
+    """
+} */
 
 process genebody_coverage {
   tag "${prefix}"
@@ -702,9 +725,6 @@ process genebody_coverage {
   geneBody_coverage.py --version &> v_rseqc
   """
 }
-
-//chBigWig.view()
-
 
 /*##########################   STEP 2: CELL VIABILITY  ####################################*/
 
