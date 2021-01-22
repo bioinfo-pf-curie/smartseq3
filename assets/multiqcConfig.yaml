@@ -156,12 +156,8 @@ sp:
 
 module_order:
   - cutadapt
-  - star:
-      name: 'Read alignments'
-      info: 'Each read is aligned on a reference genome using the STAR software.'
-  - featurecounts:
-      name: 'Read assignments'
-      info: 'Each aligned read is assigned to a gene using the featureCounts software.'
+  - star
+  - featurecounts
   - deeptools
   - rseqc
 

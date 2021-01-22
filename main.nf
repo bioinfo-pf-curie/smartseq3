@@ -480,7 +480,7 @@ process trimReads{
   cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
 
   # Old cause now I integrate umis found in R2 in getTaggedSeq process:
-  # Some tag+umi+GGG are found in R2 reads (~2%). They have to be remove prior alignment. 
+  # Some tags are found in R2 reads (~1-2%). They have to be remove prior alignment. 
   # cutadapt -G ATTGCGCAATGNNNNNNNNGGG --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${prefix}_trimmed1.R1.fastq ${prefix}_trimmed1.R2.fastq > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
@@ -507,7 +507,6 @@ process readAlignment {
   """
   STAR \
     --genomeDir $genomeIndex \
-    --sjdbGTFfile $genomeGtf \
     --readFilesIn ${trimmedR1} ${trimmedR2} \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
@@ -515,11 +514,16 @@ process readAlignment {
     --outSAMtype BAM SortedByCoordinate \
     --clip3pAdapterSeq CTGTCTCTTATACACATCT \
     --limitSjdbInsertNsj 2000000 \
-    --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
+    --sjdbGTFfile $genomeGtf --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
-    # clip3pAdapterSeq = coupe l'adaptater 3' des R2 (~2%) 
-    # limitSjdbInsertNsj = augmente le nombre de splice junctions à inserer
-    # outFilterIntronMotifs = supprime les sp non annotées
+    # outFilterMultimapNmax = max nb of loci the read is allowed to map to. If more, the read is concidered "map to too many loci". 
+    # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
+    # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
+    #                      Default is 1 000 000. By increasing it, more new junctions can be discovered. 
+    # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical junctions.
+    #                         Non-canonical but annot. or canonical but not annot. will be kept.
+    #   NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
+    #       Non-canonical are all other dinucleotide combinations. 
 
   STAR --version &> v_star.txt
   """
@@ -749,7 +753,7 @@ process umiPerGeneDist{
 }
 
 // Que si MiSeq
-process countUMIGenePerCell{
+/* process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
@@ -769,7 +773,7 @@ process countUMIGenePerCell{
   """
   umiGenePerCell.r
   """ 
-}
+} */
 
 // Que si NovaSeq == outputs = 1 tableau pour chaque compte (umi/gene) pour créer 1 histogramme de distribution
 /* process countUMIGenePerCell{

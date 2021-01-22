@@ -18,23 +18,25 @@ The directories listed below will be created in the output directory after the p
 
 ### Alignment
 
-`STAR` is used to aligned reads on the genome. The mapping statistics (`Total Reads`, `Aligned Reads`, `Unique Reads`, `Multiple Reads`) are also presented in the main summary table.
+`STAR` software is used to aligned transcrit reads to a reference genome. Mapping statistics show the total number of reads in each sample and their  mapping results.
 
-> **NB:** by default, one alignment is randomly reported in case of multiple mapping sites. If necessary, these reads can be filtered using the `--mapq` option. In addition, in case of paired-end sequencing reads, singleton are discarded from the analysis.
+Uniquely mapped : mapping pass filtered conditions.  
+Mapped too many : the read map to more than 1 loci. 
+Unmapped too short : less than ~2/3 of read length maps. 
+Unmapped other: other reason than "too short" or "too many" like for example due to a foreign genome contamination or if the read came from an unannotated reagion or from a higly repeated region. 
 
-**Output directory: `mapping`**
+**Output directory: `readAlignment`**
 
-* `sample.bam`
-  * Aligned reads. Available only if (`--saveAlignedIntermediates`) is used.
-* `sample_sorted.bam`
-  * Aligned reads sorted by chromosome position. Available only if (`--saveAlignedIntermediates`) is used.
-* `sample_sorted.bam.bai`
-  * Index of aligned and sorted reads. Available only if (`--saveAlignedIntermediates`) is used.
+* `[sample]Aligned.sortedByCoord.out.bam`
+  * Aligned reads.
+* `[sample]Log.final.out, [sample]Log.progress.out, [sample]Log.out`
+  * Log files that sum up read processing.
+
 
 The mapping statistics are presented in the MultiQC report as follows.  
-In general, we expect more than 80% of aligned reads. Samples with less than 50% of mapped reads should be further investigated, and checked for adapter content, contamination, etc.
 
-![MultiQC - Bowtie2 stats plot](images/bowtie2.png)
+
+![MultiQC - Star stats plot](images/star_alignment_plot.png)
 
 ### Assignment
 
