@@ -529,12 +529,12 @@ process readAlignment {
   """
 }
 
-process readsAssignment {
+process readAssignment {
   tag "${prefix}"
   label 'featureCounts'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outdir}/readsAssignment", mode: 'copy'
+  publishDir "${params.outdir}/readAssignment", mode: 'copy'
 
   input :
   set val(prefix), file(alignedBam) from chAlignedBam
@@ -753,14 +753,14 @@ process umiPerGeneDist{
 }
 
 // Que si MiSeq
-/* process countUMIGenePerCell{
+process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
   label 'lowMem'
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
 
-  // // when: --MiSeq
+  // when: --MiSeq
 
   input:
   file(matrices) from chMatrices_counts.collect()
@@ -773,7 +773,7 @@ process umiPerGeneDist{
   """
   umiGenePerCell.r
   """ 
-} */
+} 
 
 // Que si NovaSeq == outputs = 1 tableau pour chaque compte (umi/gene) pour créer 1 histogramme de distribution
 /* process countUMIGenePerCell{

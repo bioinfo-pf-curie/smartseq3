@@ -16,41 +16,48 @@ The directories listed below will be created in the output directory after the p
 
 ### Mapping summary
 
+The mapping summary statistics are presented in the MultiQC report as follows.  
+
+![MultiQC - Star stats plot](images/final.png)
+
 ### Alignment
 
-`STAR` software is used to aligned transcrit reads to a reference genome. Mapping statistics show the total number of reads in each sample and their  mapping results.
+[STAR](https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf) software is used to aligned transcrit reads to a reference genome. Alignment statistics show the total number of reads in each sample and their alignment results as follow :
 
-Uniquely mapped : mapping pass filtered conditions.  
-Mapped too many : the read map to more than 1 loci. 
-Unmapped too short : less than ~2/3 of read length maps. 
-Unmapped other: other reason than "too short" or "too many" like for example due to a foreign genome contamination or if the read came from an unannotated reagion or from a higly repeated region. 
+- **Uniquely mapped** : mapping pass filtered conditions.  
+- **Mapped too many** : the read map to more than 1 loci. 
+- **Unmapped too short** : less than 66% of read length (R1+R2) is correctly aligned on the genome. 
+- **Unmapped other: other** reason than "too short" or "too many" like for example due to a foreign genome contamination or if the read came from an unannotated reagion or from a higly repeated region. 
 
 **Output directory: `readAlignment`**
 
 * `[sample]Aligned.sortedByCoord.out.bam`
   * Aligned reads.
 * `[sample]Log.final.out, [sample]Log.progress.out, [sample]Log.out`
-  * Log files that sum up read processing.
+  * Log files that sum up read alignements processing.
 
-
-The mapping statistics are presented in the MultiQC report as follows.  
-
+The alignment statistics are presented in the MultiQC report as follows.  
 
 ![MultiQC - Star stats plot](images/star_alignment_plot.png)
 
+
 ### Assignment
 
-[Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html) is used to mark and remove the duplicates. 
-The results are presented in the `General Metrics` table. Duplicate reads are **removed** by default from the aligned reads to mitigate for fragments in the library that may have been sequenced more than once due to PCR biases. There is an option to keep duplicate reads with the `--keepDups` parameter but it is generally recommended to remove them to avoid the wrong interpretation of the results.	
+[FeatureCounts](https://bioconductor.org/packages/release/bioc/vignettes/Rsubread/inst/doc/SubreadUsersGuide.pdf) tool is used to assign reads to genes. Assignment statistics show the total number of reads in each sample and their assignment results as follow :
 
-**Output directory: `mapping`**
+- **Assigned** : 
+- **Unassigned_NoFeatures** : 
+- **Unassigned_Ambiguity** : 
 
-* `sample_filtered.bam`
-  * Aligned reads after filtering (`--mapq`, `--keepDups`).
-* `sample_filtered.bam.bai`
-  * Index of aligned reads after filtering.
+**Output directory: `readAssignment`**
 
-![MultiQC - Picard MarkDup stats plot](images/picard_deduplication.png)
+* `[sample]Aligned.sortedByCoord.out.bam.featureCounts.bam`
+  * Assignment results added to the previous alignment results. In the bam file, reads are tagged "Assigned" or "Unassigned". 
+* `[sample]_counts.summary`
+  * Assignment statistics summary.
+
+
+![MultiQC - Picard MarkDup stats plot](images/featureCounts_assignment_plot.png)
 
 ## Cell viability
 
