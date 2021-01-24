@@ -12,7 +12,7 @@ regexes = {
 	'STAR': ['v_star.txt', r"(\S+)"],
 	'samtools': ['v_samtools.txt', r"samtools (\S+)"],
 	'deeptools': ['v_deeptools.txt', r"bamCoverage (\S+)"],
-    'rseqc': ['v_rseqc.txt', r"geneBody_coverage.py (\S+)"],
+    'rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
 	'R': ['v_R.txt', r"R version (\S+)"],
 }
 
