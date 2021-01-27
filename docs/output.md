@@ -50,7 +50,7 @@ from a higly repeated region.
 
 [FeatureCounts](https://bioconductor.org/packages/release/bioc/vignettes/Rsubread/inst/doc/SubreadUsersGuide.pdf) tool is used to assign reads to genes. Assignment statistics show the total number of reads in each sample and their assignment results as follow :
 
-![MultiQC - Picard MarkDup stats plot](images/featureCounts_assignment_plot.png)
+![MultiQC](images/featureCounts_assignment_plot.png)
 
 - **Assigned** : successfully assigned reads to genes.
 - **Unassigned_NoFeatures** :  read alignments that do not overlap any exon (feature).
@@ -65,12 +65,25 @@ from a higly repeated region.
 
 From the aligned and assigned reads, the pipeline runs several quality control steps presented below.
 
+
+### Number of UMIs per gene
+
+To visualise the number of UMIs per gene in each sample, their distributions are plot as follow. An upper limit of 70 UMIs (x axis) is set to allow a better representation.
+
+![MultiQC](images/umiPerGene.png)
+
+**Output directory: `umiPerGeneDist`**
+
+* `[sample]_umi_HistUMIperGene_mqc.csv`
+  * Tables of each distribution curve. First column is the number of UMIs, second column is the number of genes.
+
+
 ### Cutadapt
 
 [Cutadapt](https://cutadapt.readthedocs.io/en/stable/) is used to trim 3' linker and polyA tails. 
 Results are summurized in an plot as follow:
 
-![MultiQC - Picard MarkDup stats plot](images/cutadapt_plot.png)
+![MultiQC](images/cutadapt_plot.png)
 
 **Output directory: `trimReads`**
 
@@ -81,33 +94,82 @@ Results are summurized in an plot as follow:
 
 ### Gene body coverage
 
-[Gene body coverage](http://rseqc.sourceforge.net/#genebody-coverage-py) script from the [RSeQC](http://rseqc.sourceforge.net/) package is used to show how overall reads cover genes. In smartSeq3 data, reads attached to a UMI cover the 5' part of genes whereas reads without UMI cover the middle and the 3' part of genes.
+[Gene body coverage](http://rseqc.sourceforge.net/#genebody-coverage-py) script (from [RSeQC](http://rseqc.sourceforge.net/) package) is used to show how overall reads within a cell cover genes body. In smartSeq3 data, reads attached to a UMI mainly cover the 5' part of genes whereas reads without UMI mainly cover the middle and the 3' part of genes.
 
-![MultiQC - Picard MarkDup stats plot](images/rseqc_gene_body_coverage_plot.png)
+![MultiQC](images/rseqc_gene_body_coverage_plot.png)
+
+**Output directory: `genebody_coverage`**
+
+* `geneBodyCoverage/[sample]_umi.rseqc.geneBodyCoverage.curves.pdf`, `geneBodyCoverage/[sample]_NonUmi.rseqc.geneBodyCoverage.curves.pdf`
+  * plots images in pdf format.
+* `geneBodyCoverage/data/` , `geneBodyCoverage/rscripts/`
+  * data used by gene_body_coverage.py to construct and output graph images.
+
+
+## BigWig files
+
+The [bigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) format is in an indexed binary format useful for displaying dense, continuous data in Genome Browsers such as the [UCSC](https://genome.ucsc.edu/cgi-bin/hgTracks) and [IGV](http://software.broadinstitute.org/software/igv/). This mitigates the need to load the much larger BAM files for data visualisation purposes which will be slower and result in memory issues. The coverage values represented in the bigWig file can also be normalised in order to be able to compare the coverage across multiple samples - this is not possible with BAM files. Here, a CPM (counts er million) normalisation is used.
+The bigWig format is also supported by various bioinformatics software for downstream processing such as meta-profile plotting.
+
+**Output directory: `bigWig`**
+
+* `[sample]_coverage.bw`
+  * Bigwig files
+
 
 ## Cell viability
 
 From correctly aligned and assigned reads, UMIs and genes counts are analyized.
 
-### 
+### Ratio UMIs/transcrits per cell
 
-**Output directory: `preseq`**
+Visualisation of the ratio UMIs/transcrits per cell in a dotplot as follow.
 
-* `sample_ccurve.txt`
-  * Preseq expected future yield file.
+![MultiQC](images/ratio.png)
 
-![MultiQC - Preseq library complexity plot](images/preseq_plot.png)
+**Output directory: `cellAnalysis`**
+
+* `RatioPerCell.csv`
+  * Table grouping UMIs and transcrits counts per cell. First column is the sample, second column is the number of genes and last column is the number of UMIs. 
+
+### % Mitochondrial RNAs per cell
+
+An important quality control in single cell data is the calculation of the percentage of mitochondrial (mt) transcrits over the total counts. Indeed, a high number of mt RNAs will reflect apoptotic, stressed or low-quality cells. The threshold can vary according your cell types, but a percentage lower than 5 to 20% is generaly correct. 
+
+![MultiQC](images/mt.png)
+
+**Output directory: `cellAnalysis`**
+
+* `MtGenePerCell.csv`
+  * Table grouping all mitochondrial transcrits counts accross samples. 
+
+### UMI counts matrices 
+
+[umi-tools](https://umi-tools.readthedocs.io/en/latest/reference/count.html) is used to count the number of UMIs per gene and per sample and generate matrices.
+
+**Output directory: `countMatrices`**
+
+* `[sample]_umi_Counts.tsv.gz`
+  * Matrice of two columns. The first one collect gene names and the second one, their UMI counts.
+* `[sample]_umi_Counts.log`
+  * umi-tools processing summary
+
+For [10X format matrices](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices):
+**Output directory: `cellAnalysis/10Xoutput`**
 
 ## MultiQC
+
 [MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available within the report data directory.
 
 The pipeline has special steps which allow the software versions used to be reported in the MultiQC output for future traceability.
 
 **Output directory: `multiqc`**
 
-* `multiqc_report.html`
+* `report.html`
   * MultiQC report - a standalone HTML file that can be viewed in your web browser.
 * `multiqc_data/`
   * Directory containing parsed statistics from the different tools used in the pipeline.
 
 For more information about how to use MultiQC reports, see http://multiqc.info.
+
+
