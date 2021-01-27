@@ -33,15 +33,15 @@ Alignment and assignment are described more in details in the two following part
 ![MultiQC - Star stats plot](images/star_alignment_plot.png)
 
 - **Uniquely mapped** : successfully aligned reads.  
-- **Mapped too many** : reads map to more than 1 loci. 
+- **Mapped too many** : reads mapped to more than 1 locus. 
 - **Unmapped too short** : less than 66% of reads length (R1+R2) are correctly aligned on the genome. 
-- **Unmapped other: other** : other reason than "too short" or "too many" like for example due to a foreign genome contamination or if reads came from a
+- **Unmapped other: other** : other reasons than "too short" or "too many" like for example due to a foreign genome contamination or if reads came from a
 from a higly repeated region. 
 
 **Output directory: `readAlignment`**
 
 * `[sample]Aligned.sortedByCoord.out.bam`
-  * Aligned reads save as BAM (Binary Alignment Map) file.
+  * Aligned reads saved as BAM (Binary Alignment Map) file.
 * `[sample]Log.final.out, [sample]Log.progress.out, [sample]Log.out`
   * Log files that sum up read alignements processing.
 
@@ -62,9 +62,6 @@ from a higly repeated region.
   * Assignment results added to previous alignment file. The BAM file now have tagged reads as "Assigned" or "Unassigned". 
 * `[sample]_counts.summary`
   * Assignment statistics summary.
-
-From the aligned and assigned reads, the pipeline runs several quality control steps presented below.
-
 
 ### Number of UMIs per gene
 
@@ -88,7 +85,7 @@ Results are summurized in an plot as follow:
 **Output directory: `trimReads`**
 
 * `[sample]_trimmed.R1.fastq`, `[sample]_trimmed.R2.fastq`
-  * Fastq with deleted linker and polyA. 
+  * Fastq with deleted 3' linker and polyA tails. 
 * `[sample]_trimmed.log`
   * Log file summurizing reads trimming.
 
@@ -101,7 +98,7 @@ Results are summurized in an plot as follow:
 **Output directory: `genebody_coverage`**
 
 * `geneBodyCoverage/[sample]_umi.rseqc.geneBodyCoverage.curves.pdf`, `geneBodyCoverage/[sample]_NonUmi.rseqc.geneBodyCoverage.curves.pdf`
-  * plots images in pdf format.
+  * plot images in pdf format.
 * `geneBodyCoverage/data/` , `geneBodyCoverage/rscripts/`
   * data used by gene_body_coverage.py to construct and output graph images.
 
