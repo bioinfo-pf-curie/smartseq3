@@ -344,26 +344,15 @@ process getTaggedSeq{
     # 1st: get tags in R1 == umi sequences
     # 2nd: get left reads
     # 3rd: get tags in R2 of lefted reads 
+    # 4thy: merge 1st and 3rd fastqs 
 
-    ## NB: script exists but does not work
-    #[ERRO] open : no such file or directory
-    #[ERRO] open : no such file or directory
-    #[ERRO] stat : no such file or directory
+    ## NB: script exists but does not work (getTaggedSeq.sh)
 
-    seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq -o ${prefix}_taggedReadIDs_inR1.txt
-    # create R2
-    seqkit grep -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_tagged_inR1.R2.fastq
+    getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
 
     seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
 
-    # Get tagged sequences in R2 of lefting reads == umi sequences
-    seqkit grep --by-seq --pattern "ATTGCGCAATG" ${prefix}_rest.R2.fastq -o ${prefix}_tagged_inR2.R2.fastq 
-    # exctract ids
-    seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq -o ${prefix}_taggedReadIDs_inR2.txt
-    # create R1
-    seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${reads[0]} -o ${prefix}_tagged_inR2.R1.fastq
+    getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt ${prefix}_tagged_inR2.R1.fastq
 
     # 4th: Merge all files 
     cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
@@ -438,7 +427,7 @@ process mergeReads {
   seqkit grep -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
   seqkit grep -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
-  # Merge non umis reads + correct umi reads (with umi in read names) (do not take into account reads deleted due to a lake of tag+UMI+GGG)
+  # Merge non umis reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
   cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
 
@@ -478,10 +467,6 @@ process trimReads{
   """
   # delete linker + polyA queue
   cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
-
-  # Old cause now I integrate umis found in R2 in getTaggedSeq process:
-  # Some tags are found in R2 reads (~1-2%). They have to be remove prior alignment. 
-  # cutadapt -G ATTGCGCAATGNNNNNNNNGGG --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${prefix}_trimmed1.R1.fastq ${prefix}_trimmed1.R2.fastq > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
@@ -608,6 +593,7 @@ process separateReads {
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
+  # get reads that do not match umi read IDs
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
@@ -650,7 +636,7 @@ process bigWig {
   set val(prefix), file(bam) from chSortedBAM_bigWig
 
   output:
-  set val(prefix), file("*_coverage.bw") into chBigWig // L386_coverage.bw , L386_umi_coverage.bw, L386_NonUmi_coverage.bw
+  set val(prefix), file("*_coverage.bw") into chBigWig 
   set val(prefix), file("*_coverage.log") into chBigWigLog
   file("v_deeptools.txt") into chBamCoverageVersion
 
@@ -750,7 +736,7 @@ process umiPerGeneDist{
   """ 
 }
 
-// Que si MiSeq
+// Si MiSeq: bargraphs par cell (~20)
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
@@ -773,30 +759,9 @@ process countUMIGenePerCell{
   """ 
 } 
 
-// Que si NovaSeq == outputs = 1 tableau pour chaque compte (umi/gene) pour créer 1 histogramme de distribution
-/* process countUMIGenePerCell{
-  tag "${prefix}"
-  label 'R'
-  label 'lowCpu'
-  label 'lowMem'
-  publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
-
-  // when: --Novaseq
-
-  input:
-  file(matrices) from chMatrices_counts.collect()
-
-  output:
-  file ("nbGenePerCell.csv") into chGenePerCell
-  file ("nbUMIPerCell.csv") into chUmiPerCell
-
-  script:
-  """
-  # Ajouter dans assets/mqc deux parties pour créer hist (seront innexistantes si pas option Novaseq)
-  umiGenePerCell.r
-  """ 
-}
-*/
+// Si NovaSeq (~1500 cells): 1 histogram de distribution du nb d'umis par cell 
+// == matrice de 2 columns, 1st avec nb cells, 2nd nb UMIs
+// TODO
 
 process cellAnalysis{
   tag "${prefix}"
