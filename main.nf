@@ -659,8 +659,6 @@ process bigWig {
   ## Create bigWig files
   samtools index ${bam}
   bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus}  > ${prefix}_coverage.log
-  # old version 
-  #bamCoverage -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus} > ${prefix}_coverage.log
 
   bamCoverage --version &> v_deeptools.txt
   """
