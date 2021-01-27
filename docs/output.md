@@ -6,7 +6,7 @@ This document describes the output produced by the pipeline. Most of the plots a
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes the data using the steps presented in the main README file.  
-Briefly, its goal is to process single cell RNAseq data obtained by a smartSeq3 protocol.
+Briefly, its goal is to process single cell RNAseq data obtained with smartSeq3 protocol.
 
 The directories listed below will be created in the output directory after the pipeline has finished. 
 
@@ -24,7 +24,7 @@ The mapping summary part summarises alignement and assignment steps as follow:
 - **Aligned_NotAssigned** : reads corresponding to one genome location but can't be assigned to a gene. 
 - **NotAligned_NotAssigned** : bad quality reads.
 
-Alignment and assignment are describe more in details in the two following outputs.
+Alignment and assignment are described more in details in the two following parts.
 
 ### Alignment
 
@@ -106,6 +106,15 @@ Results are summurized in an plot as follow:
   * data used by gene_body_coverage.py to construct and output graph images.
 
 
+## BAM files
+
+Once the mapping step is done, resulting sequences are sorted and stored in [bam](https://samtools.github.io/hts-specs/SAMv1.pdf) files.
+
+**Output directory: `sortBam`**
+
+* `[sample]_Sorted.bam`
+  * Bam files
+
 ## BigWig files
 
 The [bigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) format is in an indexed binary format useful for displaying dense, continuous data in Genome Browsers such as the [UCSC](https://genome.ucsc.edu/cgi-bin/hgTracks) and [IGV](http://software.broadinstitute.org/software/igv/). This mitigates the need to load the much larger BAM files for data visualisation purposes which will be slower and result in memory issues. The coverage values represented in the bigWig file can also be normalised in order to be able to compare the coverage across multiple samples - this is not possible with BAM files. Here, a CPM (counts er million) normalisation is used.
@@ -154,8 +163,10 @@ An important quality control in single cell data is the calculation of the perce
 * `[sample]_umi_Counts.log`
   * umi-tools processing summary
 
-For [10X format matrices](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices):
+A [10X format matrix](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices) is also provided containing all cells and counts within one table.
+
 **Output directory: `cellAnalysis/10Xoutput`**
+
 
 ## MultiQC
 
