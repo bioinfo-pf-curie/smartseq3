@@ -1,6 +1,6 @@
-# smartSeq3
+# SmartSeq3
 
-**Institut Curie - Nextflow ChIP-seq analysis pipeline**
+**Institut Curie - Nextflow SmartSeq3 analysis pipeline**
 
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 [![MultiQC](https://img.shields.io/badge/MultiQC-1.8-blue.svg)](https://multiqc.info/)
