@@ -162,8 +162,9 @@ it still fails after three times then the pipeline is stopped.
 The pipeline is made with a few *skip* options that allow to skip optional steps in the workflow.
 The following options can be used:
 - `--skipMultiqc` - Skip MultiQC
+- - `--skipSoftVersion` - Skip showing software version in MultiQC
 - `--skipGeneCov` - Skip gene body coverage
-				
+
 ### `--metadata`
 
 Specify a two-columns (tab-delimited) metadata file to diplay in the final Multiqc report.
