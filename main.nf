@@ -346,8 +346,6 @@ process getTaggedSeq{
     # 3rd: get tags in R2 of lefted reads 
     # 4thy: merge 1st and 3rd fastqs 
 
-    ## NB: script exists but does not work (getTaggedSeq.sh)
-
     getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
 
     seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
@@ -760,7 +758,7 @@ process countUMIGenePerCell{
 } 
 
 // Si NovaSeq (~1500 cells): 1 histogram de distribution du nb d'umis par cell 
-// == matrice de 2 columns, 1st avec nb cells, 2nd nb UMIs
+// == matrice de 2 columns, 1st avec nb cells, 2nd avec nb UMIs per cell
 // TODO
 
 process cellAnalysis{
