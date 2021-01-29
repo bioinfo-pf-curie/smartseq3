@@ -80,7 +80,7 @@ custom_data:
     umiPerGene: 
       file_format: 'csv'
       section_name: 'Number of UMIs per gene'
-      description: 'Distribution of the number of UMIs per genes in each sample. Genes having more than 70 UMIs (x axis) are not show cause they are too few.'
+      description: 'Distribution of the number of UMIs per genes in each sample. Genes having more than 70 UMIs (x axis) are not show.'
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
