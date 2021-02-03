@@ -1,9 +1,7 @@
-name: python
+name: seqkit-0.14.0
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  # Add required software dependencies here
-  - conda-forge::python=3.6.10
-  - bioconda::seqkit=0.14.0
+  - bioconda::seqkit=0.14.0=0

@@ -1,7 +1,7 @@
-name: subread-2.0.1
+name: star-2.7.6a
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::subread=2.0.1=hed695b0_0
+  - bioconda::star=2.7.6a=0

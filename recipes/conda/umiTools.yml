@@ -1,9 +1,8 @@
-name: python
+name: umi-tools-1.1.1
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  # Add required software dependencies here
-  - conda-forge::python=3.6.10
-  - bioconda::umi_tools=1.0.1
+  - bioconda::umi_tools=1.1.1=py37hf01694f_1
+
