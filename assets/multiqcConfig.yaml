@@ -23,50 +23,50 @@ custom_data:
           title: 'General Statistics'
           save_file: true
           col1_header: 'Sample ID'
-          headers:
-              Sample_name:
-                title: 'Sample Name'
-                scale: false
-                placement: 2000
-              Number_of_reads:
-                title: 'Total Reads'
-                scale: 'YlGnBu'
-                format: '{:,.0f}'
-                placement: 3000
-              Percent_UMIs:
-                title: 'UMIs reads (%)'
-                min: 0
-                max: 100
-                scale: 'Purples'
-                suffix: '%'
-                format: '{:,.1f}'
-                placement: 4000
-              Percent_Aligned:
-                title: 'Aligned (%)'
-                min: 0
-                max: 100
-                scale: 'Greens'
-                suffix: '%'
-                format: '{:,.1f}'
-                placement: 5000
-              Percent_Assigned:
-                title: 'Assigned (%)'
-                min: 0
-                max: 100
-                scale: 'YlGn'
-                suffix: '%'
-                format: '{:,.1f}'
-                placement: 6000
-              nbUmis:
-                title: '# UMIs'
-                scale: 'Oranges'
-                format: '{:,.0f}'
-                placement: 7000
-              nbGenes:
-                title: '# Genes'
-                scale: 'RdPu'
-                format: '{:,.0f}'
-                placement: 8000
+      headers:
+          Sample_name:
+            title: 'Sample Name'
+            scale: false
+            placement: 2000
+          Number_of_reads:
+            title: 'Total Fragments'
+            scale: 'YlGnBu'
+            format: '{:,.0f}'
+            placement: 3000
+          Percent_UMIs:
+            title: 'UMIs reads (%)'
+            min: 0
+            max: 100
+            scale: 'Purples'
+            suffix: '%'
+            format: '{:,.1f}'
+            placement: 4000
+          Percent_Aligned:
+            title: 'Aligned (%)'
+            min: 0
+            max: 100
+            scale: 'Greens'
+            suffix: '%'
+            format: '{:,.1f}'
+            placement: 5000
+          Percent_Assigned:
+            title: 'Assigned (%)'
+            min: 0
+            max: 100
+            scale: 'YlGn'
+            suffix: '%'
+            format: '{:,.1f}'
+            placement: 6000
+          Number_of_UMIs:
+            title: 'UMIs'
+            scale: 'Oranges'
+            format: '{:,.0f}'
+            placement: 7000
+          Number_of_genes:
+            title: 'Genes'
+            scale: 'RdPu'
+            format: '{:,.0f}'
+            placement: 8000
 
     final:
       file_format: 'csv'
@@ -114,8 +114,8 @@ custom_data:
         
     ratio: 
       file_format: 'csv'
-      section_name: 'Ratio of the number of genes and UMIs per cell'
-      description: ''
+      section_name: 'Genes/UMIs Numbers'
+      description: 'Ratio of the number of genes and UMIs per cell'
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
@@ -125,7 +125,7 @@ custom_data:
 
     mt: 
       file_format: 'csv'
-      section_name: '% Mitochondrial RNAs per cell'
+      section_name: 'Mitochondrial RNAs per cell'
       description: 'Percentage of mitochondrial RNAs is a cell viability marker. Here, only UMI reads are take into account.'
       plot_type: 'scatter'
       pconfig:
