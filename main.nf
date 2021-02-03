@@ -372,7 +372,6 @@ process mergeReads {
   seqkit seq -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
   # Extract non UMI reads
-  # input == fastq initiaux donc pas d'umis dans le nom + on ne veut pas les séquences taggées
   seqkit grep -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
   seqkit grep -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
@@ -389,7 +388,6 @@ process mergeReads {
   nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
   echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
   echo "totReads: \$nb_totreads" > ${prefix}_totReads.txt
-
   seqkit --help | grep Version > v_seqkit.txt
   """
 }
@@ -600,31 +598,8 @@ process bigWig {
 }
 
 /*
- * Subsample the BAM files if necessary
+ * Gene body Coverage
  */
-
-/* bam_forSubsamp
-    .filter { it.size() > params.subsampFilesizeThreshold }
-    .map { [it, params.subsampFilesizeThreshold / it.size() ] }
-    .set{ bam_forSubsampFiltered }
-bam_skipSubsamp
-    .filter { it.size() <= params.subsampFilesizeThreshold }
-    .set{ bam_skipSubsampFiltered }
-
-process bam_subsample {
-    tag "${bam.baseName - '.sorted'}"
-
-    input:
-    set file(bam), val(fraction) from bam_forSubsampFiltered
-
-    output:
-    file "*_subsamp.bam" into bam_subsampled
-
-    script:
-    """
-    samtools view -s $fraction -b $bam | samtools sort -o ${bam.baseName}_subsamp.bam
-    """
-} */
 
 process genebody_coverage {
   tag "${prefix}"
@@ -689,7 +664,7 @@ process umiPerGeneDist{
   """ 
 }
 
-// Si MiSeq: bargraphs par cell (~20)
+// si MiSeq ~ 20 cells
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
@@ -697,8 +672,6 @@ process countUMIGenePerCell{
   label 'lowMem'
 
   publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
-
-  // when: --MiSeq
 
   input:
   file(matrices) from chMatrices_counts.collect()
@@ -841,7 +814,6 @@ process multiqc {
   rtitle = customRunName ? "--title \"$customRunName\"" : ''
   rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
-  //isPE = params.singleEnd ? "" : "-p"
   modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
 
   """
