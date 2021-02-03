@@ -7,7 +7,6 @@
 * [Main arguments](#main-arguments)
     * [`--reads`](#--reads)
     * [`--samplePlan`](#--samplePlan)
-    * [`--design`](#--design)
 * [Reference genomes](#reference-genomes)
     * [`--genome`](#--genome)
     * [`--genomeAnnotationPath`](#--genomeAnnotationPath)
@@ -82,23 +81,6 @@ Use this to specify a sample plan file instead of a regular expression to find f
 The sample plan is a csv file with the following information :
 
 Sample ID | Sample Name | Path to R1 fastq file | Path to R2 fastq file
-
-### `--design`
-
-Specify a `design` file for extended analysis.
-
-```bash
---design 'path/to/data/design.csv'
-```
-
-A design control is a csv file that list all experimental samples, their IDs, the associated input control (or IgG), the replicate number and the expected peak type.
-The design control is expected to be created as below :
-
-SAMPLE_ID | CONTROL_ID | SAMPLE_NAME | GROUP | PEAK_TYPE
-
-The `--samplePlan` and the `--design` will be checked by the pipeline and have to be rigorously defined in order to make the pipeline work.  
-Note that the control is optional if not available but is highly recommanded.  
-If the `design` file is not specified, the pipeline will run until the alignment, QCs and track generation. The peak calling and the annotation will be skipped.
 
 ## Reference Genomes
 
