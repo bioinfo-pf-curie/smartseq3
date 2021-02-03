@@ -1,13 +1,3 @@
-version-0.0.0
+version-1.0.0
 
-NEW FEATURES
-  - add description with related issue numbers
-
-SIGNIFICANT USER-VISIBLE CHANGES
-  - add description with related issue numbers
-
-BUG FIXES
-  - add description with related issue numbers
-
-DEPRECATED
-  - add description of deprecated options
+   - First version of smarseq3 Nextflow pipeline
