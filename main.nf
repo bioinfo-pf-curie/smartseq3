@@ -15,7 +15,7 @@ This script is based on the nf-core guidelines. See https://nf-co.re/ for more i
 ========================================================================================
 SmartSeq3
 ========================================================================================
- #### Homepage / Documentation
+#### Homepage / Documentation
 https://gitlab.curie.fr/sc-platform/smartseq3
 ----------------------------------------------------------------------------------------
 */
@@ -86,9 +86,6 @@ if (params.help){
 }
 
 // Configurable reference genomes
-
-// TODO - ADD HERE ANY ANNOTATION
-
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
   exit 1, "The provided genome '${params.genome}' is not available in the genomes.config file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
@@ -125,9 +122,6 @@ if ( params.metadata ){
   chMetadata=Channel.empty()
 }                 
 
-
-/* Genomes -------------*/
-
 // Configurable reference genomes
 genomeRef = params.genome
 
@@ -159,8 +153,6 @@ if (params.bed12) {
 }else {
   exit 1, "GTF annotation file not not found: ${params.bed12}"
 }
-
-/*----------------*/
 
 // Create a channel for input read files
 if(params.samplePlan){
@@ -201,8 +193,6 @@ else if(params.readPaths){
 }
 
 // Make sample plan if not available
-/**********************************/
-
 if (params.samplePlan){
   Channel
     .fromPath(params.samplePlan)
@@ -254,8 +244,6 @@ if (params.samplePlan){
  * Design file *
  ***************/
 
-// TODO - UPDATE BASED ON YOUR DESIGN
-
 if (params.design){
   Channel
     .fromPath(params.design)
@@ -295,11 +283,9 @@ log.info """=======================================================
 smartSeq3 v${workflow.manifest.version}
 ======================================================="""
 def summary = [:]
-
-/* ADDED -------------*/
 summary['Pipeline Name']  = 'SmartSeq3'
 summary['Pipeline Version'] = workflow.manifest.version
-//summary['Run Name']     = custom_runName ?: workflow.runName
+summary['Run Name']     = customRunName ?: workflow.runName
 summary['Command Line'] = workflow.commandLine
 if (params.samplePlan) {
    summary['SamplePlan']   = params.samplePlan
@@ -307,7 +293,6 @@ if (params.samplePlan) {
    summary['Reads']        = params.reads
 }
 summary['Genome']       = params.genome
-/*--------------------------------*/
 summary['Annotation']   = params.genomeAnnotationPath
 summary['Max Memory']     = params.maxMemory
 summary['Max CPUs']       = params.maxCpus
@@ -322,7 +307,9 @@ log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
 
-/*##########################   STEP 1: MAPPING  ####################################*/
+/*
+ * Reads Mapping
+ */
 
 process getTaggedSeq{
   tag "${prefix}"
@@ -341,28 +328,23 @@ process getTaggedSeq{
 
   script:
   """
-    # 1st: get tags in R1 == umi sequences
-    # 2nd: get left reads
-    # 3rd: get tags in R2 of lefted reads 
-    # 4thy: merge 1st and 3rd fastqs 
+  # 1st: get tags in R1 == umi sequences
+  # 2nd: get left reads
+  # 3rd: get tags in R2 of lefted reads 
+  # 4thy: merge 1st and 3rd fastqs 
 
-    getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
+  getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
+  seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
+  getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt ${prefix}_tagged_inR2.R1.fastq
 
-    seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
-
-    getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt ${prefix}_tagged_inR2.R1.fastq
-
-    # 4th: Merge all files 
-    cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
-    cat ${prefix}_taggedReadIDs_inR2.txt >> ${prefix}_taggedReadIDs.txt
-
-    cat ${prefix}_tagged_inR1.R1.fastq > ${prefix}_tagged.R1.fastq
-    cat ${prefix}_tagged_inR2.R1.fastq >> ${prefix}_tagged.R1.fastq
-
-    cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
-    cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
-
-    """
+  # 4th: Merge all files 
+  cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
+  cat ${prefix}_taggedReadIDs_inR2.txt >> ${prefix}_taggedReadIDs.txt
+  cat ${prefix}_tagged_inR1.R1.fastq > ${prefix}_tagged.R1.fastq
+  cat ${prefix}_tagged_inR2.R1.fastq >> ${prefix}_tagged.R1.fastq
+  cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
+  cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
+  """
 }
 
 process umiExtraction {
@@ -370,6 +352,7 @@ process umiExtraction {
   label 'umiTools'
   label 'highCpu'
   label 'highMem'
+
   publishDir "${params.outdir}/umiExtraction", mode: 'copy'
 
   input: 
@@ -381,14 +364,12 @@ process umiExtraction {
   file("v_umi_tools.txt") into chUmiToolsVersion
 
   script:
-  length_umi = params.umi_size
   """
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
-
   # following command bugs cause write incorrect ids for R2 output (write 1:N:0 and not 2:N:0)
   umi_tools extract --either-read --extract-method=regex \\
-                    --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
-                    --bc-pattern2='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$length_umi})(?P<discard_2>GGG).*' \\
+                    --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+                    --bc-pattern2='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq \\
                     --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted_falseIds.R2.fastq \\
                     --log=${prefix}_umiExtract.log 
@@ -403,6 +384,7 @@ process mergeReads {
   label 'seqkit'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/mergeReads", mode: 'copy'
 
   input:
@@ -437,11 +419,8 @@ process mergeReads {
   nb_totreads=\$(( \$nb_lines / 4 ))
   nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
   echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
-
   echo "totReads: \$nb_totreads" > ${prefix}_totReads.txt
 
-  # Get version 
-  echo SeqKit > name
   seqkit --help | grep Version > v_seqkit.txt
   """
 }
@@ -451,6 +430,7 @@ process trimReads{
   label 'cutadapt'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/trimReads", mode: 'copy'
 
   input:
@@ -471,9 +451,10 @@ process trimReads{
 
 process readAlignment {
   tag "${prefix}"
-  label 'STAR'
+  label 'star'
   label 'extraCpu'
   label 'extraMem'
+
   publishDir "${params.outdir}/readAlignment", mode: 'copy'
 
   input :
@@ -502,11 +483,11 @@ process readAlignment {
     # outFilterMultimapNmax = max nb of loci the read is allowed to map to. If more, the read is concidered "map to too many loci". 
     # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
-    #                      Default is 1 000 000. By increasing it, more new junctions can be discovered. 
+    # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
     # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical junctions.
-    #                         Non-canonical but annot. or canonical but not annot. will be kept.
-    #   NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
-    #       Non-canonical are all other dinucleotide combinations. 
+    # Non-canonical but annot. or canonical but not annot. will be kept.
+    # NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
+    # Non-canonical are all other dinucleotide combinations. 
 
   STAR --version &> v_star.txt
   """
@@ -517,6 +498,7 @@ process readAssignment {
   label 'featureCounts'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/readAssignment", mode: 'copy'
 
   input :
@@ -547,6 +529,7 @@ process sortBam {
   label 'samtools'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/sortBam", mode: 'copy'
 
   input:
@@ -569,6 +552,7 @@ process separateReads {
   label 'samtools'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/separateReads", mode: 'copy'
 
   input :
@@ -595,9 +579,6 @@ process separateReads {
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
-
-  #-h Include the header in the output.
-  #-H Output the header only.
   """
 }
 
@@ -606,6 +587,7 @@ process countMatrices {
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
+
   publishDir "${params.outdir}/countMatrices", mode: 'copy'
 
   input:
@@ -628,6 +610,7 @@ process bigWig {
   label 'deeptools'
   label 'extraCpu'
   label 'extraMem'
+
   publishDir "${params.outdir}/bigWig", mode: 'copy'
 
   input:
@@ -643,7 +626,6 @@ process bigWig {
   ## Create bigWig files
   samtools index ${bam}
   bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus}  > ${prefix}_coverage.log
-
   bamCoverage --version &> v_deeptools.txt
   """
 }
@@ -651,6 +633,7 @@ process bigWig {
 /*
  * Subsample the BAM files if necessary
  */
+
 /* bam_forSubsamp
     .filter { it.size() > params.subsampFilesizeThreshold }
     .map { [it, params.subsampFilesizeThreshold / it.size() ] }
@@ -712,13 +695,16 @@ process genebody_coverage {
   """
 }
 
-/*##########################   STEP 2: CELL VIABILITY  ####################################*/
+/*
+ * Cell Viability
+ */
 
 process umiPerGeneDist{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
   label 'lowMem'
+
   publishDir "${params.outdir}/umiPerGeneDist", mode: 'copy'
 
   input:
@@ -740,6 +726,7 @@ process countUMIGenePerCell{
   label 'R'
   label 'lowCpu'
   label 'lowMem'
+
   publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
 
   // when: --MiSeq
@@ -766,6 +753,7 @@ process cellAnalysis{
   label 'R'
   label 'highCpu'
   label 'highMem'
+
   publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
 
   input:
@@ -785,11 +773,9 @@ process cellAnalysis{
   """ 
 }
 
-/*-----------------------------------*/
-
-/***********
- * MultiQC *
- ***********/
+/*
+ * MultiQC 
+ */
 
 process getSoftwareVersions{
   label 'python'
@@ -809,7 +795,7 @@ process getSoftwareVersions{
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
-  file ("v_rseqc") from chRseqcVersion.first().ifEmpty([])
+  file ("v_rseqc") from chRseqcVersion.ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
