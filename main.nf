@@ -45,7 +45,6 @@ def helpMessage() {
   
   Inputs:
     --starIndex [dir]             Index for STAR aligner
-    --design [file]               Path to design file for extended analysis  
     --singleEnd [bool]            Specifies that the input is single-end reads
 
   Skip options: All are false by default
@@ -57,7 +56,7 @@ def helpMessage() {
   --genomeAnnotationPath [file]      Path  to genome annotation folder
 
   Other options:
-    --outdir [file]               The output directory where the results will be saved
+    --outDir [file]               The output directory where the results will be saved
     -name [str]                   Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
  
   =======================================================
@@ -240,36 +239,6 @@ if (params.samplePlan){
 }
 
 
-/***************
- * Design file *
- ***************/
-
-if (params.design){
-  Channel
-    .fromPath(params.design)
-    .ifEmpty { exit 1, "Design file not found: ${params.design}" }
-    .into { chDesignCheck; chDesignControl; chDesignMqc }
-
-  chDesignControl
-    .splitCsv(header:true)
-    .map { row ->
-      if(row.CONTROLID==""){row.CONTROLID='NO_INPUT'}
-      return [ row.SAMPLEID, row.CONTROLID, row.SAMPLENAME, row.GROUP, row.PEAKTYPE ]
-     }
-    .set { chDesignControl }
-
-  // Create special channel to deal with no input cases
-  Channel
-    .from( ["NO_INPUT", ["NO_FILE","NO_FILE"]] )
-    .toList()
-    .set{ chNoInput }
-}else{
-  chDesignControl = Channel.empty()
-  chDesignCheck = Channel.empty()
-  chDesignMqc = Channel.empty()
-}
-
-
 /*******************
  * Header log info *
  *******************/
@@ -301,7 +270,7 @@ summary['Current home']   = "$HOME"
 summary['Current user']   = "$USER"
 summary['Current path']   = "$PWD"
 summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
+summary['Output dir']     = params.outDir
 summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
@@ -317,7 +286,7 @@ process getTaggedSeq{
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/getTaggedSeq", mode: 'copy'
+  publishDir "${params.outDir}/getTaggedSeq", mode: 'copy'
 
   input: 
   set val(prefix), file(reads) from rawReadsFastqc
@@ -353,7 +322,7 @@ process umiExtraction {
   label 'highCpu'
   label 'highMem'
 
-  publishDir "${params.outdir}/umiExtraction", mode: 'copy'
+  publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
   input: 
   set val(prefix), file(taggedR1), file(taggedR2) from chTaggedFastq
@@ -385,7 +354,7 @@ process mergeReads {
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/mergeReads", mode: 'copy'
+  publishDir "${params.outDir}/mergeReads", mode: 'copy'
 
   input:
   set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2), file(taggedReadIDs) from chMergeReadsFastq.join(chUmiExtracted).join(chTaggedIDs)
@@ -431,7 +400,7 @@ process trimReads{
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/trimReads", mode: 'copy'
+  publishDir "${params.outDir}/trimReads", mode: 'copy'
 
   input:
   set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
@@ -455,7 +424,7 @@ process readAlignment {
   label 'extraCpu'
   label 'extraMem'
 
-  publishDir "${params.outdir}/readAlignment", mode: 'copy'
+  publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
   input :
   file genomeIndex from chStar.collect()
@@ -499,7 +468,7 @@ process readAssignment {
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/readAssignment", mode: 'copy'
+  publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
   set val(prefix), file(alignedBam) from chAlignedBam
@@ -530,7 +499,7 @@ process sortBam {
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/sortBam", mode: 'copy'
+  publishDir "${params.outDir}/sortBam", mode: 'copy'
 
   input:
   set val(prefix), file(assignBam) from chAssignBam
@@ -553,7 +522,7 @@ process separateReads {
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/separateReads", mode: 'copy'
+  publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
   set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs)
@@ -588,7 +557,7 @@ process countMatrices {
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outdir}/countMatrices", mode: 'copy'
+  publishDir "${params.outDir}/countMatrices", mode: 'copy'
 
   input:
   set val(prefix), file(umiBam) from chUmiBam_countMtx
@@ -611,7 +580,7 @@ process bigWig {
   label 'extraCpu'
   label 'extraMem'
 
-  publishDir "${params.outdir}/bigWig", mode: 'copy'
+  publishDir "${params.outDir}/bigWig", mode: 'copy'
 
   input:
   set val(prefix), file(bam) from chSortedBAM_bigWig
@@ -662,7 +631,7 @@ process genebody_coverage {
   label 'rseqc'
   label 'extraCpu'
   label 'extraMem'
-  publishDir "${params.outdir}/genebody_coverage" , mode: 'copy',
+  publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
       else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
@@ -705,7 +674,7 @@ process umiPerGeneDist{
   label 'lowCpu'
   label 'lowMem'
 
-  publishDir "${params.outdir}/umiPerGeneDist", mode: 'copy'
+  publishDir "${params.outDir}/umiPerGeneDist", mode: 'copy'
 
   input:
   set val(prefix), file(matrix) from chMatrices_dist
@@ -727,7 +696,7 @@ process countUMIGenePerCell{
   label 'lowCpu'
   label 'lowMem'
 
-  publishDir "${params.outdir}/countUMIGenePerCell", mode: 'copy'
+  publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
 
   // when: --MiSeq
 
@@ -754,7 +723,7 @@ process cellAnalysis{
   label 'highCpu'
   label 'highMem'
 
-  publishDir "${params.outdir}/cellAnalysis", mode: 'copy'
+  publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
 
   input:
   file (matrices) from chMatrices.collect()
@@ -781,7 +750,7 @@ process getSoftwareVersions{
   label 'python'
   label 'lowCpu'
   label 'lowMem'
-  publishDir path: "${params.outdir}/software_versions", mode: "copy"
+  publishDir path: "${params.outDir}/software_versions", mode: "copy"
 
   when:
   !params.skipSoftVersions
@@ -834,7 +803,7 @@ process multiqc {
   label 'multiqc'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outdir}/MultiQC", mode: 'copy'
+  publishDir "${params.outDir}/MultiQC", mode: 'copy'
 
   when:
   !params.skipMultiQC
@@ -842,7 +811,6 @@ process multiqc {
   input:
   file splan from chSplan.collect()
   file multiqcConfig from chMultiqcConfig
-  file design from chDesignMqc.collect().ifEmpty([])
   file metadata from chMetadata.ifEmpty([])
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
@@ -874,7 +842,6 @@ process multiqc {
   rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   //isPE = params.singleEnd ? "" : "-p"
-  designOpts= params.design ? "-d ${params.design}" : ""
   modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
 
   """
@@ -894,7 +861,7 @@ process outputDocumentation {
   label 'lowCpu'
   label 'lowMem'
 
-  publishDir "${params.outdir}/summary", mode: 'copy'
+  publishDir "${params.outDir}/summary", mode: 'copy'
 
   input:
   file output_docs from chOutputDocs
@@ -954,7 +921,7 @@ workflow.onComplete {
   outputTxtFile.withWriter { w -> w << reportTxt }
 
   // onComplete file
-  File woc = new File("${params.outdir}/onComplete.txt")
+  File woc = new File("${params.outDir}/onComplete.txt")
   Map endSummary = [:]
   endSummary['Completed on'] = workflow.complete
   endSummary['Duration']     = workflow.duration
