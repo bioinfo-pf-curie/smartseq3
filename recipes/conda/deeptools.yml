@@ -1,9 +1,8 @@
-name: python
+name: deeptools-3.5.0
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  # Add required software dependencies here
-  - conda-forge::python=3.6.10
-  - bioconda::deeptools=3.5.0 #pas mm que dans environment.yml !!! donc ligne de commande diffère selon la version
+  - conda-forge::python=3.7.9=hffdb5ce_0_cpython
+  - bioconda::deeptools=3.5.0=py_0

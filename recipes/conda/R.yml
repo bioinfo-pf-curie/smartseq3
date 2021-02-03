@@ -1,18 +1,16 @@
-name: python
+name: r-seurat
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  # Add required software dependencies here
-  - conda-forge::python=3.6.10
-  # R-packages
-  - conda-forge::r-base=3.6.1
-  - r::r-stringi=1.4.3
-  - conda-forge::r-reshape2=1.4.4
-  - bioconda::bioconductor-dropletutils=1.6.1
-  - conda-forge::r-plotrix=3.7_8
-  - conda-forge::r-dplyr=1.0.2
-  - conda-forge::r-matrix=1.2_18
-  - conda-forge::r-seurat=3.2.2
+  - conda-forge::r-base=4.0.3=hd23ff56_6
+  - conda-forge::r-stringi=1.5.3=r40hcabe038_1
+  - conda-forge::r-reshape2=1.4.4=r40h0357c0b_1
+  - bioconda::bioconductor-dropletutils=1.10.0=r40h5f743cb_0
+  - conda-forge::r-plotrix=3.8_1=r40hc72bb7e_0
+  - conda-forge::r-dplyr=1.0.3=r40h03ef668_0
+  - conda-forge::r-matrix=1.3_2=r40he454529_0
+  - conda-forge::r-seurat=4.0.0=r40h03ef668_0
+
 
