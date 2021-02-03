@@ -61,7 +61,7 @@ Mandatory arguments:
   --genomeAnnotationPath [file]      Path  to genome annotation folder
 
   Other options:
-    --outdir [file]               The output directory where the results will be saved
+    --outDir [file]               The output directory where the results will be saved
     -name [str]                   Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
  
   =======================================================
