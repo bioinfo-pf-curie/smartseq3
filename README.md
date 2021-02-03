@@ -50,7 +50,6 @@ Mandatory arguments:
   
   Inputs:
     --starIndex [dir]             Index for STAR aligner
-    --design [file]               Path to design file for extended analysis  
     --singleEnd [bool]            Specifies that the input is single-end reads
 
   Skip options: All are false by default
@@ -90,9 +89,9 @@ nextflow run main.nf -profile test,conda
 
 ```
 
-#### Run the pipeline from a `sample plan` and a `design` file
+#### Run the pipeline from a `sample plan`
 ```
-nextflow run main.nf --samplePlan MY_SAMPLE_PLAN --design MY_DESIGN --genome 'hg19' --genomeAnnotationPath ANNOTATION_PATH --outDir MY_OUTPUT_DIR
+nextflow run main.nf --samplePlan MY_SAMPLE_PLAN --genome 'hg19' --genomeAnnotationPath ANNOTATION_PATH --outDir MY_OUTPUT_DIR
 
 ```
 
@@ -124,18 +123,6 @@ The sample plan is expected to be created as below :
 
 SAMPLE_ID | SAMPLE_NAME | FASTQ_R1 [Path to R1.fastq file] | FASTQ_R2 [For paired end, path to Read 2 fastq]
 
-### Design control
-
-A design control is a csv file that list all experimental samples, their IDs, the associated input control (or IgG), the replicate number and the expected peak type.
-The design control is expected to be created as below :
-
-SAMPLE_ID | CONTROL_ID | SAMPLE_NAME | GROUP | PEAK_TYPE
-
-Both files will be checked by the pipeline and have to be rigorously defined in order to make the pipeline work.  
-Note that the control is optional if not available but is highly recommanded.  
-If the `design` file is not specified, the pipeline will run until the alignment, QCs and track generation. The peak calling and the annotation will be skipped.
-
-
 ### Full Documentation
 
 1. [Installation](docs/installation.md)
@@ -146,7 +133,7 @@ If the `design` file is not specified, the pipeline will run until the alignment
 
 #### Credits
 
-This pipeline has been written by the single cell & bioinformatics platform of the Institut Curie (Louisa Hadj Abed, Nicolas Servant)
+This pipeline has been written by the single cell & bioinformatics platform of the Institut Curie (Louisa Hadj Abed, Celine Vallot, Nicolas Servant)
 
 #### Contacts
 
