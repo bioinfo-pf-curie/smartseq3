@@ -1,3 +1,3 @@
 [submodule "geniac"]
 	path = geniac
-	url = https://gitlab.curie.fr/bioinfo-guidelines/geniac
+	url = ssh://gitlab.curie.fr/bioinfo-guidelines/geniac
