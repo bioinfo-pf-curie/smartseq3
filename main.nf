@@ -292,7 +292,7 @@ process getTaggedSeq{
   set val(prefix), file(reads) from rawReadsFastqc
 
   output:
-  set val(prefix), file("*_tagged.R1.fastq"), file("*_tagged.R2.fastq") into chTaggedFastq
+  set val(prefix), file("*_tagged.R1.fastq.gz"), file("*_tagged.R2.fastq.gz") into chTaggedFastq
   set val(prefix), file("*_taggedReadIDs.txt") into chTaggedIDs
 
   script:
@@ -300,11 +300,22 @@ process getTaggedSeq{
   # 1st: get tags in R1 == umi sequences
   # 2nd: get left reads
   # 3rd: get tags in R2 of lefted reads 
-  # 4thy: merge 1st and 3rd fastqs 
+  # 4th: merge 1st and 3rd fastqs 
 
-  getTaggedSeq.sh ${reads[0]} ${reads[1]} ${prefix}_tagged_inR1.R1.fastq ${prefix}_taggedReadIDs_inR1.txt ${prefix}_tagged_inR1.R2.fastq
+  seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
+  #exctract ids
+  seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq -o ${prefix}_taggedReadIDs_inR1.txt
+  # create R2
+  seqkit grep -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_tagged_inR1.R2.fastq
+
   seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
-  getTaggedSeq.sh ${prefix}_rest.R2.fastq ${reads[0]} ${prefix}_tagged_inR2.R2.fastq ${prefix}_taggedReadIDs_inR2.txt ${prefix}_tagged_inR2.R1.fastq
+
+  # Get tagged sequences in R2 of lefting reads == umi sequences
+  seqkit grep --by-seq --pattern "TGCGCAATG" ${prefix}_rest.R2.fastq -o ${prefix}_tagged_inR2.R2.fastq 
+  # exctract ids
+  seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq -o ${prefix}_taggedReadIDs_inR2.txt
+  # create R1
+  seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${reads[0]} -o ${prefix}_tagged_inR2.R1.fastq
 
   # 4th: Merge all files 
   cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
@@ -313,6 +324,11 @@ process getTaggedSeq{
   cat ${prefix}_tagged_inR2.R1.fastq >> ${prefix}_tagged.R1.fastq
   cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
   cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
+
+  gzip ${prefix}_tagged.R*
+
+  rm ${prefix}_tagged_inR*
+  rm ${prefix}_taggedReadIDs_in*
   """
 }
 
@@ -546,6 +562,8 @@ process separateReads {
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
+
+  rm *.sam
   """
 }
 
