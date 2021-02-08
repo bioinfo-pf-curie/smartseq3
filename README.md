@@ -17,7 +17,7 @@ It comes with containers making installation trivial and results highly reproduc
 
 The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented the a generic transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
 
-<img src="docs/images/samartseq3-sequence.png" width="50%">
+![](docs/images/samartseq3-sequence.png)
 
 After tagmentation, which randomly cut sequences, the above generic sequence is separated in sevral reads. Some of them could have a UMI, some others only internal transcrit region and others the linker. 
 
