@@ -427,7 +427,7 @@ process trimReads{
   script:
   """
   # delete linker + polyA queue
-  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=0 -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
