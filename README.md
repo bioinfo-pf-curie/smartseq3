@@ -15,7 +15,7 @@ It comes with containers making installation trivial and results highly reproduc
 
 ### Pipeline Summary
 
-The aime of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better caracterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented the design of a transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
+The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented the a generic transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
 
 ![MultiQC](images/samartseq3-sequence.png)
 
