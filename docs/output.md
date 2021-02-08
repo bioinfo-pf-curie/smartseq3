@@ -10,13 +10,13 @@ Briefly, its goal is to process single cell RNAseq data obtained with smartSeq3 
 
 The directories listed below will be created in the output directory after the pipeline has finished. 
 
-The first part (Reads mapping) focus on reads QC and the second part (Cell viability) explores umi and gene level.
+The first part (Reads mapping) focus on read QCs and the second part (Cell viability) explores umi and gene level.
 
 ## Reads mapping
 
 ### Mapping summary
 
-The mapping summary part summarises alignement and assignment steps as follow:
+The mapping summary part summarises alignement and assignment steps and show the total proportion of correct reads (blue) that will be used to more deeply explore cells.
 
 ![MultiQC - Star stats plot](images/final.png)
 
@@ -28,7 +28,7 @@ Alignment and assignment are described more in details in the two following part
 
 ### Alignment
 
-[STAR](https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf) software is used to aligned reads to a reference genome. Alignment statistics show the total number of reads in each sample and their alignment results as follow :
+[STAR](https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf) software is used to aligned reads to a reference genome. Alignment statistics show the total number of reads in each sample and their alignment results.
 
 ![MultiQC - Star stats plot](images/star_alignment_plot.png)
 
@@ -37,6 +37,8 @@ Alignment and assignment are described more in details in the two following part
 - **Unmapped too short** : less than 66% of reads length (R1+R2) are correctly aligned on the genome. 
 - **Unmapped other: other** : other reasons than "too short" or "too many" like for example due to a foreign genome contamination or if reads came from a
 from a higly repeated region. 
+
+A percentage representation can also be plot and arround 70% of reads are expected to be uniquely mapped.
 
 **Output directory: `readAlignment`**
 
@@ -56,6 +58,8 @@ from a higly repeated region.
 - **Unassigned_NoFeatures** :  read alignments that do not overlap any exon (feature).
 - **Unassigned_Ambiguity** : read alignments that overlap two or more exons (features) or genes (meta-features).
 
+A percentage representation can also be plot and arround 60% is expected to be assigned.
+
 **Output directory: `readAssignment`**
 
 * `[sample]Aligned.sortedByCoord.out.bam.featureCounts.bam`
@@ -65,7 +69,7 @@ from a higly repeated region.
 
 ### Number of UMIs per gene
 
-To visualise the number of UMIs per gene in each sample, their distributions are plot as follow. An upper limit of 70 UMIs (x axis) is set to allow a better representation.
+The number of UMIs per gene represent gene level expression within each cell. Their distributions are plot in the following graph. Most genes have betwwen 1 and 10 UMIs. An upper limit of 70 UMIs (x axis) is set to allow a better representation. 
 
 ![MultiQC](images/umiPerGene.png)
 
@@ -77,7 +81,8 @@ To visualise the number of UMIs per gene in each sample, their distributions are
 
 ### Cutadapt
 
-[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) is used to trim 3' linker and polyA tails. 
+[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) is used to trim 5' linker (21bp in total) and polyA tails (arround 30bp long) on reverse reads. Only few of them have a part of the pattern, generally ~2% and the majority mainly have 3 to 5bp that match. 
+
 Results are summurized in an plot as follow:
 
 ![MultiQC](images/cutadapt_plot.png)
@@ -125,7 +130,7 @@ The bigWig format is also supported by various bioinformatics software for downs
 
 ## Cell viability
 
-From correctly aligned and assigned reads, UMIs and genes counts are analyized.
+From correctly aligned and assigned reads, UMIs and genes counts are analyzed.
 
 ### Ratio UMIs/transcrits per cell
 
@@ -136,11 +141,11 @@ Visualisation of the ratio UMIs/transcrits per cell in a dotplot as follow.
 **Output directory: `cellAnalysis`**
 
 * `RatioPerCell.csv`
-  * Table grouping UMIs and transcrits counts per cell. First column is the sample, second column is the number of genes and last column is the number of UMIs. 
+  * Table grouping UMIs and transcrits counts per cell. First column is the sample, second column is the number of genes and last column is the number of UMIs. At least 5 000 genes and 30 000 UMIs are expectd by cell.  
 
 ### % Mitochondrial RNAs per cell
 
-An important quality control in single cell data is the calculation of the percentage of mitochondrial (mt) transcrits over the total counts. Indeed, a high number of mt RNAs will reflect apoptotic, stressed or low-quality cells. The threshold can vary according your cell types, but a percentage lower than 5 to 20% is generaly correct. 
+An important quality control in single cell data is the calculation of the percentage of mitochondrial (mt) transcrits over the total counts. Indeed, a high number of mt RNAs will reflect apoptotic, stressed or low-quality cells. The threshold can vary according your cell types, but a percentage lower than 25% is generaly correct. 
 
 ![MultiQC](images/mt.png)
 

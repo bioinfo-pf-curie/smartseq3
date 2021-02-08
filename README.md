@@ -15,7 +15,14 @@ It comes with containers making installation trivial and results highly reproduc
 
 ### Pipeline Summary
 
-1. Get tagged reads ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
+The aime of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better caracterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented the design of a transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
+
+![MultiQC](images/samartseq3-sequence.png)
+
+After tagmentation, which randomly cut sequences, the above generic sequence is separated in sevral reads. Some of them could have a UMI, some others only internal transcrit region and others the linker. 
+
+Pipeline steps:
+1. Get reads having a tag ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
 2. Extract UMIs from tagged reads ([`umi-tools`](https://umi-tools.readthedocs.io/en/latest/))
 3. Trim 3' linker and polyA tails ([`cutadapt`](https://cutadapt.readthedocs.io/en/latest/index.html))
 4. Read alignments ([`STAR`](https://github.com/alexdobin/STAR))
@@ -23,8 +30,8 @@ It comes with containers making installation trivial and results highly reproduc
 6. Generation of UMI count matrices ([`umi-tools`](https://umi-tools.readthedocs.io/en/latest/))
 7. BigWig generations ([`bamCoverage`](https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html))
 8. Estimate gene body coverage ([`genebody_coverage`](http://rseqc.sourceforge.net/))
-9. Generate cell QC plots (#UMIS per cell, %MT transcrits per cell, UMI/Gene ratio per cell)
-10. Generate 10X format matrix 
+9. Generate cell QC plots (#UMIS per cell, %MT transcrits per cell, UMI & Gene per cell)
+10. Generate a 10X format matrix 
 11. Results summary ([`MultiQC`](https://multiqc.info/))
 
 

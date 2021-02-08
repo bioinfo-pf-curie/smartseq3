@@ -49,28 +49,3 @@ lg_nbGenes<-lg_nbGenes[,-2]
 colnames(lg_nbGenes)<-c("Cells", "Number of genes")
 write.table(lg_nbGenes, "nbGenePerCell.csv",
             sep=',', row.names=FALSE, col.names=TRUE)
-
-#################
-# si matrice une à une:
-
-# umiMatrix<- as.character(commandArgs(TRUE)[1])
-# prefix = as.character(commandArgs(TRUE)[2])
-# matrix<-read.table(umiMatrix, header=TRUE)
-
-#nbGenes<-nrow(matrix)
-#colnames(nbGenes)<-c("Cell", "Number of genes")
-#write.table(nbGenes, paste0(as.character(prefix), "nbGenePerCell_mqc.csv", collapse = "_"),
-#            sep=',', row.names=FALSE, col.names=TRUE)
-
-
-# nbUmis<-sum(matrix[2])
-# colnames(nbUmis)<-c("Cell", "Number of UMIs")
-# write.table(nbUmis, paste0(as.character(prefix), "nbUMIPerCell_mqc.csv", collapse = "_"),
-#              sep=',', row.names=FALSE, col.names=TRUE)
-
-#countUMIGene<-cbind(prefix, nbGenes, nbUmis)
-#colnames(countUMIGene)<-c("Cell", "Number of genes", "Number of UMIs")
-#
-# write.table(countUMIGene, paste0(as.character(prefix), "_countPerCell_mqc.csv"),
-#             sep=',', row.names=FALSE, col.names=FALSE)
-# 

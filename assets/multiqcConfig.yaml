@@ -15,7 +15,7 @@ custom_data:
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
-      description: 'of sequenced data'
+      description: 'Result summaries of each cell. The number of fragments is the number of RNA molecules detected within a cell. It reflects the sequencing depth. It mainly depends on your sequencer capacity and the number of cell processed. The percentage of UMIs is the proportion of fragments having tag-UMI-GGG pattern within their sequences. At least 50% are expected to have a UMI. Alignment is made on non UMI and UMI reads and should be around 70%. The assignment is made on correctly aligned reads and should be arround 60%. The number of genes is calculated from UMI reads only. Genes and UMIs numbers depend on the sequencing depth but a minimum of 5 000 genes and 30 000 UMIs are expected. Finally, the percentage de mitochondrial RNAs should be under 25% otherwise, a cell is concidered dead.'
       plot_type: 'table'
       pconfig:
           namespace: 'stats'
@@ -71,7 +71,7 @@ custom_data:
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: 'Overview of mapping steps done on all reads (UMI and non UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
+      description: 'Overview of mapping steps corresponding to alignment & assignment. The alignment is done on all reads (UMI and non UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
@@ -79,8 +79,9 @@ custom_data:
 
     umiPerGene: 
       file_format: 'csv'
-      section_name: 'Number of UMIs per gene'
-      description: 'Distribution of the number of UMIs per genes in each sample. Genes having more than 70 UMIs (x axis) are not show.'
+      section_name: 'Expression level'
+      title: 'Number of UMIs per gene'
+      description: 'Distribution of the number of UMIs per gene in each sample. Genes having more than 70 UMIs (x axis) are not shown. Most genes have between one and 10 UMIs and a bend can be observed around 5.'
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
@@ -96,8 +97,9 @@ custom_data:
 
     nbGene_perCell: 
       file_format: 'csv'
-      section_name: 'Number of genes per cell'
-      description: 'Genes are those found in umi matrices.'
+      section_name: 'Library complexity'
+      title: 'Number of genes per cell'
+      description: 'Genes are those found in the UMI matrices (non UMI reads are not take into account). In SmartSeq3, cells should have more than 5000 genes.'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbGene_perCell'
@@ -106,7 +108,7 @@ custom_data:
     nbUmi_perCell: 
       file_format: 'csv'
       section_name: 'Number of UMIs per cell'
-      description: ''
+      description: 'At least 30 000 UMIs are expected.'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbUmi_perCell'
@@ -114,8 +116,9 @@ custom_data:
         
     ratio: 
       file_format: 'csv'
-      section_name: 'Genes/UMIs Numbers'
-      description: 'Ratio of the number of genes and UMIs per cell'
+      section_name: 'Library complexity'
+      section_name: 'Number of genes & UMIs per cell'
+      description: 'A scatter plot of the ratio of the number of genes and UMIs per cell allow an easy representation of a cell composition.'
       plot_type: 'scatter'
       pconfig:
         id: 'ratio'
@@ -125,8 +128,9 @@ custom_data:
 
     mt: 
       file_format: 'csv'
-      section_name: 'Mitochondrial RNAs per cell'
-      description: 'Percentage of mitochondrial RNAs is a cell viability marker. Here, only UMI reads are take into account.'
+      section_name: 'Cell viability'
+      title: '% Mitochondrial RNAs per cell'
+      description: 'Percentage of mitochondrial RNAs is a cell viability marker. It varies according your cell type (e.g cell line, primary cells, etc.) but a maximum threshold would be 25%. Cells above are suposed dead. Here, only UMI reads are take into account.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
