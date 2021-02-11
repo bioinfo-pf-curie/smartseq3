@@ -15,12 +15,12 @@ It comes with containers making installation trivial and results highly reproduc
 
 ### Pipeline Summary
 
-The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented the a generic transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
+The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented a generic transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
 
 <img src="docs/images/samartseq3-sequence.png" width="50%">
 
 
-After tagmentation, which randomly cut sequences, the above generic sequence is separated in sevral reads. Some of them could have a UMI, some others only internal transcrit region and others the linker. 
+After tagmentation, the above generic sequence is randomly cut into sevral pieces. Some of the resulting reads will have a UMI, some others will be internal transcrit regions and others will have a polyA tail and the linker (green). 
 
 Pipeline steps:
 1. Get reads having a tag ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
