@@ -10,12 +10,12 @@
 
 ### Introduction
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. 
+The pipeline was built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. 
 It comes with containers making installation trivial and results highly reproducible.
 
 ### Pipeline Summary
 
-The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented a generic transcrit sequence prior to tagmentation and paired-end sequencing (blue arrows).
+The aim of the SmartSeq3 is to combine a full-length transcriptome coverage to a 5' UMI counting strategy to allow a detailed characterisation of the polyA RNAs of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented a generic transcript sequence prior to tagmentation and paired-end sequencing (blue arrows).
 
 <img src="docs/images/samartseq3-sequence.png" width="50%">
 
