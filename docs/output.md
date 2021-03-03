@@ -81,7 +81,7 @@ The number of UMIs per gene represents gene expression level within each cell. T
 
 ### Cutadapt
 
-[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) is used to trim linkers (21bp in total) and polyA tails (arround 30bp long) on R2. Only few of them have a part of the pattern, generally ~2% and the majority mainly have 3 to 5bp that match. 
+[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) is used to trim 3'linkers (21bp in total) and polyA tails (arround 30bp long) on R2. Only few of them have a part of the pattern, generally ~2% and the majority mainly have 3 to 5bp that match. 
 
 Results are summarized in a plot as follows:
 
