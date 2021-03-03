@@ -297,38 +297,15 @@ process getTaggedSeq{
 
   script:
   """
-  # 1st: get tags in R1 == umi sequences
-  # 2nd: get left reads
-  # 3rd: get tags in R2 of lefted reads 
-  # 4th: merge 1st and 3rd fastqs 
+  # Get tag sequences in R1 == umi sequences
 
-  seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged_inR1.R1.fastq
+  seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq
   #exctract ids
-  seqkit seq -n -i ${prefix}_tagged_inR1.R1.fastq -o ${prefix}_taggedReadIDs_inR1.txt
+  seqkit seq -n -i ${prefix}_tagged.R1.fastq -o ${prefix}_taggedReadIDs.txt
   # create R2
-  seqkit grep -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_tagged_inR1.R2.fastq
-
-  seqkit grep -v -f ${prefix}_taggedReadIDs_inR1.txt ${reads[1]} -o ${prefix}_rest.R2.fastq
-
-  # Get tagged sequences in R2 of lefting reads == umi sequences
-  seqkit grep --by-seq --pattern "TGCGCAATG" ${prefix}_rest.R2.fastq -o ${prefix}_tagged_inR2.R2.fastq 
-  # exctract ids
-  seqkit seq -n -i ${prefix}_tagged_inR2.R2.fastq -o ${prefix}_taggedReadIDs_inR2.txt
-  # create R1
-  seqkit grep -f ${prefix}_taggedReadIDs_inR2.txt ${reads[0]} -o ${prefix}_tagged_inR2.R1.fastq
-
-  # 4th: Merge all files 
-  cat ${prefix}_taggedReadIDs_inR1.txt > ${prefix}_taggedReadIDs.txt
-  cat ${prefix}_taggedReadIDs_inR2.txt >> ${prefix}_taggedReadIDs.txt
-  cat ${prefix}_tagged_inR1.R1.fastq > ${prefix}_tagged.R1.fastq
-  cat ${prefix}_tagged_inR2.R1.fastq >> ${prefix}_tagged.R1.fastq
-  cat ${prefix}_tagged_inR1.R2.fastq > ${prefix}_tagged.R2.fastq
-  cat ${prefix}_tagged_inR2.R2.fastq >> ${prefix}_tagged.R2.fastq
+  seqkit grep -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq
 
   gzip ${prefix}_tagged.R*
-
-  rm ${prefix}_tagged_inR*
-  rm ${prefix}_taggedReadIDs_in*
   """
 }
 
@@ -351,18 +328,16 @@ process umiExtraction {
   script:
   """
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
-  # following command bugs cause write incorrect ids for R2 output (write 1:N:0 and not 2:N:0)
-  umi_tools extract --either-read --extract-method=regex \\
-                    --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --bc-pattern2='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+ 
+  umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq \\
-                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted_falseIds.R2.fastq \\
-                    --log=${prefix}_umiExtract.log 
-  # correct bug
-  sed 's/1:N:0:/2:N:0/g' ${prefix}_UMIsExtracted_falseIds.R2.fastq > ${prefix}_UMIsExtracted.R2.fastq
+                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq \\
+                    --log=${prefix}_umiExtract.log
+  
   umi_tools --version &> v_umi_tools.txt
   """
 }
+
 
 process mergeReads {
   tag "${prefix}"
