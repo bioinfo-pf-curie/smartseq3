@@ -15,26 +15,23 @@ It comes with containers making installation trivial and results highly reproduc
 
 ### Pipeline Summary
 
-The aim of the SmartSeq3 is to combine a full-length transcriptome coverage to a 5' UMI counting strategy to allow a detailed characterisation of the polyA RNAs of cells. To better understand the bioinformatic pipeline processing this type of data, below is represented a generic transcript sequence prior to tagmentation and paired-end sequencing (blue arrows).
+The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of single-cell transcriptomes. To do so, a template-switching oligo (TSO) is added in 5' parts of mRNAs (cf. figure below). The TSO is used for reverse transcription and Tn5-based tagmentation that randomly cut cDNAs. This leads to three types of reads: 5'UMI reads, internal reads and 3' linker reads. Finally, these reads are sequenced in a paired-end fashion and analyzed by this bioinformatic pipeline. 
 
-<img src="docs/images/samartseq3-sequence.png" width="50%">
-
-
-After tagmentation, the above generic sequence is randomly cut into sevral pieces. Some of the resulting reads will have a UMI, some others will be internal transcrit regions and others will have a polyA tail and the linker (green). 
+![MultiQC](images/samartseq3-sequence.png)
 
 Pipeline steps:
-1. Get reads having a tag ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
+1. Get R1 reads having a 5' tag to catch UMI reads ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
 2. Extract UMIs from tagged reads ([`umi-tools`](https://umi-tools.readthedocs.io/en/latest/))
-3. Trim 3' linker and polyA tails ([`cutadapt`](https://cutadapt.readthedocs.io/en/latest/index.html))
-4. Read alignments ([`STAR`](https://github.com/alexdobin/STAR))
-5. Read assignments ([`FeatureCounts`](https://bioconductor.org/packages/release/bioc/vignettes/Rsubread/inst/doc/SubreadUsersGuide.pdf))
+3. Trim 3' linker and polyA tails on R2 reads ([`cutadapt`](https://cutadapt.readthedocs.io/en/latest/index.html))
+4. Read alignments on R1+R2 ([`STAR`](https://github.com/alexdobin/STAR))
+5. Read assignments on R1+R2 ([`FeatureCounts`](https://bioconductor.org/packages/release/bioc/vignettes/Rsubread/inst/doc/SubreadUsersGuide.pdf))
 6. Generation of UMI count matrices ([`umi-tools`](https://umi-tools.readthedocs.io/en/latest/))
 7. BigWig generations ([`bamCoverage`](https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html))
 8. Estimate gene body coverage ([`genebody_coverage`](http://rseqc.sourceforge.net/))
 9. Generate cell QC plots (#UMIS per cell, %MT transcrits per cell, UMI & Gene per cell)
-10. Generate a 10X format matrix 
+10. Generate a 10X format matrix with all cells
 11. Results summary ([`MultiQC`](https://multiqc.info/))
-
+12. 
 
 ### Quick help
 
