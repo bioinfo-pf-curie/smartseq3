@@ -34,7 +34,7 @@ custom_data:
             format: '{:,.0f}'
             placement: 3000
           Percent_UMIs:
-            title: 'UMIs reads (%)'
+            title: 'UMI reads (%)'
             min: 0
             max: 100
             scale: 'Purples'
