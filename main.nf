@@ -851,6 +851,7 @@ process multiqc {
   file ("nbGene/*") from chGenePerCell.collect() // bargraph 
   file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
   file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
+  file ('genesat/*') from genesat_results.collect().ifEmpty([])
 
   output: 
   file splan

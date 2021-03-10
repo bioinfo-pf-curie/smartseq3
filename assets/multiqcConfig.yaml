@@ -138,6 +138,19 @@ custom_data:
         xlab: 'Number of genes'
         ylab: '% mitochondrial RNAs'
 
+    gene_saturation:
+       file_format: 'tsv'
+       section_name: 'Gene-based saturation'
+       description: 'plot showing the number of detected genes for a given set of subsampling values.'
+       plot_type: 'linegraph'
+       pconfig:
+            namespace: 'gene saturation'
+            id: 'genesaturation'
+            title: 'Gene-based Saturation'
+            ylab: 'Number of detected genes'
+            xlab: 'Number of reads (M)'
+
+
 sp:
   stats:
       fn: 'table_mqc.stats'
@@ -153,6 +166,9 @@ sp:
       fn: 'RatioPerCell.csv'
   mt:
       fn: 'MtGenePerCell.csv'
+  gene_saturation:
+      fn: '*gcurve.txt'
+
 
 
 ###############################
