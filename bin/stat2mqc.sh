@@ -38,8 +38,3 @@ do
     echo -e ${sample},${sname},${aligned_assigned},${aligned_NotAssigned},${NotAligned} >> final_mqc.stats
 
 done
-
-
-
-
-    
