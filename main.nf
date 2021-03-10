@@ -757,7 +757,7 @@ process geneSaturation {
 
   script:
   """
-  gene_saturation.r $10Xoutput counts.gcurve.txt
+  gene_saturation.r ${10Xoutput} counts.gcurve.txt
   """
 }
 }
