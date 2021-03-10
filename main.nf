@@ -482,6 +482,36 @@ process readAssignment {
   """
 }
 
+/* Saturation Curves*/
+/*
+
+INCOMPATIBLE DANS ENV
+
+process saturationCurves {
+  tag "${prefix}"
+  label 'preseq'
+  label 'extraCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
+
+  when:
+  !params.skip_saturation
+
+  input:
+  file bam_preseq # add prefix + channel
+
+  output:
+  file "*curve.txt" into preseq_results
+
+  script:
+  prefix = bam_preseq.toString() - ~/(.bam)?$/
+  """
+  preseq lc_extrap -v -B $bam_preseq -o ${prefix}.extrap_curve.txt -e 200e+06
+  """
+}
+*/
+
 process sortBam {
   tag "${prefix}"
   label 'samtools'
@@ -706,6 +736,30 @@ process cellAnalysis{
   cellViability.r 10Xoutput/
   R --version &> v_R.txt  
   """ 
+
+
+ // Gene-based saturation
+
+process geneSaturation {
+  label 'R'
+  label 'medCpu'
+  label 'medMem'
+  publishDir "${params.outDir}/gene_saturation" , mode: 'copy'
+
+  //when:
+  //!params.skip_qc && !params.skip_saturation
+
+  input:
+  file (10Xoutput) from ch10X
+
+  output:
+  file "*gcurve.txt" into genesat_results
+
+  script:
+  """
+  gene_saturation.r $10Xoutput counts.gcurve.txt
+  """
+}
 }
 
 /*
