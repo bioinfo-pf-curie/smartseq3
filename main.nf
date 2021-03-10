@@ -736,7 +736,7 @@ process cellAnalysis{
   cellViability.r 10Xoutput/
   R --version &> v_R.txt  
   """ 
-
+}
 
  // Gene-based saturation
 
@@ -760,7 +760,7 @@ process geneSaturation {
   gene_saturation.r ${10Xoutput} counts.gcurve.txt
   """
 }
-}
+
 
 /*
  * MultiQC 
