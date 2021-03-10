@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
 .libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
- 
+
+library(Seurat)
 # Command line argument processing
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) {
