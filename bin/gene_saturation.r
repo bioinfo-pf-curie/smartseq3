@@ -84,7 +84,7 @@ sat <- estimate_saturation(counts=counts, ndepths=10, nreps=1, extend.lines=TRUE
 for (sname in names(sat)){
     d2w <- sat[[sname]][,c(1,2)]
     ## Reads per Millions
-    d2w[,1] <- round(d2w[,1]/1000000,2)
+    d2w[,1] <- round(d2w[,1]/1000,2)
     write.table(d2w, file=paste0(sname,"_gcurve.txt"),
                 quote=FALSE, sep="\t", col.names=FALSE, row.names=FALSE)
 }
