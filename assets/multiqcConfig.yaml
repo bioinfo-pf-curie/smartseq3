@@ -148,7 +148,7 @@ custom_data:
             id: 'genesaturation'
             title: 'Gene-based Saturation'
             ylab: 'Number of detected genes'
-            xlab: 'Number of reads (M)'
+            xlab: 'Number of UMIs (normalized per thousand)'
 
 
 sp:
