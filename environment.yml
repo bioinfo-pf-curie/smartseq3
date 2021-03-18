@@ -28,3 +28,4 @@ dependencies:
   - conda-forge::r-dplyr=1.0.5=r40h03ef668_0
   - conda-forge::r-matrix=1.3_2=r40he454529_0
   - conda-forge::r-seurat=4.0.0=r40h03ef668_0
+  - conda-forge::1.64_1=r40h0357c0b_0
