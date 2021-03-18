@@ -519,10 +519,12 @@ process saturationCurves {
 
   output:
   set val(prefix), file ("*curve.txt") into preseq_results
+  file("v_preseq.txt") into chPreseqVersion
 
   script:
   """
   preseq lc_extrap -v -B ${sortBam} -o ${prefix}.extrap_curve.txt -e 200e+06
+  preseq --version > v_preseq.txt
   """
 }
 
@@ -776,6 +778,7 @@ process getSoftwareVersions{
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
   file ("v_R.txt") from chRversion.ifEmpty([])
   file ("v_rseqc") from chRseqcVersion.ifEmpty([])
+  file("v_preseq.txt") from chPreseqVersion.ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml

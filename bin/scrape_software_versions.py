@@ -14,6 +14,7 @@ regexes = {
     'deeptools': ['v_deeptools.txt', r"bamCoverage (\S+)"],
     'rseqc': ['v_rseqc', r"geneBody_coverage.py (\S+)"],
     'R': ['v_R.txt', r"R version (\S+)"],
+    'preseq' : ['v_preseq.txt', r"Version: (\S+)"]
 }
 
 results = OrderedDict()
