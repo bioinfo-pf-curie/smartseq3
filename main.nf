@@ -830,6 +830,7 @@ process multiqc {
   file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
   file ('FC/*') from chAssignmentLogs.collect().ifEmpty([])
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
+  file ('preseq/*') from preseq_results.collect().ifEmpty([])
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('pUMIs/*') from chCountSummaryExtUMI.collect()
@@ -853,7 +854,7 @@ process multiqc {
   rtitle = customRunName ? "--title \"$customRunName\"" : ''
   rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
-  modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools  -m rseqc"
+  modules_list = "-m custom_content -m cutadapt -m samtools -m star -m featureCounts -m deeptools -m preseq -m rseqc"
 
   """
   stat2mqc.sh ${splan} 
