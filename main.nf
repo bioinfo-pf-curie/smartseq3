@@ -426,7 +426,7 @@ process readAlignment {
   file("v_star.txt") into chStarVersion
 
   script:  
-  """
+  """  
   STAR \
     --genomeDir $genomeIndex \
     --readFilesIn ${trimmedR1} ${trimmedR2} \
@@ -464,7 +464,7 @@ process readAssignment {
   file(genome) from chGtfFC.collect()
 
   output : 
-  set val(prefix), file("*featureCounts.bam") into chAssignBam
+  set val(prefix), file("*featureCounts.bam") into chAssignBam, chAssignBam_saturationCurve
   file "*.summary" into chAssignmentLogs
   file("v_featurecounts.txt") into chFCversion
 
@@ -483,10 +483,6 @@ process readAssignment {
 }
 
 /* Saturation Curves*/
-/*
-
-INCOMPATIBLE DANS ENV
-
 process saturationCurves {
   tag "${prefix}"
   label 'preseq'
@@ -495,22 +491,18 @@ process saturationCurves {
 
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
 
-  when:
-  !params.skip_saturation
-
   input:
-  file bam_preseq # add prefix + channel
+  set val(prefix), file(featureCountsBam) from chAssignBam_saturationCurve
 
   output:
-  file "*curve.txt" into preseq_results
+  set val(prefix), file ("*curve.txt") into preseq_results
 
   script:
-  prefix = bam_preseq.toString() - ~/(.bam)?$/
   """
-  preseq lc_extrap -v -B $bam_preseq -o ${prefix}.extrap_curve.txt -e 200e+06
+  preseq lc_extrap -v -B ${featureCountsBam} -o ${prefix}.extrap_curve.txt -e 200e+06
   """
 }
-*/
+
 
 process sortBam {
   tag "${prefix}"
