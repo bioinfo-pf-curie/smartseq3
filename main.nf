@@ -464,7 +464,7 @@ process readAssignment {
   file(genome) from chGtfFC.collect()
 
   output : 
-  set val(prefix), file("*featureCounts.bam") into chAssignBam, chAssignBam_saturationCurve
+  set val(prefix), file("*featureCounts.bam") into chAssignBam
   file "*.summary" into chAssignmentLogs
   file("v_featurecounts.txt") into chFCversion
 
@@ -482,28 +482,6 @@ process readAssignment {
   """
 }
 
-/* Saturation Curves*/
-process saturationCurves {
-  tag "${prefix}"
-  label 'preseq'
-  label 'extraCpu'
-  label 'extraMem'
-
-  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
-
-  input:
-  set val(prefix), file(featureCountsBam) from chAssignBam_saturationCurve
-
-  output:
-  set val(prefix), file ("*curve.txt") into preseq_results
-
-  script:
-  """
-  preseq lc_extrap -v -B ${featureCountsBam} -o ${prefix}.extrap_curve.txt -e 200e+06
-  """
-}
-
-
 process sortBam {
   tag "${prefix}"
   label 'samtools'
@@ -516,7 +494,7 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts
+  set val(prefix), file("*_Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts, chSortedBAM_saturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -524,6 +502,27 @@ process sortBam {
   samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}_Sorted.bam
 
   samtools --version &> v_samtools.txt
+  """
+}
+
+/* Saturation Curves*/
+process saturationCurves {
+  tag "${prefix}"
+  label 'preseq'
+  label 'extraCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
+
+  input:
+  set val(prefix), file(sortBam) from chSortedBAM_saturationCurve
+
+  output:
+  set val(prefix), file ("*curve.txt") into preseq_results
+
+  script:
+  """
+  preseq lc_extrap -v -B ${sortBam} -o ${prefix}.extrap_curve.txt -e 200e+06
   """
 }
 
