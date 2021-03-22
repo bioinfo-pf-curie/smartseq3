@@ -148,7 +148,7 @@ custom_data:
             id: 'genesaturation'
             title: 'Gene-based Saturation'
             ylab: 'Number of detected genes'
-            xlab: 'Number of UMIs (normalized per thousand)'
+            xlab: 'Number of UMIs (per thousand)'
 
 
 sp:
@@ -180,7 +180,7 @@ module_order:
   - featurecounts
   - preseq:
      name: 'Sequencing Complexity'
-     info: 'estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing total read count. A shallow curve indicates complexity saturation. The dashed line shows a perfectly complex library where total reads = unique reads. The presented graph shows extrapolated curves up to 200M sequencing reads.'
+     info: 'estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing total read count. A shallow curve indicates complexity saturation. The dashed line shows a perfectly complex library where total reads = unique reads.'
   - deeptools
   - rseqc
 
