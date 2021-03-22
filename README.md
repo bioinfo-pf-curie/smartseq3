@@ -17,7 +17,7 @@ It comes with containers making installation trivial and results highly reproduc
 
 The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of single-cell transcriptomes. To do so, a template-switching oligo (TSO) is added in 5' parts of mRNAs (cf. figure below). The TSO is used for reverse transcription and Tn5-based tagmentation that randomly cut cDNAs. This leads to three types of reads: 5'UMI reads, internal reads and 3' linker reads. Finally, these reads are sequenced in a paired-end fashion and analyzed by this bioinformatic pipeline. 
 
-![MultiQC](docs/images/smartseq3-sequences-1.png)
+![MultiQC](docs/images/smartseq3_sequences-1.png)
 
 Pipeline steps:
 1. Get R1 reads having a 5' tag to catch UMI reads ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
