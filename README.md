@@ -3,7 +3,7 @@
 **Institut Curie - Nextflow SmartSeq3 analysis pipeline**
 
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
-[![MultiQC](https://img.shields.io/badge/MultiQC-1.8-blue.svg)](https://multiqc.info/)
+[![MultiQC](https://img.shields.io/badge/MultiQC-1.10-blue.svg)](https://multiqc.info/)
 [![Install with](https://anaconda.org/anaconda/conda-build/badges/installer/conda.svg)](https://conda.anaconda.org/anaconda)
 [![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)](https://singularity.lbl.gov/)
 [![Docker Container available](https://img.shields.io/badge/docker-available-003399.svg)](https://www.docker.com/)
@@ -15,11 +15,11 @@ It comes with containers making installation trivial and results highly reproduc
 
 ### Pipeline Summary
 
-The aim of the SmartSeq3 is to combines a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of single-cell transcriptomes. To do so, a template-switching oligo (TSO) is added in 5' parts of mRNAs (cf. figure below). The TSO is used for reverse transcription and Tn5-based tagmentation that randomly cut cDNAs. This leads to three types of reads: 5'UMI reads, internal reads and 3' linker reads. Finally, these reads are sequenced in a paired-end fashion and analyzed by this bioinformatic pipeline. 
+The aim of the SmartSeq3 is to combine a full-length transcriptome coverage and a 5' UMI counting strategy to allow a better characterisation of single-cell transcriptomes. To do so, a template-switching oligo (TSO) is added in 5' parts of mRNAs (cf. figure below). The TSO is used for reverse transcription and Tn5-based tagmentation that randomly cut cDNAs. This leads to three types of reads: 5'UMI reads, internal reads and 3' linker reads. Finally, these reads are sequenced in a paired-end fashion and analyzed by this bioinformatic pipeline. 
 
 ![MultiQC](docs/images/samartseq3-sequence.png)
 
-Pipeline steps:
+
 1. Get R1 reads having a 5' tag to catch UMI reads ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
 2. Extract UMIs from tagged reads ([`umi-tools`](https://umi-tools.readthedocs.io/en/latest/))
 3. Trim 3' linker and polyA tails on R2 reads ([`cutadapt`](https://cutadapt.readthedocs.io/en/latest/index.html))
@@ -31,7 +31,7 @@ Pipeline steps:
 9. Generate cell QC plots (#UMIS per cell, %MT transcrits per cell, UMI & Gene per cell)
 10. Generate a 10X format matrix with all cells
 11. Results summary ([`MultiQC`](https://multiqc.info/))
-12. 
+
 
 ### Quick help
 
