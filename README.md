@@ -1,5 +1,4 @@
-# SmartSeq3 
-<img src="assets/logo-sseq3.png" alt="logo" width="100"/>
+# SmartSeq3 <img src="assets/logo-sseq3.png" alt="logo" width="50"/>
 
 
 **Institut Curie - Nextflow SmartSeq3 analysis pipeline**
