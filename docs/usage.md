@@ -15,7 +15,7 @@
 * [Other command line parameters](#other-command-line-parameters)
     * [`--skip*`](#--skip*)
     * [`--metadata`](#--metadta)
-    * [`--outdir`](#--outdir)
+    * [`--outDir`](#--outdir)
     * [`--email`](#--email)
     * [`-name`](#-name-single-dash)
     * [`-resume`](#-resume-single-dash)
@@ -51,7 +51,7 @@ results         # Finished results (configurable, see below)
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-You can change the output director using the `--outdir/-w` options.
+You can change the output director using the `--outDir/-w` options.
 
 ## Main arguments
 
@@ -94,8 +94,10 @@ You can find the keys to specify the genomes in the [genomes config file](../con
 
 * Human
   * `--genome hg38`
+  * `--genome hg19`
 * Mouse
   * `--genome mm10`
+  * `--genome mm9`
 
 > There are numerous others - check the config file for more.
 
@@ -106,10 +108,9 @@ The syntax for this reference configuration is as follows:
 params {
   genomes {
     'hg19' {
-      fasta         = '<path to the genome fasta file>'
-      starIndex     = '<path to the STAR index files>'
-      geneBed       = '<path to a gene annotation file in bed format>'
-	  gtf           = '<path to annotation file in gtf format>'
+      starIndex = '<path to the STAR index files>'
+      gtf       = '<path to a gene annotation file in gtf format>'
+	    bed12     = '<path to annotation file in b bed12 format>'
     }
     // Any number of additional genomes, key is used with --genome
   }
@@ -117,10 +118,9 @@ params {
 ```
 
 Note that these paths can be updated on command line using the following parameters:
-- `--fasta` - Path to genome fasta file
 - `--starIndex` - Path to STAR index
 - `--gtf` - Path to GTF file
-- `--geneBed` - Path to gene file
+- `--bed12` - Path to bed12 file
 
 ### `--genomeAnnotationPath`
 

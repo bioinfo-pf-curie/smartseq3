@@ -169,6 +169,27 @@ A [10X format matrix](https://support.10xgenomics.com/single-cell-gene-expressio
 
 **Output directory: `cellAnalysis/10Xoutput`**
 
+## Complexity Curves
+
+Preseq estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing the total read count. 
+A shallow curve indicates that the library has reached complexity saturation and further sequencing would likely not add further unique reads. 
+The dashed line shows a perfectly complex library where total reads = unique reads.
+
+> **NB:** Note that these are predictive numbers only, not absolute. The MultiQC plot shows extrapolation until 16 Millions of sequencing reads on the X axis - click and drag from the left side of the plot to zoom in on more realistic numbers.
+
+**Output directory: `results/preseq`**
+
+* `sample.extrap_ccurve.txt`
+  * Results of complexity extrapolation up to 16 millions reads
+
+## Gene-based Saturation
+
+In addition to library complexity, we use a custom R script to infer the library complexity at the gene level. In this case, the script downsample the libraries and counts how many genes are detected (with at least 1 UMI). It therefore gives an overview of the number of detected genes at various sequencing depth.
+
+**Output directory: `results/geneSaturation`**
+
+* `counts.gcurve.txt`
+  * Results of downsampling for all samples
 
 ## MultiQC
 
