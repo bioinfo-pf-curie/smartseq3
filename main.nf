@@ -482,7 +482,7 @@ process readAssignment {
   """
 }
 
-process sortBam {
+process sortAndIndexBam {
   tag "${prefix}"
   label 'samtools'
   label 'medCpu'
@@ -494,13 +494,13 @@ process sortBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.bam") into chSortedBAM_bigWig, chSortedBAM_sepReads, chSortedBAM_readCounts, chSortedBAM_saturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAMSepReads, chSortedBAMSaturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
   """
   samtools sort -@ ${task.cpus} ${assignBam} -o ${prefix}_Sorted.bam
-
+  samtools index ${prefix}_Sorted.bam
   samtools --version &> v_samtools.txt
   """
 }
@@ -515,7 +515,7 @@ process saturationCurves {
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
 
   input:
-  set val(prefix), file(sortBam) from chSortedBAM_saturationCurve
+  set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
 
   output:
   set val(prefix), file ("*curve.txt") into preseq_results
@@ -523,7 +523,7 @@ process saturationCurves {
 
   script:
   """
-  preseq lc_extrap -v -B ${sortBam} -o ${prefix}.extrap_curve.txt -e 200e+06
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
   preseq --version > v_preseq.txt
   """
 }
@@ -537,30 +537,33 @@ process separateReads {
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_sepReads.join(chUmiReadsIDs)
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAMSepReads.join(chUmiReadsIDs)
 
   output:
-  set val("${prefix}_umi"), file("*_assignedUMIs.bam") into chUmiBam, chUmiBam_countMtx
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.bam") into chNonUmiBam
+  set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
 
   script:  
   """
   # Separate umi and non umi reads
-  samtools view ${sortedBam} > ${prefix}assignedAll.sam
+  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
 
   # save header and extract umi reads 
-  samtools view -H ${sortedBam} > ${prefix}_assignedUMIs.sam
+  samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
   fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
 
   # save header and extract non umi reads 
-  samtools view -H ${sortedBam} > ${prefix}_assignedNonUMIs.sam
+  samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
   # get reads that do not match umi read IDs
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
 
+  # index
+  samtools index ${prefix}_assignedUMIs.bam
+  samtools index ${prefix}_assignedNonUMIs.bam
   rm *.sam
   """
 }
@@ -574,7 +577,7 @@ process countMatrices {
   publishDir "${params.outDir}/countMatrices", mode: 'copy'
 
   input:
-  set val(prefix), file(umiBam) from chUmiBam_countMtx
+  set val(prefix), file(umiBam) from chUmiBamCountMtx
 
   output:
   set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts
@@ -583,8 +586,7 @@ process countMatrices {
   script:
   """
   # Count UMIs per gene per cell
-  samtools index ${umiBam}
-  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
+  umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam[0]} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
   """
 }
 
@@ -597,7 +599,7 @@ process bigWig {
   publishDir "${params.outDir}/bigWig", mode: 'copy'
 
   input:
-  set val(prefix), file(bam) from chSortedBAM_bigWig
+  set val(prefix), file(bam) from chSortedBAMBigWig
 
   output:
   set val(prefix), file("*_coverage.bw") into chBigWig 
@@ -607,8 +609,7 @@ process bigWig {
   script:
   """
   ## Create bigWig files
-  samtools index ${bam}
-  bamCoverage --normalizeUsing CPM -b ${bam} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus}  > ${prefix}_coverage.log
+  bamCoverage --normalizeUsing CPM -b ${bam[0]} -of bigwig -o ${prefix}_coverage.bw --numberOfProcessors=${task.cpus}  > ${prefix}_coverage.log
   bamCoverage --version &> v_deeptools.txt
   """
 }
@@ -617,7 +618,7 @@ process bigWig {
  * Gene body Coverage
  */
 
-process genebody_coverage {
+process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
   label 'extraCpu'
@@ -644,9 +645,8 @@ process genebody_coverage {
 
   script:
   """
-  samtools index ${bm}
   geneBody_coverage.py \\
-      -i ${bm} \\
+      -i ${bm[0]} \\
       -o ${prefix}.rseqc \\
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt

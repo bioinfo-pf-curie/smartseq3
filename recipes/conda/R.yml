@@ -9,8 +9,10 @@ dependencies:
   - conda-forge::r-reshape2=1.4.4=r40h0357c0b_1
   - bioconda::bioconductor-dropletutils=1.10.0=r40h5f743cb_0
   - conda-forge::r-plotrix=3.8_1=r40hc72bb7e_0
-  - conda-forge::r-dplyr=1.0.3=r40h03ef668_0
+  - conda-forge::r-dplyr=1.0.5=r40h03ef668_0
   - conda-forge::r-matrix=1.3_2=r40he454529_0
   - conda-forge::r-seurat=4.0.0=r40h03ef668_0
+  - conda-forge::r-spatstat=1.64_1=r40h0357c0b_0
+
 
 
