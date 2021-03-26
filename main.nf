@@ -792,6 +792,8 @@ process getSoftwareVersions{
 }
 
 process workflowSummaryMqc {
+  label 'onlyLinux'
+
   when:
   !params.skipMultiQC
 
