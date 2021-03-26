@@ -177,6 +177,8 @@ The dashed line shows a perfectly complex library where total reads = unique rea
 
 > **NB:** Note that these are predictive numbers only, not absolute. The MultiQC plot shows extrapolation until 16 Millions of sequencing reads on the X axis - click and drag from the left side of the plot to zoom in on more realistic numbers.
 
+![MultiQC](images/preseq_plot.png)
+
 **Output directory: `results/preseq`**
 
 * `sample.extrap_ccurve.txt`
@@ -185,6 +187,8 @@ The dashed line shows a perfectly complex library where total reads = unique rea
 ## Gene-based Saturation
 
 In addition to library complexity, we use a custom R script to infer the library complexity at the gene level. In this case, the script downsample the libraries and counts how many genes are detected (with at least 1 UMI). It therefore gives an overview of the number of detected genes at various sequencing depth.
+
+![MultiQC](images/genesaturation.png)
 
 **Output directory: `results/geneSaturation`**
 
