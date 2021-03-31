@@ -301,7 +301,7 @@ process getTaggedSeq{
 
   seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
   #exctract ids
-  seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq -o ${prefix}_taggedReadIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
   # create R2
   seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
   """
