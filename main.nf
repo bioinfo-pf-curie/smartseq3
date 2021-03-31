@@ -732,7 +732,6 @@ process cellAnalysis{
 }
 
  // Gene-based saturation
-
 process geneSaturation {
   label 'R'
   label 'medCpu'
