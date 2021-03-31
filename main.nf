@@ -365,10 +365,10 @@ process mergeReads {
   seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Merge non umis reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
-  cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
+  cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
   cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
 
-  cat ${umiReads_R2} > ${prefix}_totReads.R2.fastq
+  cat <(gzip -cd${umiReads_R2}) > ${prefix}_totReads.R2.fastq
   cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
 
   ## Save % of correct UMIs reads (do not take into account all tagged sequences but only tag+UMI+GGG)
