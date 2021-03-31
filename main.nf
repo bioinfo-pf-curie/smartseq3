@@ -431,7 +431,7 @@ process readAlignment {
   """  
   STAR \
     --genomeDir $genomeIndex \
-    --readFilesIn gunzip -c ${trimmedR1} ${trimmedR2} \
+    --readFilesIn <(gzip -cd ${trimmedR1} ${trimmedR2}) \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
