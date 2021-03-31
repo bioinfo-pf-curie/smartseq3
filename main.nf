@@ -299,13 +299,11 @@ process getTaggedSeq{
   """
   # Get tag sequences in R1 == umi sequences
 
-  seqkit grep --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq
+  seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
   #exctract ids
-  seqkit seq -n -i ${prefix}_tagged.R1.fastq -o ${prefix}_taggedReadIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq -o ${prefix}_taggedReadIDs.txt
   # create R2
-  seqkit grep -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq
-
-  gzip ${prefix}_tagged.R*
+  seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
   """
 }
 
@@ -321,7 +319,7 @@ process umiExtraction {
   set val(prefix), file(taggedR1), file(taggedR2) from chTaggedFastq
 
   output:
-  set val(prefix), file("*_UMIsExtracted.R1.fastq"), file("*_UMIsExtracted.R2.fastq") into chUmiExtracted
+  set val(prefix), file("*_UMIsExtracted.R1.fastq.gz"), file("*_UMIsExtracted.R2.fastq.gz") into chUmiExtracted
   set val(prefix), file("*_umiExtract.log") into chUmiExtractedLog
   file("v_umi_tools.txt") into chUmiToolsVersion
 
@@ -330,8 +328,8 @@ process umiExtraction {
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
  
   umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq \\
-                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq \\
+                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
+                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
                     --log=${prefix}_umiExtract.log
   
   umi_tools --version &> v_umi_tools.txt
@@ -351,7 +349,7 @@ process mergeReads {
   set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2), file(taggedReadIDs) from chMergeReadsFastq.join(chUmiExtracted).join(chTaggedIDs)
 
   output:
-  set val(prefix), file("*_totReads.R1.fastq"), file("*_totReads.R2.fastq") into chMergeReads
+  set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_totReads.txt") into chTotReads
@@ -360,11 +358,11 @@ process mergeReads {
   script:
   """
   # Get UMI read IDs (with UMIs in names for separateReads process)
-  seqkit seq -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
   # Extract non UMI reads
-  seqkit grep -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
   # Merge non umis reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
   cat ${umiReads_R1} > ${prefix}_totReads.R1.fastq
@@ -379,7 +377,11 @@ process mergeReads {
   nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
   echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
   echo "totReads: \$nb_totreads" > ${prefix}_totReads.txt
+  
   seqkit --help | grep Version > v_seqkit.txt
+
+  gzip ${prefix}_totReads.R2.fastq ${prefix}_totReads.R1.fastq
+  rm *.fastq
   """
 }
 
@@ -395,14 +397,14 @@ process trimReads{
   set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
 
   output:
-  set val(prefix), file("*_trimmed.R1.fastq"), file("*_trimmed.R2.fastq") into chTrimmedReads
+  set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads
   set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
   file("v_cutadapt.txt") into chCutadaptVersion
 
   script:
   """
   # delete linker + polyA queue
-  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq -p ${prefix}_trimmed.R2.fastq ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
@@ -429,7 +431,7 @@ process readAlignment {
   """  
   STAR \
     --genomeDir $genomeIndex \
-    --readFilesIn ${trimmedR1} ${trimmedR2} \
+    --readFilesIn gunzip -c ${trimmedR1} ${trimmedR2} \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
