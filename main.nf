@@ -527,7 +527,7 @@ process saturationCurves {
   script:
   """
   preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
-  preseq --version > v_preseq.txt
+  preseq &> v_preseq.txt
   """
 }
 
@@ -553,7 +553,14 @@ process separateReads {
 
   # save header and extract umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
-  fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+
+  nbLines=$(wc -l < ${umisReadsIDs})
+
+  if(($nbLines!=0))
+  then
+    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+  fi
+
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
 
