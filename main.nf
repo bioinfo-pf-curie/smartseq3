@@ -326,6 +326,7 @@ process umiExtraction {
   script:
   """
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
+  # If no umi is find, the reads is leave without changement
  
   umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
@@ -364,7 +365,7 @@ process mergeReads {
   seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
   seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
-  # Merge non umis reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
+  # Merge non umi reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
   cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
   cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
 
@@ -533,8 +534,8 @@ process saturationCurves {
 process separateReads {
   tag "${prefix}"
   label 'samtools'
-  label 'medCpu'
-  label 'medMem'
+  label 'highCpu'
+  label 'highMem'
 
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
@@ -554,18 +555,18 @@ process separateReads {
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
   fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   # sam to bam
-  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_assignedUMIs.bam
+  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
   # get reads that do not match umi read IDs
   fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   # sam to bam
-  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_assignedNonUMIs.bam
+  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
 
   # index
-  samtools index ${prefix}_assignedUMIs.bam
-  samtools index ${prefix}_assignedNonUMIs.bam
+  samtools index ${prefix}_umi_assignedUMIs.bam
+  samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
   rm *.sam
   """
 }
