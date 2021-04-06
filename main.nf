@@ -526,7 +526,9 @@ process saturationCurves {
 
   script:
   """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 -D
+  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
+  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
   preseq &> v_preseq.txt
   """
 }
@@ -556,7 +558,7 @@ process separateReads {
 
   nbLines=\$(wc -l < ${umisReadsIDs})
 
-  if(($nbLines!=0))
+  if((\$nbLines!=0))
   then
     fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
