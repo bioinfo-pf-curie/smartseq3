@@ -573,7 +573,7 @@ process separateReads {
   then
     fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   else 
-    ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+    cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
     cat 
   # sam to bam
