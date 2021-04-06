@@ -569,7 +569,13 @@ process separateReads {
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
   # get reads that do not match umi read IDs
-  fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  if((\$nbLines!=0))
+  then
+    fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  else 
+    ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+  fi
+    cat 
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
 
