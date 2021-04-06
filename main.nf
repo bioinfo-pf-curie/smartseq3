@@ -554,7 +554,7 @@ process separateReads {
   # save header and extract umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
 
-  nbLines=$(wc -l < ${umisReadsIDs})
+  nbLines=\$(wc -l < ${umisReadsIDs})
 
   if(($nbLines!=0))
   then
