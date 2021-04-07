@@ -8,6 +8,7 @@ regexes = {
     'Pipeline': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'seqkit': ['v_seqkit.txt', r"Version: (\S+)"],
+    'cutadapt': ['v_cutadapt.txt', r"(\S+)"],
     'umi_tools': ['v_umi_tools.txt', r"UMI-tools version: (\S+)"],
     'STAR': ['v_star.txt', r"(\S+)"],
     'samtools': ['v_samtools.txt', r"samtools (\S+)"],
@@ -20,11 +21,15 @@ regexes = {
 results = OrderedDict()
 results['Pipeline'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
+results['cutadapt'] = '<span style="color:#999999;\">N/A</span>'
+results['seqkit'] = '<span style="color:#999999;\">N/A</span>'
 results['STAR'] = '<span style="color:#999999;\">N/A</span>'
+results['umi_tools'] = '<span style="color:#999999;\">N/A</span>'
 results['samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['deeptools'] = '<span style="color:#999999;\">N/A</span>'
 results['rseqc'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
+results['preseq'] = '<span style="color:#999999;\">N/A</span>'
 
 
 # Search each file using its regex
