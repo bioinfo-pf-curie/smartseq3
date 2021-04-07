@@ -48,9 +48,10 @@ def helpMessage() {
     --singleEnd [bool]            Specifies that the input is single-end reads
 
   Skip options: All are false by default
-    --skipSoftVersion [bool]      Do not report software version
-    --skipMultiQC [bool]          Skips MultiQC
-    --skipGeneCov [bool]          Skips calculating genebody coverage
+    --skipSoftVersion [bool]      Do not report software version. Default is false.
+    --skipMultiQC [bool]          Skips MultiQC. Default is false.
+    --skipGeneCov [bool]          Skips calculating genebody coverage. Default is false.
+    --skipSatCurves [bool]        Skips saturation curves. Default is false.
   
   Genomes: If not specified in the configuration file or if you wish to overwrite any of the references given by the --genome field
   --genomeAnnotationPath [file]      Path  to genome annotation folder
@@ -516,6 +517,9 @@ process saturationCurves {
   label 'extraMem'
 
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
+
+  when:
+  !params.skipSatCurves
 
   input:
   set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
