@@ -4,6 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - conda-forge::zip=3.0=h7f98852_1
   - conda-forge::r-base=4.0.3=hd23ff56_6
   - conda-forge::r-stringi=1.5.3=r40hcabe038_1
   - conda-forge::r-reshape2=1.4.4=r40h0357c0b_1
