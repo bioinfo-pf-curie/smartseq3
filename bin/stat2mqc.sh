@@ -26,7 +26,7 @@ do
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
-        paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/$tot_reads)" | bc -l)
+        paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/$tot_reads*2)" | bc -l)
     else
 	    paligned_assigned=0
     fi
