@@ -16,7 +16,7 @@ do
     ##id
     sname=$(awk -F, -v sname=$sample '$1==sname{print $2}' $splan)
 
-    # Number of reads:
+    # Number of FRAGMENTS (tot_reads = nb_frgmts * 2) :
     tot_reads=`grep "totReads: " totReads/${sample}_totReads.txt | sed -e 's/totReads: //'`
     pUMIs=`grep "percentUMI:" pUMIs/${sample}_pUMIs.txt | cut -d':' -f2`
     aligned=`grep "Uniquely mapped reads number" star/${sample}Log.final.out | awk '{print $NF}'`
@@ -26,7 +26,7 @@ do
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
-        paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/$tot_reads*2)" | bc -l)
+        paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/($tot_reads*2))" | bc -l)
     else
 	    paligned_assigned=0
     fi
