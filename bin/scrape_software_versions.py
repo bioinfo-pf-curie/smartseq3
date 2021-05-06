@@ -44,7 +44,7 @@ for k, v in regexes.items():
 print ('''
 id: 'software versions'
 section_name: 'Software Versions'
-section_href: 'https://gitlab.curie.fr/data-analysis/atac-seq/'
+section_href: 'https://gitlab.curie.fr/sc-platform/smartseq3'
 plot_type: 'html'
 description: 'are collected at run time from the software output.'
 data: |

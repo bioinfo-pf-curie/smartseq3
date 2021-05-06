@@ -792,16 +792,16 @@ process getSoftwareVersions{
   !params.skipSoftVersions
 
   input:
-  file("v_umi_tools.txt") from chUmiToolsVersion.ifEmpty([])
-  file("v_seqkit.txt") from chSeqkitVersion.ifEmpty([])
-  file("v_cutadapt.txt") from chCutadaptVersion.ifEmpty([])
-  file("v_star.txt") from chStarVersion.ifEmpty([])
-  file("v_featurecounts.txt") from chFCversion.ifEmpty([])
-  file("v_samtools.txt") from chSamtoolsVersion.ifEmpty([])
-  file("v_deeptools.txt") from chBamCoverageVersion.ifEmpty([])
-  file("v_R.txt") from chRversion.ifEmpty([])
-  file("v_rseqc") from chRseqcVersion.ifEmpty([])
-  file("v_preseq.txt") from chPreseqVersion.ifEmpty([])
+  file("v_umi_tools.txt") from chUmiToolsVersion.first().ifEmpty([])
+  file("v_seqkit.txt") from chSeqkitVersion.first().ifEmpty([])
+  file("v_cutadapt.txt") from chCutadaptVersion.first().ifEmpty([])
+  file("v_star.txt") from chStarVersion.first().ifEmpty([])
+  file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
+  file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
+  file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
+  file("v_R.txt") from chRversion.first().ifEmpty([])
+  file("v_rseqc") from chRseqcVersion.first().ifEmpty([])
+  file("v_preseq.txt") from chPreseqVersion.first().ifEmpty([])
 
   output:
   file 'software_versions_mqc.yaml' into softwareVersionsYaml
