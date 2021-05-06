@@ -22,7 +22,7 @@ do
     aligned=`grep "Uniquely mapped reads number" star/${sample}Log.final.out | awk '{print $NF}'`
     paligned=`grep "Uniquely mapped reads %" star/${sample}Log.final.out | awk '{print $NF}' | sed -e 's/%//'`
     aligned_assigned=`grep "Assigned" FC/${sample}_counts.summary | cut -f2`
-    NotAligned=`echo $(( $tot_reads - $aligned ))`
+    NotAligned=`echo $(( $tot_reads*2 - $aligned ))`
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
