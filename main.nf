@@ -478,6 +478,14 @@ process readAlignment {
 
   STAR --version &> v_star.txt
   """
+
+  // Filter removes all 'aligned' channels that fail the check
+  chAlignedBam
+    .filter { logs, bams -> checkStarLog(logs) }
+    .map { logs, bams -> bams }
+    .dump (tag:'starbams')
+    .set { chAssignBam }
+
 }
 
 process readAssignment {
@@ -509,14 +517,6 @@ process readAssignment {
 
   featureCounts -v &> v_featurecounts.txt
   """
-
-
-  // Filter removes all 'aligned' channels that fail the check
-  chAlignedBam
-    .filter { logs, bams -> checkStarLog(logs) }
-    .map { logs, bams -> bams }
-    .dump (tag:'starbams')
-    .into { chSortedBAMBigWig; chSortedBAMSepReads; chSortedBAMSaturationCurve }
 }
 
 process sortAndIndexBam {
