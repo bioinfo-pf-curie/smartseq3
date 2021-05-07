@@ -435,6 +435,9 @@ def checkStarLog(logs) {
   }
 }
 
+// Update input channel
+chStarRawReads = Channel.empty()
+chStarRawReads = chTrimmedReads
 
 process readAlignment {
   tag "${prefix}"
@@ -447,7 +450,7 @@ process readAlignment {
   input :
   file genomeIndex from chStar.collect()
   file genomeGtf from chGtfSTAR.collect()
-  set val(prefix), file(trimmedR1) , file(trimmedR2) from chTrimmedReads
+  set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
   set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
