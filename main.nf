@@ -453,7 +453,7 @@ process readAlignment {
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
-  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam, chAlignmentLogs_check
+  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
   file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
@@ -483,8 +483,35 @@ process readAlignment {
   """
 }
 
+process starSort {
+    tag "$prefix"
+    label 'samtools'
+    label 'medCpu'
+    label 'medMem'
+    publishDir "${params.outDir}/mapping", mode: 'copy'
+ 
+    input:
+    set val(prefix), file(LogFinalOut), file (starBam) from chAlignedBam
+
+    output:
+    set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chStarAligned
+    file "${prefix}_sorted.bam.bai"
+    file("v_samtools.txt") into chSamtoolsVersionSort
+
+    script:
+    """
+    samtools --version &> v_samtools.txt
+    samtools sort  \\
+        -@  ${task.cpus}  \\
+        -o ${prefix}_sorted.bam  \\
+        ${starBam}
+    samtools index ${prefix}_sorted.bam
+    """
+    }
+
+
 // Filter removes all 'aligned' channels that fail the check
-chAlignmentLogs_check
+chStarAligned
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
