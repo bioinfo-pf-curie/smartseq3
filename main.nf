@@ -478,6 +478,7 @@ process readAlignment {
 
   STAR --version &> v_star.txt
   """
+  }
 
   // Filter removes all 'aligned' channels that fail the check
   chAlignedBam
