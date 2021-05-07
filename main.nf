@@ -484,7 +484,7 @@ process readAlignment {
 }
 
 // Filter removes all 'aligned' channels that fail the check
-chAlignedBam
+chAlignmentLogs
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
@@ -500,7 +500,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chAssignBamCheck
+  set val(prefix), file(alignedBam) from chAlignedBam
   file(genome) from chGtfFC.collect()
 
   output : 
