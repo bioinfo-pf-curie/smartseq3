@@ -478,7 +478,6 @@ process readAlignment {
 
   STAR --version &> v_star.txt
   """
-  }
 
   // Filter removes all 'aligned' channels that fail the check
   chAlignedBam
@@ -498,7 +497,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chAssignBamCheck
+  set val(prefix), file(alignedBam) from chAlignedBam
   file(genome) from chGtfFC.collect()
 
   output : 
