@@ -454,7 +454,8 @@ process readAlignment {
 	
   output :
   set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
-  file "*.out" into chAlignmentLogs, chAlignmentLogs_check
+  set val(prefix), file ("*Log.final.out") into chAlignmentLogs_check
+  file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
   script:  
