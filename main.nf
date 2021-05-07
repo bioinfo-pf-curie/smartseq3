@@ -484,7 +484,7 @@ process readAlignment {
     .filter { logs, bams -> checkStarLog(logs) }
     .map { logs, bams -> bams }
     .dump (tag:'starbams')
-    .set { chAssignBam }
+    .set { chAssignBamCheck }
 
 }
 
@@ -497,7 +497,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chAlignedBam
+  set val(prefix), file(alignedBam) from chAssignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
