@@ -453,8 +453,7 @@ process readAlignment {
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
-  set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
-  set val(prefix), file ("*Log.final.out") into chAlignmentLogs_check
+  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam, chAlignmentLogs_check
   file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
@@ -501,7 +500,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chAlignedBam
+  set val(prefix), file(log) , file(alignedBam) from chAlignedBam
   file(genome) from chGtfFC.collect()
 
   output : 
