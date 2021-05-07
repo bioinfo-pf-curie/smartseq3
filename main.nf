@@ -454,7 +454,7 @@ process readAlignment {
 	
   output :
   set val(prefix), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
-  file "*.out" into chAlignmentLogs
+  file "*.out" into chAlignmentLogs, chAlignmentLogs_check
   file("v_star.txt") into chStarVersion
 
   script:  
@@ -484,7 +484,7 @@ process readAlignment {
 }
 
 // Filter removes all 'aligned' channels that fail the check
-chAlignmentLogs
+chAlignmentLogs_check
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
