@@ -453,7 +453,7 @@ process readAlignment {
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
-  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam
+  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam, chAlignedBam_sort
   file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
@@ -491,7 +491,7 @@ process starSort {
     publishDir "${params.outDir}/mapping", mode: 'copy'
  
     input:
-    set val(prefix), file(LogFinalOut), file (starBam) from chAlignedBam
+    set val(prefix), file(LogFinalOut), file (starBam) from chAlignedBam_sort
 
     output:
     set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chStarAligned
