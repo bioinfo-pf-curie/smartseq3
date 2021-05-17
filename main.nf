@@ -453,7 +453,7 @@ process readAlignment {
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
-  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignedBam, chAlignedBam_sort
+  set val(prefix), file ("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignBam
   file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
@@ -491,10 +491,10 @@ process starSort {
     publishDir "${params.outDir}/mapping", mode: 'copy'
  
     input:
-    set val(prefix), file(LogFinalOut), file (starBam) from chAlignedBam_sort
+    set val(prefix), file(LogFinalOut), file (starBam) from chAlignBam
 
     output:
-    set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chStarAligned
+    set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
     file "${prefix}_sorted.bam.bai"
     file("v_samtools.txt") into chSamtoolsVersionSort
 
@@ -511,11 +511,11 @@ process starSort {
 
 
 // Filter removes all 'aligned' channels that fail the check
-chStarAligned
+chAlignBamSort
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
-  .set { chAssignBamCheck }
+  .set { chAlignBamCheck }
 
 
 process readAssignment {
@@ -527,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam) from chAlignedBam
+  set val(prefix), file(log) , file(alignedBam) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
