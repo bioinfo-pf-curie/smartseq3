@@ -527,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam) from chAlignBamCheck
+  set val(prefix), file(log) , file(alignedBam) from chAlignBamSort
   file(genome) from chGtfFC.collect()
 
   output : 
