@@ -494,13 +494,10 @@ process starSort {
     set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
     output:
-    set val(prefix), file("*Log.final.out"), file("*.bam"), file("*.bai") into chAlignBamSort
-    file "${prefix}_sorted.bam.bai"
-    file("v_samtools.txt") into chSamtoolsVersionSort
+    set val(prefix), file("${prefix}Log.final.out"), file("*.bam"), file("*.bai") into chAlignBamSort
 
     script:
     """
-    samtools --version &> v_samtools.txt
     samtools sort  \\
         -@  ${task.cpus}  \\
         -o ${prefix}_sorted.bam  \\
@@ -527,7 +524,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam) , file (alignedBai) from chAlignBamCheck
+  set val(prefix), file(logFinalOut) , file(alignedBam) , file (alignedBai) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
