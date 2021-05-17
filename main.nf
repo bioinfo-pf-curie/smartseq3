@@ -527,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam), file(alignedBai) from chAlignBamCheck
+  set val(prefix), file(log) , file(alignedBam) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -543,7 +543,7 @@ process readAssignment {
     -T ${task.cpus} \
     -R BAM \
     -g gene_name \
-    ${alignedBam}
+    ${alignedBam[0]}
 
   featureCounts -v &> v_featurecounts.txt
   """
