@@ -426,7 +426,7 @@ def checkStarLog(logs) {
   }
   logname = logs.getBaseName() - 'Log.final'
   if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 1000.toInteger() ){
-      log.info "#################### VERY POOR ALIGNMENT RATE! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)    >> ${percentAligned}% <<"
+      log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
   } else {
@@ -494,7 +494,7 @@ process starSort {
     set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
     output:
-    set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
+    set file("${prefix}Log.final.out"), file ("*.bam"), file ("*.bai") into chAlignBamSort
     file "${prefix}_sorted.bam.bai"
     file("v_samtools.txt") into chSamtoolsVersionSort
 
@@ -527,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam) from chAlignBamCheck
+  set val(prefix), file(log) , file(alignedBam) , file (alignedBai) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -543,7 +543,7 @@ process readAssignment {
     -T ${task.cpus} \
     -R BAM \
     -g gene_name \
-    ${alignedBam[0]}
+    ${alignedBam}
 
   featureCounts -v &> v_featurecounts.txt
   """
