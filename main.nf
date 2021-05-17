@@ -494,7 +494,10 @@ process starSort {
     set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
     output:
-    set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
+    set file("${prefix}Log.final.out"), file ("${prefix}*.bam") , file ("${prefix}*.bai") into chAlignBamSort // A TESTER
+    // set file("${prefix}Log.final.out"), file ("*.{bam,bai}") into chAlignBamSort // ne marche pas car ne prend pas en compte le bai
+    // set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*bam.bai") into chAlignBamSort ne marche pas 
+
 
     script:
     """
@@ -524,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(logFinalOut) , file(alignedBam) from chAlignBamCheck
+  set val(prefix), file(logFinalOut) , file(alignedBam), file(alignedBai) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -540,7 +543,7 @@ process readAssignment {
     -T ${task.cpus} \
     -R BAM \
     -g gene_name \
-    ${alignedBam[0]}
+    ${alignedBam}
 
   featureCounts -v &> v_featurecounts.txt
   """
