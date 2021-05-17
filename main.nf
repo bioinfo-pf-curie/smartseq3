@@ -495,6 +495,7 @@ process starSort {
 
     output:
     set val(prefix), file("${prefix}Log.final.out"), file("*.bam"), file("*.bai") into chAlignBamSort
+    file "${prefix}_sorted.bam.bai"
 
     script:
     """
