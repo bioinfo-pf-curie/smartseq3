@@ -491,7 +491,7 @@ process starSort {
     publishDir "${params.outDir}/mapping", mode: 'copy'
  
     input:
-    set val(prefix), file(LogFinalOut), file (starBam) from chAlignBam
+    set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
     output:
     set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
@@ -527,7 +527,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(log) , file(alignedBam) from chAlignBamSort
+  set val(prefix), file(log) , file(alignedBam), file(alignedBai) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
