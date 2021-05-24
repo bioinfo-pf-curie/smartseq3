@@ -551,7 +551,7 @@ process readAssignment {
   file("v_featurecounts.txt") into chFCversion
 
   script:
-  prefix = bam[0].toString() - ~/(Aligned.sortedByCoord.out)?(.bam)?$/
+  prefix = alignedBam[0].toString() - ~/(Aligned.sortedByCoord.out)?(.bam)?$/
   """	
   featureCounts  -p \
     -a ${genome} \
