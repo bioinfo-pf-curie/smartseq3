@@ -498,7 +498,6 @@ process starSort {
   output:
   set file("${prefix}Log.final.out"), file ("*.bam") into chAlignBamSort
 
-  /*
   set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*.bai") into chAlignBamSort // ne marche pas 
   WARN: Process 'workflowSummaryMqc' cannot be executed by 'pbs' executor -- Using 'local' executor instead
   Invalid method invocation `call` with arguments: [/data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10Log.final.out, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam.bai] (java.util.ArrayList) on _runScript_closure40 type
@@ -509,10 +508,9 @@ process starSort {
   Error report..................: No signature of method: Script_32509b01$_runScript_closure40.call() is applicable for argument types: (ArrayList) values: [[/data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10Log.final.out, ...]]
   Possible solutions: any(), any(), tap(groovy.lang.Closure), each(groovy.lang.Closure), any(groovy.lang.Closure), tap(groovy.lang.Closure)
   FAILED: jolly_mclean
-  */
 
   // set file("${prefix}Log.final.out"), file ("*.{bam,bai}") into chAlignBamSort // ne marche pas car ne prend pas en compte le bai
-/*
+
   script:
   """
   samtools sort  \\
@@ -530,6 +528,10 @@ chAlignBam
   .dump (tag:'starbams')
   .set { chAlignBamCheck }
 
+/*
+#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! (V590T15)  >> 31.25% <<
+WARN: Process 'workflowSummaryMqc' cannot be executed by 'pbs' executor -- Using 'local' executor instead
+*/
 
 process readAssignment {
   tag "${prefix}"
@@ -912,6 +914,37 @@ process workflowSummaryMqc {
   ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
         </dl>
   """.stripIndent()
+}
+
+process workflowSummaryMqc {
+  when:
+  !params.skipMultiQC
+
+  output:
+  file 'workflow_summary_mqc.yaml' into workflowSummaryYaml
+
+  exec:
+  def yaml_file = task.workDir.resolve('workflow_summary_mqc.yaml')
+  yaml_file.text  = """
+  id: 'summary'
+  description: " - this information is collected when the pipeline is started."
+  section_name: 'Workflow Summary'
+  section_href: 'https://gitlab.curie.fr/data-analysis/RNA-seq'
+  plot_type: 'html'
+  data: |
+      <dl class=\"dl-horizontal\">
+${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+      </dl>
+  """.stripIndent()
+}
+
+if (skippedPoorAlignment.size() > 0){
+  Channel.fromList(skippedPoorAlignment)
+         .flatMap{ it -> it + ": Poor alignment rate. Sample discarded"}
+         .collectFile(name: 'warnings.txt', newLine: true)
+         .set{chWarn}
+}else{
+  chWarn = Channel.empty()
 }
 
 process multiqc {
