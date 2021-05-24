@@ -542,7 +542,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedBam) from chAlignBamCheck
+  file(alignedBam) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
