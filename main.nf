@@ -494,8 +494,7 @@ process starSort {
   set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
   output:
-  set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
-  file "${prefix}_sorted.bam.bai"
+  set file("${prefix}Log.final.out"), file ("*.bam") into chAlignBamSort
 
   /*
   set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*.bai") into chAlignBamSort // ne marche pas 
@@ -519,7 +518,6 @@ process starSort {
       -@  ${task.cpus}  \\
       -o ${prefix}_sorted.bam  \\
       ${starBam}
-  samtools index ${prefix}_sorted.bam
   """
 }
 
