@@ -483,6 +483,7 @@ process readAlignment {
   """
 }
 
+/*
 process starSort {
   tag "$prefix"
   label 'samtools'
@@ -510,8 +511,7 @@ process starSort {
   */
 
   // set file("${prefix}Log.final.out"), file ("*.{bam,bai}") into chAlignBamSort // ne marche pas car ne prend pas en compte le bai
-
-
+/*
   script:
   """
   samtools sort  \\
@@ -520,9 +520,10 @@ process starSort {
       ${starBam}
   """
 }
+*/
 
 // Filter removes all 'aligned' channels that fail the check
-chAlignBamSort
+chAlignBam
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
