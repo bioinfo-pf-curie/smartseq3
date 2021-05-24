@@ -480,6 +480,7 @@ process readAlignment {
     # Non-canonical are all other dinucleotide combinations. 
 
   STAR --version &> v_star.txt
+  
   """
 }
 
