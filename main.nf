@@ -494,9 +494,11 @@ process starSort {
   set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
 
   output:
-  set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*.bai") into chAlignBamSort // ne marche pas 
+  set file("${prefix}Log.final.out"), file ("*.{bam,bam.bai}") into chAlignBamSort
+  file "${prefix}_sorted.bam.bai"
 
   /*
+  set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*.bai") into chAlignBamSort // ne marche pas 
   WARN: Process 'workflowSummaryMqc' cannot be executed by 'pbs' executor -- Using 'local' executor instead
   Invalid method invocation `call` with arguments: [/data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10Log.final.out, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam.bai] (java.util.ArrayList) on _runScript_closure40 type
   Completed on..................: 2021-05-17T19:23:31.449+02:00
