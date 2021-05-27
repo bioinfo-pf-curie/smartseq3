@@ -941,6 +941,7 @@ process multiqc {
   file metadata from chMetadata.ifEmpty([])
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflow_summary/*') from workflowSummaryYaml.collect()
+  file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
   //Modules
   //file ('trimming/*') from chtrimmedReadsLog.collect().ifEmpty([])
   file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
@@ -971,11 +972,11 @@ process multiqc {
   rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
   metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   modules_list = "-m custom_content -m samtools -m star -m featureCounts -m deeptools -m preseq -m rseqc"
-
+  warn=skippedPoorAlignment.size() > 0 ? "--warn workflowSummary/warnings.txt" : ""
   """
   stat2mqc.sh ${splan} 
   #mean_calculation.r 
-  mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} ${metadataOpts} > multiqc-config-header.yaml
+  mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} ${warn} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
 }
@@ -1027,6 +1028,8 @@ workflow.onComplete {
   if(workflow.commitId) reportFields['summary']['Pipeline repository Git Commit'] = workflow.commitId
   if(workflow.revision) reportFields['summary']['Pipeline Git branch/tag'] = workflow.revision
 
+  report_fields['skippedPoorAlignment'] = skippedPoorAlignment
+  
   // Render the TXT template
   def engine = new groovy.text.GStringTemplateEngine()
   def tf = new File("$baseDir/assets/onCompleteTemplate.txt")
@@ -1049,7 +1052,7 @@ workflow.onComplete {
   outputTxtFile.withWriter { w -> w << reportTxt }
 
   // onComplete file
-  File woc = new File("${params.outDir}/onComplete.txt")
+  File woc = new File("${params.outDir}/workflowOnComplete.txt")
   Map endSummary = [:]
   endSummary['Completed on'] = workflow.complete
   endSummary['Duration']     = workflow.duration
@@ -1061,7 +1064,11 @@ workflow.onComplete {
   String execInfo = "Execution summary\n${endWfSummary}\n"
   woc.write(execInfo)
 
-  // final logs
+  /*final logs*/
+  if(skippedPoorAlignment.size() > 0){
+    log.info "[rnaseq] WARNING - ${skippedPoorAlignment.size()} samples skipped due to poor alignment scores!"
+  }
+
   if(workflow.success){
       log.info "Pipeline Complete"
   }else{
