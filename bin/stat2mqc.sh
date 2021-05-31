@@ -9,9 +9,9 @@ all_samples=$(awk -F, '{print $1}' $splan)
 if [[ -f "workflowSummary/warnings.txt" ]]
 then
     removed_samples=$(cat workflowSummary/warnings.txt)
-    sed -i "s|{desc}|$removed_samples|g" ../../../../assets/multiqcConfig.yaml
+    sed -i "s|{desc}|$removed_samples|g" ../../../assets/multiqcConfig.yaml
 else
-    sed -i "s|{desc}||g" ../../../../assets/multiqcConfig.yaml
+    sed -i "s|{desc}||g" ../../../assets/multiqcConfig.yaml
 fi
 
 # to add in future to write wich samples to bad
