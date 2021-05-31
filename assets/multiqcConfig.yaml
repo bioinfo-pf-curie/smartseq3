@@ -71,7 +71,7 @@ custom_data:
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
-      description: '{desc} Overview of mapping steps corresponding to alignment & assignment. The alignment is done on all reads (UMI and non UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
+      description: '{desc}  Overview of mapping steps corresponding to alignment & assignment. The alignment is done on all reads (UMI and non UMI reads). Correct reads are aligned on the genome and assigned to a gene.'
       plot_type: 'bargraph'
       pconfig:
         id: 'final'
