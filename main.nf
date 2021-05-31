@@ -867,7 +867,7 @@ process workflowSummaryMqc {
   id: 'summary'
   description: " - this information is collected when the pipeline is started."
   section_name: 'Workflow Summary'
-  section_href: 'https://gitlab.curie.fr/data-analysis/chip-seq'
+  section_href: 'https://gitlab.curie.fr/sc-platform/smartseq3'
   plot_type: 'html'
   data: |
         <dl class=\"dl-horizontal\">
@@ -935,7 +935,7 @@ process multiqc {
   """
   stat2mqc.sh ${splan}
   #mean_calculation.r
-  mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} > multiqc-config-header.yaml
+  mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} ${warn} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
 }
@@ -986,8 +986,7 @@ workflow.onComplete {
   if(workflow.repository) reportFields['summary']['Pipeline repository Git URL'] = workflow.repository
   if(workflow.commitId) reportFields['summary']['Pipeline repository Git Commit'] = workflow.commitId
   if(workflow.revision) reportFields['summary']['Pipeline Git branch/tag'] = workflow.revision
-
-  report_fields['skippedPoorAlignment'] = skippedPoorAlignment
+  reportFields['skippedPoorAlignment'] = skippedPoorAlignment
   
   // Render the TXT template
   def engine = new groovy.text.GStringTemplateEngine()
@@ -1025,7 +1024,7 @@ workflow.onComplete {
 
   /*final logs*/
   if(skippedPoorAlignment.size() > 0){
-    log.info "[rnaseq] WARNING - ${skippedPoorAlignment.size()} samples skipped due to poor alignment scores!"
+    log.info "WARNING - ${skippedPoorAlignment.size()} samples skipped due to poor alignment scores!"
   }
 
   if(workflow.success){
