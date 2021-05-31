@@ -5,6 +5,16 @@ splan=$1
 ## Catch sample names
 all_samples=$(awk -F, '{print $1}' $splan)
 
+
+if test -f "workflowSummary/warnings.txt" ; then
+    removed_samples=$(cat workflowSummary/warnings.txt)
+    desc="!! WARNING !! <br> Following samples have been removed from the analysis due to their poor quality: <br> $removed_samples" 
+    sed -i "s|{desc}|$desc|g" ../../../assets/multiqcConfig.yaml
+fi
+
+# to add in future to write wich samples to bad
+#
+
 ## Header
 #Table:
 echo -e "Sample_id,Sample_name,Number_of_reads,Percent_UMIs,Percent_Aligned,Percent_Assigned,Number_of_genes,Number_of_UMIs" > table_mqc.stats

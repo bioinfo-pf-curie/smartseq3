@@ -484,43 +484,6 @@ process readAlignment {
   """
 }
 
-/*
-process starSort {
-  tag "$prefix"
-  label 'samtools'
-  label 'medCpu'
-  label 'medMem'
-  publishDir "${params.outDir}/mapping", mode: 'copy'
-
-  input:
-  set val(prefix), file(logFinalOut), file (starBam) from chAlignBam
-
-  output:
-  set file("${prefix}Log.final.out"), file ("*.bam") into chAlignBamSort
-
-  set val(prefix), file("*Log.final.out"), file ("*.bam"), file("*.bai") into chAlignBamSort // ne marche pas 
-  WARN: Process 'workflowSummaryMqc' cannot be executed by 'pbs' executor -- Using 'local' executor instead
-  Invalid method invocation `call` with arguments: [/data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10Log.final.out, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam, /data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10_sorted.bam.bai] (java.util.ArrayList) on _runScript_closure40 type
-  Completed on..................: 2021-05-17T19:23:31.449+02:00
-  Duration......................: 7.5s
-  Success.......................: false
-  exit status...................: null
-  Error report..................: No signature of method: Script_32509b01$_runScript_closure40.call() is applicable for argument types: (ArrayList) values: [[/data/users/lhadjabe/smartSeq3/smartSeq3_V590/smartseq3/fastq_test_log/work/00/f2234b879cf7ac87edb208bbf71faa/V590T10Log.final.out, ...]]
-  Possible solutions: any(), any(), tap(groovy.lang.Closure), each(groovy.lang.Closure), any(groovy.lang.Closure), tap(groovy.lang.Closure)
-  FAILED: jolly_mclean
-
-  // set file("${prefix}Log.final.out"), file ("*.{bam,bai}") into chAlignBamSort // ne marche pas car ne prend pas en compte le bai
-
-  script:
-  """
-  samtools sort  \\
-      -@  ${task.cpus}  \\
-      -o ${prefix}_sorted.bam  \\
-      ${starBam}
-  """
-}
-*/
-
 // Filter removes all 'aligned' channels that fail the check
 chAlignBam
   .filter { logs, bams -> checkStarLog(logs) }
@@ -528,10 +491,6 @@ chAlignBam
   .dump (tag:'starbams')
   .set { chAlignBamCheck }
 
-/*
-#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! (V590T15)  >> 31.25% <<
-WARN: Process 'workflowSummaryMqc' cannot be executed by 'pbs' executor -- Using 'local' executor instead
-*/
 
 process readAssignment {
   tag "${prefix}"
@@ -940,7 +899,7 @@ process multiqc {
   file multiqcConfig from chMultiqcConfig
   file metadata from chMetadata.ifEmpty([])
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
-  file ('workflow_summary/*') from workflowSummaryYaml.collect()
+  file ('workflowSummary/*') from workflowSummaryYaml.collect()
   file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
   //Modules
   //file ('trimming/*') from chtrimmedReadsLog.collect().ifEmpty([])
@@ -974,8 +933,8 @@ process multiqc {
   modules_list = "-m custom_content -m samtools -m star -m featureCounts -m deeptools -m preseq -m rseqc"
   warn=skippedPoorAlignment.size() > 0 ? "--warn workflowSummary/warnings.txt" : ""
   """
-  stat2mqc.sh ${splan} 
-  #mean_calculation.r 
+  stat2mqc.sh ${splan}
+  #mean_calculation.r
   mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} ${warn} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
   """
