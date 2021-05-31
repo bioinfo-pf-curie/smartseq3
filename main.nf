@@ -878,7 +878,7 @@ process workflowSummaryMqc {
 
 if (skippedPoorAlignment.size() > 0){
   Channel.fromList(skippedPoorAlignment)
-         .flatMap{ it -> it + ": Poor alignment rate. Sample discarded"}
+         .flatMap{ it -> it + ": Poor alignment rate. Sample removed from the analysis. <br>"}
          .collectFile(name: 'warnings.txt', newLine: true)
          .set{chWarn}
 }else{

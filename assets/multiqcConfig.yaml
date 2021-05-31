@@ -81,7 +81,7 @@ custom_data:
       file_format: 'csv'
       section_name: 'Expression level'
       title: 'Number of UMIs per gene'
-      description: '{desc} Distribution of the number of UMIs per gene in each sample. Genes having more than 70 UMIs (x axis) are not shown. Most genes have between one and 10 UMIs and a bend can be observed around 5.'
+      description: '{desc}  Distribution of the number of UMIs per gene in each sample. Genes having more than 70 UMIs (x axis) are not shown. Most genes have between one and 10 UMIs and a bend can be observed around 5.'
       plot_type: 'linegraph'
       pconfig:
         id: 'umiPerGene'
