@@ -10,6 +10,8 @@ if test -f "workflowSummary/warnings.txt" ; then
     removed_samples=$(cat workflowSummary/warnings.txt)
     desc="!! WARNING !! <br> $removed_samples" 
     sed -i "s|{desc}|$desc|g" ../../../assets/multiqcConfig.yaml
+else
+    sed -i "s|{desc}||g" ../../../assets/multiqcConfig.yaml
 fi
 
 # to add in future to write wich samples to bad
