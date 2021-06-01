@@ -425,7 +425,7 @@ def checkStarLog(logs) {
     }
   }
   logname = logs.getBaseName() - 'Log.final'
-  if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 10000.toInteger() ){
+  if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
       log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
