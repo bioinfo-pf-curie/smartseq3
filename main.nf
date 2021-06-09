@@ -299,12 +299,18 @@ process getTaggedSeq{
   script:
   """
   # Get tag sequences in R1 == umi sequences
-
   seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
   #exctract ids
   seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
-  # create R2
-  seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
+
+  nbLines=\$(wc -l < ${prefix}_taggedReadIDs.txt)
+
+  if((\$nbLines!=0))
+  then
+    seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
+  else
+    touch ${prefix}_tagged.R2.fastq.gz
+  fi
   """
 }
 
@@ -547,6 +553,34 @@ process sortAndIndexBam {
   """
 }
 
+// Function that checks the alignment rate of the STAR output
+// and returns true if the alignment passed and otherwise false
+skippedPoorAlignment = []
+def checkStarLog(logs) {
+  def percentAligned = 0;
+  logs.eachLine { line ->
+    if ((matcher = line =~ /Uniquely mapped reads %\s*\|\s*([\d\.]+)%/)) {
+      percentAligned = matcher[0][1]
+    }else if ((matcher = line =~ /Uniquely mapped reads number\s*\|\s*([\d\.]+)/)) {
+      numAligned = matcher[0][1]
+    }
+  }
+  logname = logs.getBaseName() - 'Log.final'
+  if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
+      log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
+      skippedPoorAlignment << logname
+      return false
+  } else {
+      log.info "          Passed alignment > star ($logname)   >> ${percentAligned}% <<"
+      return true
+  }
+}
+
+// Update input channel
+chStarRawReads = Channel.empty()
+chStarRawReads = chTrimmedReads
+
+
 /* Saturation Curves*/
 process saturationCurves {
   tag "${prefix}"
@@ -568,7 +602,13 @@ process saturationCurves {
 
   script:
   """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 -s 100
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
+
+  # install bedtools
+  # bedtools bamtobed [OPTIONS] -i <BAM>
+  # prendre le bed en input pour gc_extrap
+
+  preseq gc_extrap 
   # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
   # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
   # -s, -step The step size for samples. Default is 1 000 000 reads
