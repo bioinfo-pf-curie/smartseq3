@@ -584,7 +584,7 @@ process saturationCurves {
 
   script:
   """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 -pe
 
   # install bedtools
   # bedtools bamtobed [OPTIONS] -i <BAM>
@@ -598,6 +598,7 @@ process saturationCurves {
   # -c, -cval Level for confidence intervals. Default is 0.95
   # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
   # -x, -termsMax number of terms for extrapolation. Default is 100
+  # -pe,  Input is a paired end read file
   preseq &> v_preseq.txt
   """
 }
