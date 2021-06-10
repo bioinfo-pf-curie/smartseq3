@@ -368,16 +368,25 @@ process mergeReads {
   # Get UMI read IDs (with UMIs in names for separateReads process)
   seqkit seq -j ${task.cpus} -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
-  # Extract non UMI reads
-  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
+  nbLines=\$(wc -l < ${prefix}_umisReadsIDs.txt)
 
-  # Merge non umi reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
-  cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
-  cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
+  if((\$nbLines!=0))
+  then
+    # Extract non UMI reads
+    seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
+    seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
 
-  cat <(gzip -cd ${umiReads_R2}) > ${prefix}_totReads.R2.fastq
-  cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
+    # Merge non umi reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
+    cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
+    cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
+
+    cat <(gzip -cd ${umiReads_R2}) > ${prefix}_totReads.R2.fastq
+    cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
+  else
+    cat <(gzip -cd ${reads[0]}) > ${prefix}_totReads.R1.fastq
+    cat <(gzip -cd ${reads[1]}) > ${prefix}_totReads.R2.fastq
+  fi
+
 
   ## Save % of correct UMIs reads (do not take into account all tagged sequences but only tag+UMI+GGG)
   nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
@@ -631,7 +640,7 @@ process separateReads {
   if((\$nbLines!=0))
   then
     fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
-  else 
+  else
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
     cat 
