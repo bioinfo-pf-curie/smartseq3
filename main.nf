@@ -382,6 +382,8 @@ process mergeReads {
 
     cat <(gzip -cd ${umiReads_R2}) > ${prefix}_totReads.R2.fastq
     cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
+
+    rm *_nonUMIs.R*
   else
     cat <(gzip -cd ${reads[0]}) > ${prefix}_totReads.R1.fastq
     cat <(gzip -cd ${reads[1]}) > ${prefix}_totReads.R2.fastq
@@ -398,7 +400,6 @@ process mergeReads {
   seqkit --help | grep Version > v_seqkit.txt
 
   gzip ${prefix}_totReads.R2.fastq ${prefix}_totReads.R1.fastq
-  rm *.fastq
   """
 }
 
