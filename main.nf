@@ -584,8 +584,13 @@ process saturationCurves {
 
   script:
   """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 -pe
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
 
+  if grep ERROR ${prefix}.extrap_curve.log
+  then 
+    touch ${prefix}.extrap_curve.txt
+  fi
+  
   # install bedtools
   # bedtools bamtobed [OPTIONS] -i <BAM>
   # prendre le bed en input pour gc_extrap
