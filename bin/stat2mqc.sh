@@ -35,9 +35,10 @@ do
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
-        paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/($tot_reads*2))" | bc -l)
+	paligned_assigned=$(echo "${aligned_assigned} ${tot_reads}" | awk ' { printf "%.*f",2,$1*100/($2*2) } ')
+	#paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/($tot_reads*2))" | bc -l)
     else
-	    paligned_assigned=0
+	paligned_assigned=0
     fi
 
     nbGenes=$(grep ${sample}\" resume.txt | cut -d, -f3)
