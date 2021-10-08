@@ -40,7 +40,10 @@ for k, v in regexes.items():
             match = re.search(v[1], versions)
             if match:
                 results[k] = "v{}".format(match.group(1))
+<<<<<<< HEAD
                 
+=======
+>>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
 # Dump to YAML
 print ('''
 id: 'software versions'
