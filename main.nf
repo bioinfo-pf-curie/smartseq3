@@ -113,15 +113,6 @@ if ((params.reads && params.samplePlan) || (params.readPaths && params.samplePla
   exit 1, "Input reads must be defined using either '--reads' or '--samplePlan' parameters. Please choose one way."
 }
 
-if ( params.metadata ){
-  Channel
-    .fromPath( params.metadata )
-    .ifEmpty { exit 1, "Metadata file not found: ${params.metadata}" }
-    .set { chMetadata }
-}else{
-  chMetadata=Channel.empty()
-}                 
-
 // Configurable reference genomes
 genomeRef = params.genome
 
@@ -300,7 +291,7 @@ process getTaggedSeq{
   """
   # Get tag sequences in R1 == umi sequences
   seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
-  #exctract ids
+  # exctract ids
   seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
 
   nbLines=\$(wc -l < ${prefix}_taggedReadIDs.txt)
@@ -359,6 +350,7 @@ process mergeReads {
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
+  // multiqc info: %umis and total fragments
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_totReads.txt") into chTotReads
   file("v_seqkit.txt") into chSeqkitVersion
@@ -441,7 +433,7 @@ def checkStarLog(logs) {
     }
   }
   logname = logs.getBaseName() - 'Log.final'
-  if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
+  if(percentAligned.toFloat() <= '10'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
       log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
@@ -490,7 +482,7 @@ process readAlignment {
     # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
     # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
-    # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical junctions.
+    # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical (<=> unusual) junctions.
     # Non-canonical but annot. or canonical but not annot. will be kept.
     # NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
     # Non-canonical are all other dinucleotide combinations. 
@@ -773,7 +765,6 @@ process umiPerGeneDist{
   """ 
 }
 
-// si MiSeq ~ 20 cells
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
@@ -794,10 +785,6 @@ process countUMIGenePerCell{
   umiGenePerCell.r
   """ 
 } 
-
-// Si NovaSeq (~1500 cells): 1 histogram de distribution du nb d'umis par cell 
-// == matrice de 2 columns, 1st avec nb cells, 2nd avec nb UMIs per cell
-// TODO
 
 process cellAnalysis{
   tag "${prefix}"
@@ -870,7 +857,7 @@ process getSoftwareVersions{
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
-  file("v_R.txt") from chRversion.ifEmpty([])
+  file("v_R.txt") from chRversion.first().ifEmpty([])
   file("v_rseqc") from chRseqcVersion.first().ifEmpty([])
   file("v_preseq.txt") from chPreseqVersion.first().ifEmpty([])
 
