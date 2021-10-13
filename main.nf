@@ -113,18 +113,6 @@ if ((params.reads && params.samplePlan) || (params.readPaths && params.samplePla
   exit 1, "Input reads must be defined using either '--reads' or '--samplePlan' parameters. Please choose one way."
 }
 
-<<<<<<< HEAD
-=======
-if ( params.metadata ){
-  Channel
-    .fromPath( params.metadata )
-    .ifEmpty { exit 1, "Metadata file not found: ${params.metadata}" }
-    .set { chMetadata }
-}else{
-  chMetadata=Channel.empty()
-}                 
-
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
 // Configurable reference genomes
 genomeRef = params.genome
 
@@ -302,7 +290,6 @@ process getTaggedSeq{
   script:
   """
   # Get tag sequences in R1 == umi sequences
-<<<<<<< HEAD
   seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
   # exctract ids
   seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
@@ -315,14 +302,6 @@ process getTaggedSeq{
   else
     touch ${prefix}_tagged.R2.fastq.gz
   fi
-=======
-
-  seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
-  #exctract ids
-  seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
-  # create R2
-  seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
   """
 }
 
@@ -371,10 +350,7 @@ process mergeReads {
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
   set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
-<<<<<<< HEAD
   // multiqc info: %umis and total fragments
-=======
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_totReads.txt") into chTotReads
   file("v_seqkit.txt") into chSeqkitVersion
@@ -384,7 +360,6 @@ process mergeReads {
   # Get UMI read IDs (with UMIs in names for separateReads process)
   seqkit seq -j ${task.cpus} -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
 
-<<<<<<< HEAD
   nbLines=\$(wc -l < ${prefix}_umisReadsIDs.txt)
 
   if((\$nbLines!=0))
@@ -406,18 +381,6 @@ process mergeReads {
     cat <(gzip -cd ${reads[1]}) > ${prefix}_totReads.R2.fastq
   fi
 
-=======
-  # Extract non UMI reads
-  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-  seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
-
-  # Merge non umi reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
-  cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
-  cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
-
-  cat <(gzip -cd ${umiReads_R2}) > ${prefix}_totReads.R2.fastq
-  cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
 
   ## Save % of correct UMIs reads (do not take into account all tagged sequences but only tag+UMI+GGG)
   nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
@@ -429,10 +392,6 @@ process mergeReads {
   seqkit --help | grep Version > v_seqkit.txt
 
   gzip ${prefix}_totReads.R2.fastq ${prefix}_totReads.R1.fastq
-<<<<<<< HEAD
-=======
-  rm *.fastq
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
   """
 }
 
@@ -474,11 +433,7 @@ def checkStarLog(logs) {
     }
   }
   logname = logs.getBaseName() - 'Log.final'
-<<<<<<< HEAD
   if(percentAligned.toFloat() <= '10'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
-=======
-  if(percentAligned.toFloat() <= '2'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
       log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
@@ -527,11 +482,7 @@ process readAlignment {
     # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
     # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
-<<<<<<< HEAD
     # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical (<=> unusual) junctions.
-=======
-    # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical junctions.
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
     # Non-canonical but annot. or canonical but not annot. will be kept.
     # NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
     # Non-canonical are all other dinucleotide combinations. 
@@ -625,7 +576,6 @@ process saturationCurves {
 
   script:
   """
-<<<<<<< HEAD
   preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
 
   if grep ERROR ${prefix}.extrap_curve.log
@@ -646,11 +596,6 @@ process saturationCurves {
   # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
   # -x, -termsMax number of terms for extrapolation. Default is 100
   # -pe,  Input is a paired end read file
-=======
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06
-  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
-  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
   preseq &> v_preseq.txt
   """
 }
@@ -694,11 +639,7 @@ process separateReads {
   if((\$nbLines!=0))
   then
     fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
-<<<<<<< HEAD
   else
-=======
-  else 
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
     cat 
@@ -824,10 +765,6 @@ process umiPerGeneDist{
   """ 
 }
 
-<<<<<<< HEAD
-=======
-// si MiSeq ~ 20 cells
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
@@ -849,13 +786,6 @@ process countUMIGenePerCell{
   """ 
 } 
 
-<<<<<<< HEAD
-=======
-// Si NovaSeq (~1500 cells): 1 histogram de distribution du nb d'umis par cell 
-// == matrice de 2 columns, 1st avec nb cells, 2nd avec nb UMIs per cell
-// TODO
-
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
 process cellAnalysis{
   tag "${prefix}"
   label 'R'
@@ -927,11 +857,7 @@ process getSoftwareVersions{
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
   file("v_samtools.txt") from chSamtoolsVersion.first().ifEmpty([])
   file("v_deeptools.txt") from chBamCoverageVersion.first().ifEmpty([])
-<<<<<<< HEAD
   file("v_R.txt") from chRversion.first().ifEmpty([])
-=======
-  file("v_R.txt") from chRversion.ifEmpty([])
->>>>>>> 64a61a80d2d39f3f015a1eff7b2e3fe3519f200a
   file("v_rseqc") from chRseqcVersion.first().ifEmpty([])
   file("v_preseq.txt") from chPreseqVersion.first().ifEmpty([])
 
