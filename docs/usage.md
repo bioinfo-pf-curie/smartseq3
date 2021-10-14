@@ -98,6 +98,8 @@ You can find the keys to specify the genomes in the [genomes config file](../con
 * Mouse
   * `--genome mm10`
   * `--genome mm9`
+* Fly
+  * `--genome dm6`
 
 > There are numerous others - check the config file for more.
 
