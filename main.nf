@@ -917,7 +917,6 @@ process multiqc {
   input:
   file splan from chSplan.collect()
   file multiqcConfig from chMultiqcConfig
-  file metadata from chMetadata.ifEmpty([])
   file ('software_versions/*') from softwareVersionsYaml.collect().ifEmpty([])
   file ('workflowSummary/*') from workflowSummaryYaml.collect()
   file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
