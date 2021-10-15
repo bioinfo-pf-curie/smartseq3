@@ -948,7 +948,6 @@ process multiqc {
   script:
   rtitle = customRunName ? "--title \"$customRunName\"" : ''
   rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
-  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
   modules_list = "-m custom_content -m samtools -m star -m featureCounts -m deeptools -m preseq -m rseqc"
   //warn=skippedPoorAlignment.size() > 0 ? "--warn workflowSummary/warnings.txt" : ""
   """
