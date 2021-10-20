@@ -11,10 +11,10 @@ library(reshape2)
 library(ggplot2)
 
 dir_res_10X<-as.character(commandArgs(TRUE)[1])
+genome<- as.character(commandArgs(TRUE)[2])
 
-##### Merge Matrices
+##### Merge individual matrices
 ####----------------------------------------
-
 listFile<-list.files(path = ".", pattern= "*.tsv.gz")
 
 i=1
@@ -43,6 +43,9 @@ longMatx<-longMatx[which(longMatx$value>0),]
 
 matrixFinal<-column_to_rownames(matrixFinal, var = "gene")
 
+### Summary matrix: gene and umi counts per cell
+#----------------------------------------------
+
 # Make resume data 
 resume<-data.frame(nb_UMIs = colSums(matrixFinal))
 resume$nb_Genes<-apply(matrixFinal, 2,  function(x) length(which(x>0)))
@@ -50,8 +53,11 @@ colnames(resume)<-c("UMI_counts", "Gene_counts")
 
 write.table(resume, "resume.txt", sep=',', row.names=TRUE, col.names=FALSE)
 
-#####  Long to sparse matrix:
+
+#### Save results like 10X
 ####-----------------------------------------
+
+##  Long to sparse matrix:
 library(Matrix)
 longMatx$gene=as.factor(longMatx$gene)
 longMatx$variable=as.factor(longMatx$variable)
@@ -63,8 +69,7 @@ sparseMtx <- with(longMatx, sparseMatrix(i=as.numeric(gene),
 )
 )
 
-#### Save results like 10X
-####-----------------------------------------
+##  Create 10X like outputs
 library("DropletUtils")
 cell.ids <- levels(longMatx[,2])
 ngenes <- nrow(sparseMtx)
@@ -75,20 +80,25 @@ write10xCounts(path = dir_res_10X, sparseMtx, gene.id=gene.ids,
                gene.symbol=gene.symb, barcodes=cell.ids)
 
 
-#### Create Plots
-####-----------------------------------------
+### Ratio GeneVSumi & %MT for mqc plots
+#--------------------------------------
 
-### ratio GeneVSumi & %MT
-#------------
-#=> scatters
-
+# Ratio
 Ratio<-cbind(rownames(resume), resume)
 colnames(Ratio)<-c("Samples", "Number of genes", "Number of UMIs")
 write.table(Ratio, "RatioPerCell.csv", sep=',', row.names=FALSE, col.names=FALSE)
 
 
+# MT
 umiMatrix <- CreateSeuratObject(counts = sparseMtx, min.features = 0)
-umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
+if(genome=="hg38" || genome=="hg19"){
+    umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
+}
+# if mouse genome
+if(genome=="mm10" || genome=="mm9" || genome=="dm6"){
+    umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^mt-")
+}
+
 MT<-cbind(rownames(umiMatrix[["percent.mt"]]), Ratio$`Number of genes`, umiMatrix[["percent.mt"]])
 colnames(MT)<-c("Samples", "Number of genes", "% Mitochondrial genes")
 write.table(MT, "MtGenePerCell.csv", sep=',', row.names=FALSE, col.names=FALSE)
