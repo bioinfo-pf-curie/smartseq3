@@ -34,8 +34,8 @@ def helpMessage() {
   ======================================================================
 
   Usage:
-  nextflow run main.nf --reads '*_R{1,2}.fastq.gz' --genome 'hg19' -profile conda
-  nextflow run main.nf --samplePlan samplePlan --genome 'hg19' -profile conda
+  nextflow run main.nf --reads '*_R{1,2}.fastq.gz' --genome 'hg38' -profile conda
+  nextflow run main.nf --samplePlan samplePlan --genome 'hg38' -profile conda
 
   Mandatory arguments:
     --reads [file]                Path to input data (must be surrounded with quotes)
@@ -482,7 +482,7 @@ process readAlignment {
     # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
     # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
-    # outFilterIntronMotifs = delete non annotated (not in genomeGtf) + non-canonical (<=> unusual) junctions.
+    # outFilterIntronMotifs = delete unannotated (not in genomeGtf) splice junctions with non-canonical (<=> unusual) intron motifs.
     # Non-canonical but annot. or canonical but not annot. will be kept.
     # NB: Canonical <=> juctions describe as having GT/AG, GC/AG or AT/AC (donor/acceptor) dinucleotide combination. 
     # Non-canonical are all other dinucleotide combinations. 
@@ -529,6 +529,11 @@ process readAssignment {
     ${alignedBam}
 
   featureCounts -v &> v_featurecounts.txt
+
+  # -a annotation file
+  # -R results format
+  # 
+
   """
 }
 
