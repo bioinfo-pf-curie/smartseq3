@@ -568,6 +568,8 @@ process saturationCurves {
   label 'extraMem'
 
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
+  
+  errorStrategy 'ignore'
 
   when:
   !params.skipSatCurves

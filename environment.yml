@@ -13,7 +13,7 @@ dependencies:
 
   - bioconda::subread=2.0.1=hed695b0_0
   - bioconda::samtools=1.11=h6270b1f_0
-  - bioconda::star=2.7.6a=0
+  - bioconda::star=2.7.8a
   - bioconda::umi_tools=1.1.1=py37hf01694f_1
   - bioconda::cutadapt=3.3=py37hf01694f_0
   - bioconda::seqkit=0.15.0=0
