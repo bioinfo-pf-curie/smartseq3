@@ -1,3 +1,4 @@
-version-1.0.0
+version-1.1.0
 
-   - First version of smarseq3 Nextflow pipeline
+   - Second version of smarseq3 Nextflow pipeline
+      + add errorStrategy 'ignore' for preseq process to skip the error when the estimation is not possible
