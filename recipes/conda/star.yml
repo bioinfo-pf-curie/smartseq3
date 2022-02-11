@@ -1,7 +1,7 @@
-name: star-2.7.6a
+name: star-2.7.8a
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::star=2.7.6a=0
+  - bioconda::star=2.7.8a=h9ee0642_1

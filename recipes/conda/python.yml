@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - python=3.7.9=hffdb5ce_0_cpython
-  - pymdown-extensions=7.1=pyh9f0ad1d_0
+  - pymdown-extensions=8.1.1=pyh44b312d_0
   - conda-forge::biopython=1.78=py37h5e8e339_1
   - bioconda::python-sortedcontainers=2.3.0=pyh3252c3a_0
 

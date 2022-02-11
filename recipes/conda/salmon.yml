@@ -1,7 +1,8 @@
-name: seqkit-0.15.0
+name: salmon-0.14.2
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::seqkit=0.15.0=0
+  - bioconda::salmon=0.14.2=ha0cc327_0
+

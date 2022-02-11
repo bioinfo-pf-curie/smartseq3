@@ -5,4 +5,4 @@ channels:
   - defaults
 dependencies:
   - conda-forge::python=3.7.9=hffdb5ce_0_cpython
-  - bioconda::cutadapt=3.1=py37hf01694f_0
+  - bioconda::cutadapt=3.3=py37hf01694f_0
