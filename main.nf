@@ -611,7 +611,7 @@ process separateReads {
   tag "${prefix}"
   label 'samtools'
   label 'highCpu'
-  label 'highMem'
+  label 'extraMem'
 
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
