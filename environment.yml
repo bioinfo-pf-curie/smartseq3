@@ -4,16 +4,16 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - conda-forge::zip=3.0=h7f98852_1
+  # python
   - python=3.7.9=hffdb5ce_100_cpython
   - pymdown-extensions=8.1.1=pyh44b312d_0
   - conda-forge::biopython=1.78=py37h5e8e339_2
   - bioconda::python-sortedcontainers=2.3.0=pyh3252c3a_0
+  # tools
   - bioconda::salmon=0.14.2=ha0cc327_0
-
   - bioconda::subread=2.0.1=hed695b0_0
   - bioconda::samtools=1.11=h6270b1f_0
-  - bioconda::star=2.7.8a
+  - bioconda::star=2.7.8a=h9ee0642_1
   - bioconda::umi_tools=1.1.1=py37hf01694f_1
   - bioconda::cutadapt=3.3=py37hf01694f_0
   - bioconda::seqkit=0.15.0=0
@@ -21,11 +21,12 @@ dependencies:
   - bioconda::deeptools=3.5.0=py_0
   - bioconda::multiqc=1.10=py_1
   - bioconda::preseq=2.0.3=hc216eb9_5
-
+  # R
+  - conda-forge::zip=3.0=h7f98852_1
   - conda-forge::r-base=4.0.3=h8ff2632_7
   - conda-forge::r-stringi=1.5.3=r40hcabe038_1
   - conda-forge::r-reshape2=1.4.4=r40h0357c0b_1
-  - bioconda::bioconductor-dropletutils
+  - bioconda::bioconductor-dropletutils=1.10.0=r40h5f743cb_0
   - conda-forge::r-plotrix=3.8_1=r40hc72bb7e_0
   - conda-forge::r-dplyr=1.0.5=r40h03ef668_0
   - conda-forge::r-matrix=1.3_2=r40he454529_0
