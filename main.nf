@@ -308,8 +308,8 @@ process getTaggedSeq{
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
-  label 'highCpu'
-  label 'highMem'
+  label 'medCpu'
+  label 'medMem'
 
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
@@ -398,7 +398,7 @@ process mergeReads {
 process trimReads{
   tag "${prefix}"
   label 'cutadapt'
-  label 'medCpu'
+  label 'highCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/trimReads", mode: 'copy'
@@ -451,7 +451,7 @@ process readAlignment {
   tag "${prefix}"
   label 'star'
   label 'extraCpu'
-  label 'extraMem'
+  label 'highMem'
 
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
@@ -503,7 +503,7 @@ chAlignBam
 process readAssignment {
   tag "${prefix}"
   label 'featureCounts'
-  label 'medCpu'
+  label 'highCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
@@ -540,7 +540,7 @@ process readAssignment {
 process sortAndIndexBam {
   tag "${prefix}"
   label 'samtools'
-  label 'medCpu'
+  label 'highCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/sortBam", mode: 'copy'
@@ -610,7 +610,7 @@ process saturationCurves {
 process separateReads {
   tag "${prefix}"
   label 'samtools'
-  label 'highCpu'
+  label 'medCpu'
   label 'extraMem'
 
   publishDir "${params.outDir}/separateReads", mode: 'copy'
@@ -686,7 +686,7 @@ process bigWig {
   tag "${prefix}"
   label 'deeptools'
   label 'extraCpu'
-  label 'extraMem'
+  label 'medMem'
 
   publishDir "${params.outDir}/bigWig", mode: 'copy'
 
@@ -713,8 +713,8 @@ process bigWig {
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
-  label 'extraCpu'
-  label 'extraMem'
+  label 'medCpu'
+  label 'medMem'
   publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -776,7 +776,7 @@ process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
-  label 'lowMem'
+  label 'medMem'
 
   publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
 
@@ -797,7 +797,7 @@ process cellAnalysis{
   tag "${prefix}"
   label 'R'
   label 'highCpu'
-  label 'highMem'
+  label 'medhMem'
 
   publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
 
@@ -915,7 +915,7 @@ if (skippedPoorAlignment.size() > 0){
 process multiqc {
   label 'multiqc'
   label 'medCpu'
-  label 'medMem'
+  label 'lowMem'
   publishDir "${params.outDir}/MultiQC", mode: 'copy'
 
   when:
