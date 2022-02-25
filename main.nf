@@ -349,7 +349,7 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
-  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
+  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
   // multiqc info: %umis and total fragments
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_totReads.txt") into chTotReads
@@ -358,7 +358,7 @@ process mergeReads {
   script:
   """
   # Get UMI read IDs (with UMIs in names for separateReads process)
-  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1} | cut -f6,7 -d":" > ${prefix}_umisReadsIDs.txt
 
   nbLines=\$(wc -l < ${prefix}_umisReadsIDs.txt)
 
@@ -549,7 +549,7 @@ process sortAndIndexBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAMSepReads, chSortedBAMSaturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads,chSortedBAMSaturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -607,7 +607,7 @@ process saturationCurves {
   """
 }
 
-process separateReads {
+process extractUMIreads {
   tag "${prefix}"
   label 'samtools'
   label 'medCpu'
@@ -616,11 +616,10 @@ process separateReads {
   publishDir "${params.outDir}/separateReads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAMSepReads.join(chUmiReadsIDs)
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
 
   script:  
   """
@@ -640,8 +639,36 @@ process separateReads {
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
 
+  # index
+  samtools index ${prefix}_umi_assignedUMIs.bam
+  rm *.sam
+  """
+}
+
+process extractNonUMIreads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/separateReads", mode: 'copy'
+
+  input :
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
+
+  output:
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
+  
+  nbLines=\$(wc -l < ${umisReadsIDs})
+
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
+
   # get reads that do not match umi read IDs
   if((\$nbLines!=0))
   then
@@ -649,12 +676,11 @@ process separateReads {
   else
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
-    cat 
+ 
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
 
   # index
-  samtools index ${prefix}_umi_assignedUMIs.bam
   samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
   rm *.sam
   """
