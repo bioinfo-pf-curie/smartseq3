@@ -569,7 +569,7 @@ process saturationCurves {
 
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
   
-  errorStrategy 'ignore'
+  //errorStrategy 'ignore'
 
   when:
   !params.skipSatCurves
