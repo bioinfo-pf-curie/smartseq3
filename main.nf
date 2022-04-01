@@ -823,7 +823,7 @@ process cellAnalysis{
   tag "${prefix}"
   label 'R'
   label 'highCpu'
-  label 'medhMem'
+  label 'medMem'
 
   publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
 
