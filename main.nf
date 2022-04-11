@@ -467,9 +467,11 @@ process readAlignment {
 
   script:  
   """  
+
   STAR \
     --genomeDir $genomeIndex \
-    --readFilesIn <(gzip -cd ${trimmedR1} ${trimmedR2}) \
+    --readFilesIn ${trimmedR1} ${trimmedR2} \
+    --readFilesCommand zcat \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
