@@ -476,12 +476,10 @@ process readAlignment {
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
-    --clip3pAdapterSeq CTGTCTCTTATACACATCT \
     --limitSjdbInsertNsj 2000000 \
     --sjdbGTFfile $genomeGtf --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
     # outFilterMultimapNmax = max nb of loci the read is allowed to map to. If more, the read is concidered "map to too many loci". 
-    # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
     # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
     # outFilterIntronMotifs = delete unannotated (not in genomeGtf) splice junctions with non-canonical (<=> unusual) intron motifs.
