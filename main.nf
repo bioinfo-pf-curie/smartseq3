@@ -340,7 +340,7 @@ process mergeReads {
   tag "${prefix}"
   label 'seqkit'
   label 'medCpu'
-  label 'medMem'
+  label 'highMem'
 
   publishDir "${params.outDir}/mergeReads", mode: 'copy'
 
@@ -451,7 +451,7 @@ process readAlignment {
   tag "${prefix}"
   label 'star'
   label 'extraCpu'
-  label 'highMem'
+  label 'extraMem'
 
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
