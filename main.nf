@@ -613,7 +613,7 @@ process extractUMIreads {
   label 'medCpu'
   label 'extraMem'
 
-  publishDir "${params.outDir}/separateReads", mode: 'copy'
+  publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
 
   input :
   set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
@@ -651,7 +651,7 @@ process extractNonUMIreads {
   label 'medCpu'
   label 'extraMem'
 
-  publishDir "${params.outDir}/separateReads", mode: 'copy'
+  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
 
   input :
   set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
