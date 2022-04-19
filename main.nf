@@ -433,8 +433,8 @@ def checkStarLog(logs) {
     }
   }
   logname = logs.getBaseName() - 'Log.final'
-  if(percentAligned.toFloat() <= '10'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
-      log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
+  if(numAligned.toInteger() <= 2000.toInteger() ){
+      log.info "#################### TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
   } else {
@@ -633,7 +633,7 @@ process extractUMIreads {
 
   if((\$nbLines!=0))
   then
-    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.samf
   fi
 
   # sam to bam
