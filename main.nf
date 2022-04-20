@@ -633,7 +633,7 @@ process extractUMIreads {
 
   if((\$nbLines!=0))
   then
-    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.samf
+    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
 
   # sam to bam
