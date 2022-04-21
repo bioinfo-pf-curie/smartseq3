@@ -434,7 +434,7 @@ def checkStarLog(logs) {
   }
   logname = logs.getBaseName() - 'Log.final'
   if(numAligned.toInteger() <= 2000.toInteger() ){
-      log.info "#################### TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
+      log.info "#################### LESS THAN 2000 READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
   } else {
