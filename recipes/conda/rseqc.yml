@@ -1,4 +1,4 @@
-name: rseqc-3.0.1
+name: rseqc-4.0.0
 channels:
   - conda-forge
   - bioconda

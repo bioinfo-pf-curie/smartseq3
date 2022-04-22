@@ -1,4 +1,4 @@
-name: samtools-1.10
+name: samtools-1.11
 channels:
   - conda-forge
   - bioconda

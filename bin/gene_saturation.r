@@ -23,7 +23,7 @@ message("R package loc. (Arg 2: ", ifelse(length(args) > 2, args[2], "Not specif
 ## nreps : number of times the subsampling is performed to calculate a variance
 ## mincounts : minimum counts level to consider a gene as expressed. If NA, the threshold is fixed to 1 CPM
 ## extend.lines : If TRUE, the max number of detected genes is returned when the maximum number of reads is reached.
-estimate_saturation <- function(counts, max_reads=Inf, ndepths=6, nreps=1, mincounts=NA, extend.lines=FALSE){
+estimate_saturation <- function(counts, max_reads=Inf, ndepths=6, nreps=1, mincounts=1, extend.lines=FALSE){
   stopifnot(require(S4Vectors))
   
   counts <- as.matrix(counts)

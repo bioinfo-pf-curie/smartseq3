@@ -21,11 +21,11 @@ https://gitlab.curie.fr/sc-platform/smartseq3
 */
 
 // File with text to display when a developement version is used
-devMessageFile = file("$baseDir/assets/devMessage.txt")
+devMessageFile = file("$projectDir/assets/devMessage.txt")
 
 def helpMessage() {
   if ("${workflow.manifest.version}" =~ /dev/ ){
-    devMess = file("$baseDir/assets/devMessage.txt")
+    devMess = file("$projectDir/assets/devMessage.txt")
     log.info devMessageFile.text
   }
 
@@ -94,8 +94,8 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 Channel
   .fromPath(params.multiqcConfig, checkIfExists: true)
   .set{chMultiqcConfig}
-chOutputDocs = file("$baseDir/docs/output.md", checkIfExists: true)
-chOutputDocsImages = file("$baseDir/docs/images/", checkIfExists: true)
+chOutputDocs = file("$projectDir/docs/output.md", checkIfExists: true)
+chOutputDocsImages = file("$projectDir/docs/images/", checkIfExists: true)
 
 //Has the run name been specified by the user?
 //This has the bonus effect of catching both -name and --name
@@ -340,7 +340,7 @@ process mergeReads {
   tag "${prefix}"
   label 'seqkit'
   label 'medCpu'
-  label 'medMem'
+  label 'highMem'
 
   publishDir "${params.outDir}/mergeReads", mode: 'copy'
 
@@ -349,7 +349,7 @@ process mergeReads {
 
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
-  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs
+  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
   // multiqc info: %umis and total fragments
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_totReads.txt") into chTotReads
@@ -358,7 +358,7 @@ process mergeReads {
   script:
   """
   # Get UMI read IDs (with UMIs in names for separateReads process)
-  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1}  > ${prefix}_umisReadsIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1} | cut -f6,7 -d":" > ${prefix}_umisReadsIDs.txt
 
   nbLines=\$(wc -l < ${prefix}_umisReadsIDs.txt)
 
@@ -433,8 +433,8 @@ def checkStarLog(logs) {
     }
   }
   logname = logs.getBaseName() - 'Log.final'
-  if(percentAligned.toFloat() <= '10'.toFloat() || numAligned.toInteger() <= 6000.toInteger() ){
-      log.info "#################### VERY POOR ALIGNMENT RATE OR TOO LOW NUMBER OF READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
+  if(numAligned.toInteger() <= 2000.toInteger() ){
+      log.info "#################### LESS THAN 2000 READS! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($logname)  >> ${percentAligned}% <<"
       skippedPoorAlignment << logname
       return false
   } else {
@@ -467,19 +467,19 @@ process readAlignment {
 
   script:  
   """  
+
   STAR \
     --genomeDir $genomeIndex \
-    --readFilesIn <(gzip -cd ${trimmedR1} ${trimmedR2}) \
+    --readFilesIn ${trimmedR1} ${trimmedR2} \
+    --readFilesCommand zcat \
     --runThreadN ${task.cpus} \
     --outFilterMultimapNmax 1 \
     --outFileNamePrefix ${prefix} \
     --outSAMtype BAM SortedByCoordinate \
-    --clip3pAdapterSeq CTGTCTCTTATACACATCT \
     --limitSjdbInsertNsj 2000000 \
     --sjdbGTFfile $genomeGtf --outFilterIntronMotifs RemoveNoncanonicalUnannotated 
 
     # outFilterMultimapNmax = max nb of loci the read is allowed to map to. If more, the read is concidered "map to too many loci". 
-    # clip3pAdapterSeq = cut 3' remaining illumina adaptater (~1-2%) 
     # limitSjdbInsertNsj = max number of junctions to be insterted to the genome (those known (annotated) + those not annot. but found in many reads). 
     # Default is 1 000 000. By increasing it, more new junctions can be discovered. 
     # outFilterIntronMotifs = delete unannotated (not in genomeGtf) splice junctions with non-canonical (<=> unusual) intron motifs.
@@ -488,6 +488,8 @@ process readAlignment {
     # Non-canonical are all other dinucleotide combinations. 
 
   STAR --version &> v_star.txt
+
+  rm -rf ${prefix}_STARtmp ${prefix}_STARgenome
   
   """
 }
@@ -549,7 +551,7 @@ process sortAndIndexBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAMSepReads, chSortedBAMSaturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads,chSortedBAMSaturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -607,20 +609,19 @@ process saturationCurves {
   """
 }
 
-process separateReads {
+process extractUMIreads {
   tag "${prefix}"
   label 'samtools'
   label 'medCpu'
   label 'extraMem'
 
-  publishDir "${params.outDir}/separateReads", mode: 'copy'
+  publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAMSepReads.join(chUmiReadsIDs)
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
 
   script:  
   """
@@ -640,8 +641,36 @@ process separateReads {
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
 
+  # index
+  samtools index ${prefix}_umi_assignedUMIs.bam
+  rm *.sam
+  """
+}
+
+process extractNonUMIreads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
+
+  input :
+  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
+
+  output:
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
+  
+  nbLines=\$(wc -l < ${umisReadsIDs})
+
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
+
   # get reads that do not match umi read IDs
   if((\$nbLines!=0))
   then
@@ -649,12 +678,11 @@ process separateReads {
   else
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
-    cat 
+ 
   # sam to bam
   samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
 
   # index
-  samtools index ${prefix}_umi_assignedUMIs.bam
   samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
   rm *.sam
   """
@@ -797,7 +825,11 @@ process cellAnalysis{
   tag "${prefix}"
   label 'R'
   label 'highCpu'
+<<<<<<< HEAD
   label 'medhMem'
+=======
+  label 'medMem'
+>>>>>>> devel
 
   publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
 
@@ -1015,12 +1047,12 @@ workflow.onComplete {
   
   // Render the TXT template
   def engine = new groovy.text.GStringTemplateEngine()
-  def tf = new File("$baseDir/assets/onCompleteTemplate.txt")
+  def tf = new File("$projectDir/assets/onCompleteTemplate.txt")
   def txtTemplate = engine.createTemplate(tf).make(reportFields)
   def reportTxt = txtTemplate.toString()
 
   // Render the HTML template
-  def hf = new File("$baseDir/assets/onCompleteTemplate.html")
+  def hf = new File("$projectDir/assets/onCompleteTemplate.html")
   def htmlTemplate = engine.createTemplate(hf).make(reportFields)
   def reportHtml = htmlTemplate.toString()
 
