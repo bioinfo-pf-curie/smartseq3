@@ -833,6 +833,7 @@ process cellAnalysis{
   file (matrices) from chMatrices.collect()
 
   output:
+  file ("10Xoutput/") into ch10X
   file ("10Xoutput.zip") into ch10Xzip
   file ("resume.txt") into chResume
   file ("RatioPerCell.csv") into chUmiGeneRatio
