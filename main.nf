@@ -844,7 +844,6 @@ process cellAnalysis{
   """
   cellViability.r 10Xoutput/ ${params.genome}
   zip 10Xoutput.zip 10Xoutput/*
-  rm -rf 10Xoutput/
   R --version &> v_R.txt  
   """ 
 }
