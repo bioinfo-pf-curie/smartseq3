@@ -825,11 +825,7 @@ process cellAnalysis{
   tag "${prefix}"
   label 'R'
   label 'highCpu'
-<<<<<<< HEAD
-  label 'medhMem'
-=======
   label 'medMem'
->>>>>>> devel
 
   publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
 
