@@ -821,7 +821,7 @@ process countUMIGenePerCell{
   """ 
 } 
 
-process cellAnalysis{
+process cellAnalysis {
   tag "${prefix}"
   label 'R'
   label 'highCpu'
