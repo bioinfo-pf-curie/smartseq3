@@ -768,7 +768,7 @@ process genebodyCoverage {
   """
   nb_line=\$(gzip -cd ${matrix} | wc -l)
 
-  if( $nb_line < 2 ){
+  if( \$nb_line < 2 ){
     geneBody_coverage.py \\
       -i ${bm[0]} \\
       -o ${prefix}.rseqc \\
