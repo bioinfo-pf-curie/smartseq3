@@ -451,7 +451,7 @@ process readAlignment {
   tag "${prefix}"
   label 'star'
   label 'extraCpu'
-  label 'extraMem'
+  label 'highMem'
 
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
 
@@ -700,7 +700,7 @@ process countMatrices {
   set val(prefix), file(umiBam) from chUmiBamCountMtx
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts, chGenvCov
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -743,6 +743,7 @@ process genebodyCoverage {
   label 'rseqc'
   label 'medCpu'
   label 'medMem'
+  errorStrategy 'ignore'
   publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -758,6 +759,7 @@ process genebodyCoverage {
   input:
   file bed12 from chBedGeneCov.collect()
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
+  set val(prefix), file(matrix) from chGenvCov
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
@@ -770,7 +772,6 @@ process genebodyCoverage {
       -o ${prefix}.rseqc \\
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
-
   geneBody_coverage.py --version &> v_rseqc
   """
 }

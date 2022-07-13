@@ -15,7 +15,7 @@ custom_data:
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
-      description: 'Result summaries of each cell. The number of fragments is the number of cDNA sequenced. It is the sequencing depth. The percentage of UMIs is the proportion of fragments having tag-UMI-GGG pattern within their sequences. At least 50% are expected to have a UMI. Alignment is made on non UMI and UMI reads and should be around 70%. The assignment is made on correctly aligned reads and should be around 60%. The number of genes is calculated from UMI reads only. A minimum of 5 000 genes and 30 000 UMIs are expected.'
+      description: 'Result summaries of each cell. The number of fragments is the number of cDNA sequenced. It is the sequencing depth. The percentage of UMIs is the proportion of fragments having tag-UMI-GGG pattern within their sequences. Alignment is made on non UMI and UMI reads. The assignment is made on correctly aligned reads. The number of genes is calculated from UMI reads only.'
       plot_type: 'table'
       pconfig:
           namespace: 'stats'
@@ -99,7 +99,7 @@ custom_data:
       file_format: 'csv'
       section_name: 'Library complexity'
       title: 'Number of genes per cell'
-      description: 'Genes are those found in the UMI matrices (non UMI reads are not take into account). In SmartSeq3, cells should have more than 5000 genes.'
+      description: 'Genes are those found in the UMI matrices (non UMI reads are not take into account).'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbGene_perCell'
@@ -108,7 +108,6 @@ custom_data:
     nbUmi_perCell: 
       file_format: 'csv'
       section_name: 'Number of UMIs per cell'
-      description: 'At least 30 000 UMIs are expected.'
       plot_type: 'bargraph'
       pconfig:
         id: 'nbUmi_perCell'
@@ -130,7 +129,7 @@ custom_data:
       file_format: 'csv'
       section_name: 'Cell viability'
       title: '% Mitochondrial RNAs per cell'
-      description: 'Percentage of mitochondrial RNAs is a cell viability marker. It varies according your cell type (e.g cell line, primary cells, etc.). Here, only UMI reads are take into account.'
+      description: 'Percentage of mitochondrial RNAs is a cell viability marker. It varies according to your cell type (e.g cell line, primary cells, etc.). Here, only UMI reads are take into account.'
       plot_type: 'scatter'
       pconfig:
         id: 'mt'
@@ -141,7 +140,7 @@ custom_data:
     gene_saturation:
        file_format: 'tsv'
        section_name: 'Gene-based saturation'
-       description: 'plot showing the number of detected genes for a given set of subsampling values.'
+       description: 'Plot showing the number of detected genes for a given set of subsampled values.'
        plot_type: 'linegraph'
        pconfig:
             namespace: 'gene saturation'
@@ -180,7 +179,7 @@ module_order:
   - featurecounts
   - preseq:
      name: 'Sequencing Complexity'
-     info: 'estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing total read count. A shallow curve indicates complexity saturation. The dashed line shows a perfectly complex library where total reads = unique reads.'
+     info: 'Estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing total read count. A shallow curve indicates complexity saturation. The dashed line shows a perfectly complex library where total reads = unique reads.'
   - deeptools
   - rseqc
 
