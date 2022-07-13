@@ -772,8 +772,6 @@ process genebodyCoverage {
       -o ${prefix}.rseqc \\
       -r $bed12
   mv log.txt ${prefix}.rseqc.log.txt
-
-
   geneBody_coverage.py --version &> v_rseqc
   """
 }

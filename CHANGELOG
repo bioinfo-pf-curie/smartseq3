@@ -1,3 +1,10 @@
+
+
+***************************************
+version-1.2.0
+
++ add errorStrategy 'ignore' for geneBodyCoverage process to skip the error when the estimation is not possible
+
 ***************************************
 version-1.1.0
 
@@ -5,7 +12,7 @@ version-1.1.0
     + correct STAR unzip error -> add zcat option
     + update STAR versions indexes
     + add dm6 genome
-    + add errorStrategy 'ignore' for preseq process to skip the error when the estimation is not possible
+    + add errorStrategy 'ignore' to saturationCurve process to skip the error when the estimation is not possible
     + modification des fichiers d'installation après mise à jour de geniac
 
 ***************************************
