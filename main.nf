@@ -743,6 +743,7 @@ process genebodyCoverage {
   label 'rseqc'
   label 'medCpu'
   label 'medMem'
+  errorStrategy 'ignore'
   publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -766,16 +767,12 @@ process genebodyCoverage {
 
   script:
   """
-  nb_line=\$(gzip -cd ${matrix} | wc -l)
-
-  if((\$nb_line<2))
-  then
-    geneBody_coverage.py \\
+  geneBody_coverage.py \\
       -i ${bm[0]} \\
       -o ${prefix}.rseqc \\
       -r $bed12
-    mv log.txt ${prefix}.rseqc.log.txt
-  fi
+  mv log.txt ${prefix}.rseqc.log.txt
+
 
   geneBody_coverage.py --version &> v_rseqc
   """
