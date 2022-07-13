@@ -768,13 +768,14 @@ process genebodyCoverage {
   """
   nb_line=\$(gzip -cd ${matrix} | wc -l)
 
-  if( \$nb_line < 2 ){
+  if((\$nb_line<2))
+  then
     geneBody_coverage.py \\
       -i ${bm[0]} \\
       -o ${prefix}.rseqc \\
       -r $bed12
     mv log.txt ${prefix}.rseqc.log.txt
-  }
+  fi
 
   geneBody_coverage.py --version &> v_rseqc
   """
