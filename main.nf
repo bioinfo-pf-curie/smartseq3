@@ -700,7 +700,7 @@ process countMatrices {
   set val(prefix), file(umiBam) from chUmiBamCountMtx
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts
+  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts, chGenvCov
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -758,6 +758,7 @@ process genebodyCoverage {
   input:
   file bed12 from chBedGeneCov.collect()
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
+  set val(prefix), file(matrix) from chGenvCov
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
@@ -765,11 +766,15 @@ process genebodyCoverage {
 
   script:
   """
-  geneBody_coverage.py \\
+  nb_line=\$(gzip -cd ${matrix} | wc -l)
+
+  if( $nb_line < 2 ){
+    geneBody_coverage.py \\
       -i ${bm[0]} \\
       -o ${prefix}.rseqc \\
       -r $bed12
-  mv log.txt ${prefix}.rseqc.log.txt
+    mv log.txt ${prefix}.rseqc.log.txt
+  }
 
   geneBody_coverage.py --version &> v_rseqc
   """
