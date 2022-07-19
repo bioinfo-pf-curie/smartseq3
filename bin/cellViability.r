@@ -95,7 +95,7 @@ if(genome=="hg38" || genome=="hg19"){
     umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^MT-")
 }
 # if mouse genome
-if(genome=="mm10" || genome=="mm9" || genome=="dm6"){
+if(genome=="mm10" || genome=="mm9" || genome=="dmelr6.28"){
     umiMatrix[["percent.mt"]] <- PercentageFeatureSet(umiMatrix, pattern = "^mt-")
 }
 
