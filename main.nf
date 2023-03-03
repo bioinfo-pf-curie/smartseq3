@@ -330,23 +330,26 @@ process umiExtraction {
 
   script:
   """
-  if [[ ${params.protocol} == "flashseq" ]]
-  then 
-    tag="TGGTATCAACGCAGAGT"
-    spacer="CTAACGGG"
-  else 
-    tag="TGCGCAATG"
-    spacer="GGG"
-  fi
-
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
   # If no umi is find, the reads is leave without changement
- 
-  umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*\$tag)(?P<umi_1>.{$params.umi_size})(?P<discard_2>\$spacer).*' \\
+
+  if [[ ${params.protocol} == "flashseq" ]]
+  then 
+    #tag="TGGTATCAACGCAGAGT"
+    #spacer="CTAACGGG"
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGGTATCAACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>CTAACGGG).*' \\
+                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
+                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
+                    --log=${prefix}_umiExtract.log
+  else 
+    #tag="TGCGCAATG"
+    #spacer="GGG"
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
                     --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
                     --log=${prefix}_umiExtract.log
   
+  fi
   umi_tools --version &> v_umi_tools.txt
   """
 }
@@ -431,13 +434,13 @@ process trimReads{
   """
   if [[ ${params.protocol} == "flashseq" ]]
   then 
-    adaptator="ACGCAGAGT"
+    # delete linker + polyA queue
+    cutadapt -G ACGCAGAGT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   else 
-    adaptator="GCATACGAT"
+    # delete linker + polyA queue
+    cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   fi
   
-  # delete linker + polyA queue
-  cutadapt -G \$adaptator{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
