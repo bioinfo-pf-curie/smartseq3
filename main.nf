@@ -289,8 +289,15 @@ process getTaggedSeq{
 
   script:
   """
+  if [[ ${params.protocol} == "flashseq" ]]
+  then 
+    tag="TGGTATCAACGCAGAGT"
+  else 
+    tag="TGCGCAATG"
+  fi
+
   # Get tag sequences in R1 == umi sequences
-  seqkit grep -j ${task.cpus} --by-seq --pattern "TGCGCAATG" ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
+  seqkit grep -j ${task.cpus} --by-seq --pattern \$tag ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
   # exctract ids
   seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
 
@@ -323,10 +330,19 @@ process umiExtraction {
 
   script:
   """
+  if [[ ${params.protocol} == "flashseq" ]]
+  then 
+    tag="TGGTATCAACGCAGAGT"
+    spacer="CTAACGGG"
+  else 
+    tag="TGCGCAATG"
+    spacer="GGG"
+  fi
+
   # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
   # If no umi is find, the reads is leave without changement
  
-  umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*ATTGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+  umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*\$tag)(?P<umi_1>.{$params.umi_size})(?P<discard_2>\$spacer).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
                     --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
                     --log=${prefix}_umiExtract.log
@@ -413,11 +429,19 @@ process trimReads{
 
   script:
   """
+  if [[ ${params.protocol} == "flashseq" ]]
+  then 
+    adaptator="ACGCAGAGT"
+  else 
+    adaptator="GCATACGAT"
+  fi
+  
   # delete linker + polyA queue
-  cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+  cutadapt -G \$adaptator{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
   cutadapt --version &> v_cutadapt.txt
   """
 }
+
 
 // From nf-core
 // Function that checks the alignment rate of the STAR output
