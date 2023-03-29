@@ -337,7 +337,7 @@ process umiExtraction {
   then 
     #tag="TGGTATCAACGCAGAGT"
     #spacer="CTAACGGG"
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGGTATCAACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>CTAACGGG).*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGGTATCAACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
                     --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
                     --log=${prefix}_umiExtract.log
@@ -936,6 +936,8 @@ process getSoftwareVersions{
 }
 
 process workflowSummaryMqc {
+  label 'lowCpu'
+  label 'lowMem'
   label 'onlyLinux'
 
   when:
