@@ -859,7 +859,6 @@ process getSoftwareVersions{
 
   input:
   file("v_umi_tools.txt") from chUmiToolsVersion.first().ifEmpty([])
-  file("v_seqkit.txt") from chSeqkitVersion.first().ifEmpty([])
   file("v_cutadapt.txt") from chCutadaptVersion.first().ifEmpty([])
   file("v_star.txt") from chStarVersion.first().ifEmpty([])
   file("v_featurecounts.txt") from chFCversion.first().ifEmpty([])
