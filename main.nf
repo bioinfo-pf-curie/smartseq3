@@ -152,13 +152,13 @@ if(params.samplePlan){
       .from(file("${params.samplePlan}"))
       .splitCsv(header: false)
       .map{ row -> [ row[0], [file(row[2])]] }
-      .into { rawReadsFastqc; chMergeReadsFastq }
+      .into { rawReads }
   }else{
     Channel
       .from(file("${params.samplePlan}"))
       .splitCsv(header: false)
       .map{ row -> [ row[0], [file(row[2]), file(row[3])]] }
-      .into { rawReadsFastqc ; chMergeReadsFastq}
+      .into { rawReads }
    }
   params.reads=false
 }
@@ -168,19 +168,19 @@ else if(params.readPaths){
       .from(params.readPaths)
       .map { row -> [ row[0], [file(row[1][0])]] }
       .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied." }
-      .into { rawReadsFastqc ; chMergeReadsFastq}
+      .into { rawReads }
   } else {
     Channel
       .from(params.readPaths)
       .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
       .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied." }
-      .into { rawReadsFastqc ; chMergeReadsFastq}
+      .into { rawReads }
   }
 } else {
   Channel
     .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-    .into { rawReadsFastqc ; chMergeReadsFastq}
+    .into { rawReads }
 }
 
 // Make sample plan if not available
@@ -268,50 +268,6 @@ log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
 
-/*
- * Reads Mapping
- */
-
-process getTaggedSeq{
-  tag "${prefix}"
-  label 'seqkit'
-  label 'medCpu'
-  label 'medMem'
-
-  publishDir "${params.outDir}/getTaggedSeq", mode: 'copy'
-
-  input: 
-  set val(prefix), file(reads) from rawReadsFastqc
-
-  output:
-  set val(prefix), file("*_tagged.R1.fastq.gz"), file("*_tagged.R2.fastq.gz") into chTaggedFastq
-  set val(prefix), file("*_taggedReadIDs.txt") into chTaggedIDs
-
-  script:
-  """
-  if [[ ${params.protocol} == "flashseq" ]]
-  then 
-    tag="TGGTATCAACGCAGAGT"
-  else 
-    tag="TGCGCAATG"
-  fi
-
-  # Get tag sequences in R1 == umi sequences
-  seqkit grep -j ${task.cpus} --by-seq --pattern \$tag ${reads[0]} -o ${prefix}_tagged.R1.fastq.gz
-  # exctract ids
-  seqkit seq -j ${task.cpus} -n -i ${prefix}_tagged.R1.fastq.gz -o ${prefix}_taggedReadIDs.txt
-
-  nbLines=\$(wc -l < ${prefix}_taggedReadIDs.txt)
-
-  if((\$nbLines!=0))
-  then
-    seqkit grep -j ${task.cpus} -f ${prefix}_taggedReadIDs.txt ${reads[1]} -o ${prefix}_tagged.R2.fastq.gz
-  else
-    touch ${prefix}_tagged.R2.fastq.gz
-  fi
-  """
-}
-
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
@@ -321,98 +277,81 @@ process umiExtraction {
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
   input: 
-  set val(prefix), file(taggedR1), file(taggedR2) from chTaggedFastq
+  set val(prefix), file(reads) from rawReads
 
   output:
-  set val(prefix), file("*_UMIsExtracted.R1.fastq.gz"), file("*_UMIsExtracted.R2.fastq.gz") into chUmiExtracted
-  set val(prefix), file("*_umiExtract.log") into chUmiExtractedLog
+  set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chTrimReads
+  set val(prefix), file("*_umiExtractR1.log"), file("*_umiExtractR2.log") into chUmiExtractedLog
+  set val(prefix), file("*_nononUmisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
+  set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
+  set val(prefix), file("*_nbTotFrag.txt") into chTotFrag
+
   file("v_umi_tools.txt") into chUmiToolsVersion
 
   script:
   """
-  # Extract sequences that have tag+UMI+GGG and add UMI to read names (NB: other sequences are deleted)
+  # Extract sequences that have tag+UMI+GGG and add UMI to read names
   # If no umi is find, the reads is leave without changement
 
   if [[ ${params.protocol} == "flashseq" ]]
   then 
-    #tag="TGGTATCAACGCAGAGT"
-    #spacer="CTAACGGG"
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGGTATCAACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
-                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
-                    --log=${prefix}_umiExtract.log
+    #tag="AAGCAGTGGTATCAACGCAGAGT"
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+                    --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
+                    --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
+                    --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\ #keep reads not matching
+                    --log=${prefix}_umiExtractR1.log
+
+    # use R2 as stdin to exrtract umis also from R2 
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+                    --stdin=${prefix}_noUMIinR1.R2.fastq.gz  --stdout=${prefix}_UMIsExtractedR2.R2.fastq.gz \\
+                    --read2-in=${prefix}_noUMIinR1.R1.fastq.gz  --read2-out=${prefix}_UMIsExtractedR2.R1.fastq.gz \\
+                    --filtered-out ${prefix}_nonUMIreads.R2.fastq.gz --filtered-out2 ${prefix}_nonUMIreads.R1.fastq.gz \\ #keep reads not matching
+                    --log=${prefix}_umiExtractR2.log                
   else 
     #tag="TGCGCAATG"
-    #spacer="GGG"
+    # extract umis from R1 
     umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --stdin=${taggedR1} --stdout=${prefix}_UMIsExtracted.R1.fastq.gz \\
-                    --read2-in=${taggedR2} --read2-out=${prefix}_UMIsExtracted.R2.fastq.gz \\
-                    --log=${prefix}_umiExtract.log
-  
+                    --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
+                    --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
+                    --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\ #keep reads not matching
+                    --log=${prefix}_umiExtractR1.log
+    # extract umi from R2 
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+                    --stdin=${prefix}_noUMIinR1.R2.fastq.gz  --stdout=${prefix}_UMIsExtractedR2.R2.fastq.gz \\
+                    --read2-in=${prefix}_noUMIinR1.R1.fastq.gz  --read2-out=${prefix}_UMIsExtractedR2.R1.fastq.gz \\
+                    --filtered-out ${prefix}_nonUMIreads.R2.fastq.gz --filtered-out2 ${prefix}_nonUMIreads.R1.fastq.gz \\ #keep reads not matching
+                    --log=${prefix}_umiExtractR2.log   
   fi
+
+  # save read IDs that have no umis in a file to extract them after alignment 
+  seqkit seq -j ${task.cpus} -n -i ${prefix}_nonUMIreads.R2.fastq.gz -o ${prefix}_nononUmisReadsIDs.txt
+
+  # concatenate R1 and R2 umi reads == all umi reads 
+  cat ${prefix}_UMIsExtractedR2.R1.fastq.gz >> ${prefix}_UMIsExtractedR1.R1.fastq.gz 
+  ############## Save % UMIs reads
+  nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
+  nb_totFrag=\$(( \$nb_lines / 4 ))
+  echo "totFrag: \$nb_totFrag" > ${prefix}_nbTotFrag.txt
+
+  nb_lines=`wc -l < ${prefix}_UMIsExtractedR1.R1.fastq.gz `
+  nb_umis=\$(( \$nb_lines / 4 ))
+  echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totFrag ))" > ${prefix}_pUMIs.txt
+  ##############
+  # add non umi reads == all reads 
+  cat ${prefix}_nonUMIreads.R1.fastq.gz >> ${prefix}_UMIsExtractedR1.R1.fastq.gz 
+  mv ${prefix}_UMIsExtractedR1.R2.fastq.gz ${prefix}_totReads.R1.fastq.gz
+
+  # concatenate R1 and R2 umi reads
+  cat ${prefix}_UMIsExtractedR2.R2.fastq.gz >> ${prefix}_UMIsExtractedR1.R2.fastq.gz 
+  # add non umi reads
+  cat ${prefix}_nonUMIreads.R2.fastq.gz >> ${prefix}_UMIsExtractedR1.R2.fastq.gz 
+  mv ${prefix}_UMIsExtractedR1.R2.fastq.gz ${prefix}_totReads.R2.fastq.gz
+
   umi_tools --version &> v_umi_tools.txt
   """
 }
 
-
-process mergeReads {
-  tag "${prefix}"
-  label 'seqkit'
-  label 'medCpu'
-  label 'highMem'
-
-  publishDir "${params.outDir}/mergeReads", mode: 'copy'
-
-  input:
-  set val(prefix), file(reads), file(umiReads_R1), file(umiReads_R2), file(taggedReadIDs) from chMergeReadsFastq.join(chUmiExtracted).join(chTaggedIDs)
-
-  output:
-  set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chMergeReads
-  set val(prefix), file("*_umisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
-  // multiqc info: %umis and total fragments
-  set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
-  set val(prefix), file("*_totReads.txt") into chTotReads
-  file("v_seqkit.txt") into chSeqkitVersion
-
-  script:
-  """
-  # Get UMI read IDs (with UMIs in names for separateReads process)
-  seqkit seq -j ${task.cpus} -n -i ${umiReads_R1} | cut -f6,7 -d":" > ${prefix}_umisReadsIDs.txt
-
-  nbLines=\$(wc -l < ${prefix}_umisReadsIDs.txt)
-
-  if((\$nbLines!=0))
-  then
-    # Extract non UMI reads
-    seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[0]} -o ${prefix}_nonUMIs.R1.fastq
-    seqkit grep -j ${task.cpus} -v -f ${taggedReadIDs} ${reads[1]} -o ${prefix}_nonUMIs.R2.fastq
-
-    # Merge non umi reads + correct umi reads (with umi sequence in read names) (reads without the exact pattern: tag+UMI+GGG are through out)
-    cat <(gzip -cd ${umiReads_R1}) > ${prefix}_totReads.R1.fastq
-    cat ${prefix}_nonUMIs.R1.fastq >> ${prefix}_totReads.R1.fastq
-
-    cat <(gzip -cd ${umiReads_R2}) > ${prefix}_totReads.R2.fastq
-    cat ${prefix}_nonUMIs.R2.fastq >> ${prefix}_totReads.R2.fastq
-
-    rm *_nonUMIs.R*
-  else
-    cat <(gzip -cd ${reads[0]}) > ${prefix}_totReads.R1.fastq
-    cat <(gzip -cd ${reads[1]}) > ${prefix}_totReads.R2.fastq
-  fi
-
-
-  ## Save % of correct UMIs reads (do not take into account all tagged sequences but only tag+UMI+GGG)
-  nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
-  nb_totreads=\$(( \$nb_lines / 4 ))
-  nb_umis=`wc -l < ${prefix}_umisReadsIDs.txt`
-  echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totreads ))" > ${prefix}_pUMIs.txt
-  echo "totReads: \$nb_totreads" > ${prefix}_totReads.txt
-  
-  seqkit --help | grep Version > v_seqkit.txt
-
-  gzip ${prefix}_totReads.R2.fastq ${prefix}_totReads.R1.fastq
-  """
-}
 
 process trimReads{
   tag "${prefix}"
@@ -423,22 +362,28 @@ process trimReads{
   publishDir "${params.outDir}/trimReads", mode: 'copy'
 
   input:
-  set val(prefix), file(totReadsR1), file(totReadsR2) from chMergeReads
+  set val(prefix), file(totReadsR1), file(totReadsR2) from chTrimReads
 
   output:
-  set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads
-  set val(prefix), file("*_trimmed.log") into chtrimmedReadsLog
+  set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads 
+  set val(prefix), file("*_trimSens.log"), file("*_trimAntisens.log") into chtrimmedReadsLog
   file("v_cutadapt.txt") into chCutadaptVersion
 
   script:
   """
+  ## Delete linker + polyA/T queue
   if [[ ${params.protocol} == "flashseq" ]]
   then 
-    # delete linker + polyA queue
-    cutadapt -G ACGCAGAGT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+    # 1) sens strand
+    cutadapt -g A{30}GTACTCTGCGTTGATACCACTGCTT -G A{30}GTACTCTGCGTTGATACCACTGCTT --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+    # 2) antisens strand 
+    cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimmed.log
   else 
-    # delete linker + polyA queue
-    cutadapt -G GCATACGAT{30} --minimum-length=15 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimmed.log
+    # 1) sens strand
+    cutadapt -a A{30}TCGTATGCTGCTGATGCTCGT -A A{30}TCGTATGCTGCTGATGCTCGT --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+    # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
+    # 2) antisens strand 
+    cutadapt -a ACGAGCATCAGCAGCATACGAT{30} -A ACGAGCATCAGCAGCATACGAT{30} --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
   fi
   
   cutadapt --version &> v_cutadapt.txt
@@ -645,7 +590,7 @@ process extractUMIreads {
   publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
+  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
@@ -658,11 +603,11 @@ process extractUMIreads {
   # save header and extract umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
 
-  nbLines=\$(wc -l < ${umisReadsIDs})
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
 
   if((\$nbLines!=0))
   then
-    fgrep -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+    fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
 
   # sam to bam
@@ -683,7 +628,7 @@ process extractNonUMIreads {
   publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
 
   input :
-  set val(prefix), file(sortedBam), file(umisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
+  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
 
   output:
   set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
@@ -693,7 +638,7 @@ process extractNonUMIreads {
   # Separate umi and non umi reads
   samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
   
-  nbLines=\$(wc -l < ${umisReadsIDs})
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
@@ -701,7 +646,7 @@ process extractNonUMIreads {
   # get reads that do not match umi read IDs
   if((\$nbLines!=0))
   then
-    fgrep -v -f ${umisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   else
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
@@ -994,7 +939,7 @@ process multiqc {
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('pUMIs/*') from chCountSummaryExtUMI.collect()
-  file('totReads/*') from chTotReads.collect()
+  file('totReads/*') from chTotFrag.collect()
   file ('bigwig/*') from chBigWigLog.collect()
   file (resume) from chResume // general stats 
   //PLOTS
