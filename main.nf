@@ -340,7 +340,7 @@ process umiExtraction {
   ##############
   # add non umi reads == all reads 
   cat ${prefix}_nonUMIreads.R1.fastq.gz >> ${prefix}_UMIsExtractedR1.R1.fastq.gz 
-  mv ${prefix}_UMIsExtractedR1.R2.fastq.gz ${prefix}_totReads.R1.fastq.gz
+  mv ${prefix}_UMIsExtractedR1.R1.fastq.gz ${prefix}_totReads.R1.fastq.gz
 
   # concatenate R1 and R2 umi reads
   cat ${prefix}_UMIsExtractedR2.R2.fastq.gz >> ${prefix}_UMIsExtractedR1.R2.fastq.gz 
@@ -439,7 +439,6 @@ process readAlignment {
 
   script:  
   """  
-
   STAR \
     --genomeDir $genomeIndex \
     --readFilesIn ${trimmedR1} ${trimmedR2} \
@@ -462,7 +461,6 @@ process readAlignment {
   STAR --version &> v_star.txt
 
   rm -rf ${prefix}_STARtmp ${prefix}_STARgenome
-  
   """
 }
 
@@ -643,7 +641,7 @@ process extractNonUMIreads {
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
 
-  # get reads that do not match umi read IDs
+  # get reads that match non umi read IDs
   if((\$nbLines!=0))
   then
     fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
