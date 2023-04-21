@@ -267,7 +267,6 @@ summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
-
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
@@ -282,7 +281,7 @@ process umiExtraction {
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chTrimReads
   set val(prefix), file("*_umiExtractR1.log"), file("*_umiExtractR2.log") into chUmiExtractedLog
-  set val(prefix), file("*_nononUmisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
+  set val(prefix), file("*_nonUmisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
   set val(prefix), file("*_nbTotFrag.txt") into chTotFrag
 
@@ -325,7 +324,7 @@ process umiExtraction {
   fi
 
   # save read IDs that have no umis in a file to extract them after alignment 
-  seqkit seq -j ${task.cpus} -n -i ${prefix}_nonUMIreads.R2.fastq.gz -o ${prefix}_nononUmisReadsIDs.txt
+  seqkit seq -j ${task.cpus} -n -i ${prefix}_nonUMIreads.R2.fastq.gz -o ${prefix}_nonUmisReadsIDs.txt
 
   # concatenate R1 and R2 umi reads == all umi reads 
   cat ${prefix}_UMIsExtractedR2.R1.fastq.gz >> ${prefix}_UMIsExtractedR1.R1.fastq.gz 
@@ -597,15 +596,15 @@ process extractUMIreads {
   """
   # Separate umi and non umi reads
   samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-
   # save header and extract umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
 
   nbLines=\$(wc -l < ${nonUmisReadsIDs})
-
   if((\$nbLines!=0))
   then
     fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+  else
+    cat ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
 
   # sam to bam
