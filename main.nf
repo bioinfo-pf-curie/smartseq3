@@ -935,7 +935,7 @@ process multiqc {
   //LOGS
   file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('pUMIs/*') from chCountSummaryExtUMI.collect()
-  file('totReads/*') from chTotFrag.collect()
+  file('totFrag/*') from chTotFrag.collect()
   file ('bigwig/*') from chBigWigLog.collect()
   file (resume) from chResume // general stats 
   //PLOTS

@@ -25,18 +25,19 @@ do
     ##id
     sname=$(awk -F, -v sname=$sample '$1==sname{print $2}' $splan)
 
-    # Number of FRAGMENTS (tot_reads = nb_frgmts * 2) :
-    tot_reads=`grep "totReads: " totReads/${sample}_totReads.txt | sed -e 's/totReads: //'`
+    # Number of FRAGMENTS (tot_frag = nb_frgmts * 2) :
+    tot_frag=`grep "totFrag: " totFrag/${sample}_nbTotFrag.txt | sed -e 's/totFrag: //'`
     pUMIs=`grep "percentUMI:" pUMIs/${sample}_pUMIs.txt | cut -d':' -f2`
+    # star = en frag 
     aligned=`grep "Uniquely mapped reads number" star/${sample}Log.final.out | awk '{print $NF}'`
     paligned=`grep "Uniquely mapped reads %" star/${sample}Log.final.out | awk '{print $NF}' | sed -e 's/%//'`
+    # featureCount = assigned
     aligned_assigned=`grep "Assigned" FC/${sample}_counts.summary | cut -f2`
-    NotAligned=`echo $(( $tot_reads*2 - $aligned ))`
+    NotAligned=`echo $(( $tot_frag - $aligned ))`
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
-	paligned_assigned=$(echo "${aligned_assigned} ${tot_reads}" | awk ' { printf "%.*f",2,$1*100/($2*2) } ')
-	#paligned_assigned=$(echo "scale=2; ($aligned_assigned*100/($tot_reads*2))" | bc -l)
+	paligned_assigned=$(echo "${aligned_assigned} ${tot_frag}" | awk ' { printf "%.*f",2,$1*100/($2*2) } ')
     else
 	paligned_assigned=0
     fi
@@ -44,7 +45,7 @@ do
     nbGenes=$(grep ${sample}\" resume.txt | cut -d, -f3)
     nbUMIs=$(grep ${sample}\" resume.txt | cut -d, -f2)
 
-    echo -e ${sample},${sname},${tot_reads},${pUMIs},${paligned},${paligned_assigned},${nbGenes},${nbUMIs} >> table_mqc.stats
+    echo -e ${sample},${sname},${tot_frag},${pUMIs},${paligned},${paligned_assigned},${nbGenes},${nbUMIs} >> table_mqc.stats
     echo -e ${sample},${sname},${aligned_assigned},${aligned_NotAssigned},${NotAligned} >> final_mqc.stats
 
 done
