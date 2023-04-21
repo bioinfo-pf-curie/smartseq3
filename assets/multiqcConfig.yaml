@@ -28,7 +28,7 @@ custom_data:
             title: 'Sample Name'
             scale: false
             placement: 2000
-          Number_of_reads:
+          Number_of_fragments:
             title: 'Total Fragments'
             scale: 'YlGnBu'
             format: '{:,.0f}'

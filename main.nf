@@ -333,7 +333,7 @@ process umiExtraction {
   nb_totFrag=\$(( \$nb_lines / 4 ))
   echo "totFrag: \$nb_totFrag" > ${prefix}_nbTotFrag.txt
 
-  nb_lines=`wc -l < ${prefix}_UMIsExtractedR1.R1.fastq.gz `
+  nb_lines=`wc -l < <(gzip -cd ${prefix}_UMIsExtractedR1.R1.fastq.gz) `
   nb_umis=\$(( \$nb_lines / 4 ))
   echo "percentUMI:\$(( \$nb_umis * 100 / \$nb_totFrag ))" > ${prefix}_pUMIs.txt
   ##############

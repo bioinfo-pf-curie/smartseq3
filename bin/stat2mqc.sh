@@ -16,7 +16,7 @@ fi
 
 ## Header
 #Table:
-echo -e "Sample_id,Sample_name,Number_of_reads,Percent_UMIs,Percent_Aligned,Percent_Assigned,Number_of_genes,Number_of_UMIs" > table_mqc.stats
+echo -e "Sample_id,Sample_name,Number_of_fragments,Percent_UMIs,Percent_Aligned,Percent_Assigned,Number_of_genes,Number_of_UMIs" > table_mqc.stats
 #Bargraph:
 echo -e "Sample_id,Sample_name,Aligned_Assigned,Aligned_NotAssigned,NotAligned_NotAssagned" > final_mqc.stats
 
