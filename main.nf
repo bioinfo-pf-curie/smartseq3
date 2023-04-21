@@ -374,15 +374,27 @@ process trimReads{
   if [[ ${params.protocol} == "flashseq" ]]
   then 
     # 1) sens strand
-    cutadapt -g A{30}GTACTCTGCGTTGATACCACTGCTT -G A{30}GTACTCTGCGTTGATACCACTGCTT --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+    cutadapt -g A{30}GTACTCTGCGTTGATACCACTGCTT -G A{30}GTACTCTGCGTTGATACCACTGCTT --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
+    <(gzip -cd ${totReadsR1}) <(gzip -cd ${totReadsR2}) > ${prefix}_trimSens.log
+
     # 2) antisens strand 
-    cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+    cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
+    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+
   else 
     # 1) sens strand
-    cutadapt -a A{30}TCGTATGCTGCTGATGCTCGT -A A{30}TCGTATGCTGCTGATGCTCGT --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+    cutadapt -a A{30}TCGTATGCTGCTGATGCTCGT -A A{30}TCGTATGCTGCTGATGCTCGT --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
+    ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+
     # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
     # 2) antisens strand 
-    cutadapt -a ACGAGCATCAGCAGCATACGAT{30} -A ACGAGCATCAGCAGCATACGAT{30} --minimum-length=20 --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+    cutadapt -a ACGAGCATCAGCAGCATACGAT{30} -A ACGAGCATCAGCAGCATACGAT{30} --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
+    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+
   fi
   
   cutadapt --version &> v_cutadapt.txt
