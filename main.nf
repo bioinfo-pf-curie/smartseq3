@@ -656,8 +656,6 @@ process extractNonUMIreads {
   if((\$nbLines!=0))
   then
     fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
-  else
-    cat ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
   fi
  
   # sam to bam
