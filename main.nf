@@ -608,13 +608,14 @@ process extractUMIreads {
   """
   # Separate umi and non umi reads
   samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-  # save header and extract umi reads 
+
+  # save header for extracting umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
 
   nbLines=\$(wc -l < ${nonUmisReadsIDs})
   if((\$nbLines!=0))
   then
-    fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+    fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam || echo "no sequence found"
   else
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
@@ -646,16 +647,15 @@ process extractNonUMIreads {
   """
   # Separate umi and non umi reads
   samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-  
-  nbLines=\$(wc -l < ${nonUmisReadsIDs})
 
   # save header and extract non umi reads 
   samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
 
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
   # get reads that match non umi read IDs
   if((\$nbLines!=0))
   then
-    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam
+    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam || echo "no sequence found"
   fi
  
   # sam to bam
