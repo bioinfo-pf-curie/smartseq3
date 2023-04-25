@@ -523,6 +523,12 @@ process readAssignment {
 * Step - summarize featureCounts
 */
 process summarize_FC {
+  ag "${prefix}"
+  label 'summarize_FC'
+  label 'lowCpu'
+  label 'highMem'
+
+
   input:
       // do so in chunks, to avoid limit MAX_OPEN_FILES limit
       file x from featureCountMatrix.collate(200)
