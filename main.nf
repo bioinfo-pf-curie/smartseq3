@@ -498,6 +498,7 @@ process readAssignment {
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
   file "*.summary" into chAssignmentLogs
+  set val(prefix), file("*_counts") into featureCountMatrix
   file("v_featurecounts.txt") into chFCversion
 
   script:
@@ -515,10 +516,53 @@ process readAssignment {
 
   # -a annotation file
   # -R results format
-  # 
-
   """
 }
+
+/**
+* Step - summarize featureCounts
+*/
+process summarize_FC {
+  input:
+      // do so in chunks, to avoid limit MAX_OPEN_FILES limit
+      file x from featureCountMatrix.collate()
+
+  output:
+      file("*_resfc.txt") into result_files_fc
+
+  script:
+      """
+      for fileid in $x
+      do
+          name=`basename \${fileid} _counts`
+          echo \${name} > \${name}_fc.txt
+          grep -v "^#" \${fileid} | cut -f 7 | tail -n+2 >> \${name}_fc.txt
+      done
+      paste *_fc.txt > \${name}_resfc.txt
+      """
+}
+
+/**
+* Step - generate final count matrices
+* This additional step is required because of a failure with
+* "too many open files" when pasting all filese in one go.
+*/
+/*process make_matrices_fc {
+  publishDir "$outdir/featureCounts", mode: "$mode"
+
+  input:
+      file x from result_files_fc.collect()
+      file y from count_files2.collect()
+
+  output:
+      file("resultCOUNT.txt") into fc_cr
+
+  script:
+  """
+  cut -f 1 ${y.get(0)} | grep -v "^#" > header_fc.txt
+  paste header_fc.txt *_resfc.txt > resultCOUNT.txt
+  """
+}*/
 
 process sortAndIndexBam {
   tag "${prefix}"
