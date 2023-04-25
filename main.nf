@@ -525,7 +525,7 @@ process readAssignment {
 process summarize_FC {
   input:
       // do so in chunks, to avoid limit MAX_OPEN_FILES limit
-      file x from featureCountMatrix.collate()
+      file x from featureCountMatrix.collate(200)
 
   output:
       file("*_resfc.txt") into result_files_fc
