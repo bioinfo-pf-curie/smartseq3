@@ -509,8 +509,7 @@ process readAssignment {
     -o ${prefix}_counts \
     -T ${task.cpus} \
     -R BAM \
-    -g gene_name \
-    ${alignedBam}
+    -g gene_name ${alignedBam}
 
   featureCounts -v &> v_featurecounts.txt
 
