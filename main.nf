@@ -786,7 +786,7 @@ process genebodyCoverage {
   input:
   file bed12 from chBedGeneCov.collect()
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
-  set val(prefix), file(matrix) from chGenvCov
+  //set val(prefix), file(matrix) from chGenvCov
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res

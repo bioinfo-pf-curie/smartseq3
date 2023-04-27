@@ -31,13 +31,13 @@ do
     # star = en frag 
     aligned=`grep "Uniquely mapped reads number" star/${sample}Log.final.out | awk '{print $NF}'`
     paligned=`grep "Uniquely mapped reads %" star/${sample}Log.final.out | awk '{print $NF}' | sed -e 's/%//'`
-    # featureCount = assigned
+    # featureCount = assigned en frag
     aligned_assigned=`grep "Assigned" FC/${sample}_counts.summary | cut -f2`
     NotAligned=`echo $(( $tot_frag - $aligned ))`
     aligned_NotAssigned=`echo $(( $aligned - $aligned_assigned ))`
 
     if [ $aligned_assigned != 0 ]; then  
-	paligned_assigned=$(echo "${aligned_assigned} ${tot_frag}" | awk ' { printf "%.*f",2,$1*100/($2*2) } ')
+	paligned_assigned=$(echo "${aligned_assigned} ${tot_frag}" | awk ' { printf "%.*f", 2, $1*100/$2 } ')
     else
 	paligned_assigned=0
     fi
