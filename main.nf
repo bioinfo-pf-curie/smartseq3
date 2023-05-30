@@ -295,14 +295,14 @@ process umiExtraction {
   if [[ ${params.protocol} == "flashseq" ]]
   then 
     #tag="AAGCAGTGGTATCAACGCAGAGT"
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size}).*' \\
                     --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
                     --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
                     --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\
                     --log=${prefix}_umiExtractR1.log
 
     # use R2 as stdin to exrtract umis also from R2 
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size}).*' \\
                     --stdin=${prefix}_noUMIinR1.R2.fastq.gz  --stdout=${prefix}_UMIsExtractedR2.R2.fastq.gz \\
                     --read2-in=${prefix}_noUMIinR1.R1.fastq.gz  --read2-out=${prefix}_UMIsExtractedR2.R1.fastq.gz \\
                     --filtered-out ${prefix}_nonUMIreads.R2.fastq.gz --filtered-out2 ${prefix}_nonUMIreads.R1.fastq.gz \\
@@ -765,6 +765,10 @@ process bigWig {
  * Gene body Coverage
  */
 
+
+chUmiBam.concat(chNonUmiBam).view{}
+
+
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
@@ -786,7 +790,6 @@ process genebodyCoverage {
   input:
   file bed12 from chBedGeneCov.collect()
   set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
-  //set val(prefix), file(matrix) from chGenvCov
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
