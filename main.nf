@@ -521,28 +521,24 @@ process readAssignment {
 /**
 * Step - summarize featureCounts
 */
-process summarize_FC {
+process featureCountsReadCounts {
   tag "${prefix}"
-  label 'summarize_FC'
+  label 'featureCounts'
   label 'lowCpu'
   label 'highMem'
 
   input:
-      // do so in chunks, to avoid limit MAX_OPEN_FILES limit
-      file x from featureCountMatrix.collect()
+    file(featureCountsBed) from featureCountMatrix
 
   output:
-      file("*_resfc.txt") into result_files_fc
+    set val(prefix), file("*_readCounts.tsv") into readCountMatx
+    set val(prefix), file("*_nbGenes.txt") into readCountGenes
 
   script:
       """
-      for fileid in $x
-      do
-          name=`basename \${fileid} _counts`
-          echo \${name} > \${name}_fc.txt
-          grep -v "^#" \${fileid} | cut -f 7 | tail -n+2 >> \${name}_fc.txt
-      done
-      paste *_fc.txt > \${name}_resfc.txt
+      grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
+      awk '{if($2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
+      wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"; done
       """
 }
 
