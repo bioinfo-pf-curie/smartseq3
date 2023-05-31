@@ -528,7 +528,7 @@ process featureCountsReadCounts {
   label 'highMem'
 
   input:
-    file(featureCountsBed) from featureCountMatrix
+    set val(prefix), file(featureCountsBed) from featureCountMatrix
 
   output:
     set val(prefix), file("*_readCounts.tsv") into readCountMatx
