@@ -761,10 +761,6 @@ process bigWig {
  * Gene body Coverage
  */
 
-
-chUmiBam.concat(chNonUmiBam).view{}
-
-
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
