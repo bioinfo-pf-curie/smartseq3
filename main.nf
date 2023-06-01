@@ -521,11 +521,13 @@ process readAssignment {
 /**
 * Step - summarize featureCounts
 */
-process featureCountsReadCounts {
+process countMatrices_reads {
   tag "${prefix}"
   label 'featureCounts'
   label 'lowCpu'
   label 'highMem'
+
+  publishDir "${params.outDir}/countMatrices_reads", mode: 'copy'
 
   input:
     set val(prefix), file(featureCountsBed) from featureCountMatrix
