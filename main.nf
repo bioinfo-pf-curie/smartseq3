@@ -758,7 +758,7 @@ process mergeReadMatrices {
 
   script:
   """
-  merge_matrices.r ${umimatrices} read
+  merge_matrices.r 10XlikeMatrix_read/ read
   zip 10XlikeMatrix_read.zip 10XlikeMatrix_read/*
   """ 
 }
@@ -772,7 +772,7 @@ process mtRNA {
   publishDir "${params.outDir}/mtRNA", mode: 'copy'
 
   input:
-  file ("10XlikeMatrix_umi/*") from ch10X_mt
+  file (matDir) from ch10X_mt
   file (umiSummary) from chUmiResume_mt
 
   output:
@@ -781,7 +781,7 @@ process mtRNA {
 
   script:
   """
-  mt_ratio_rna.r 10XlikeMatrix_umi/ ${params.genome} ${umiSummary}
+  mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
   """ 
 }
 
