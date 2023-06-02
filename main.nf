@@ -42,10 +42,10 @@ def helpMessage() {
     --samplePlan [file]           Path to sample plan input file (cannot be used with --reads)
     --genome [str]                Name of genome reference
     -profile [str]                Configuration profile to use. test / conda / multiconda / path / multipath / singularity / docker / cluster (see below)
+    --protocol [str]
   
   Inputs:
     --starIndex [dir]             Index for STAR aligner
-    --singleEnd [bool]            Specifies that the input is single-end reads
 
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version. Default is false.
