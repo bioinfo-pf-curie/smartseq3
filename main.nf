@@ -686,6 +686,9 @@ process countMatricesAllReads {
       grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
       awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
       wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
+      echo -e 'gene\tcount' > header
+      cat ${prefix}"_nbGenes.txt" >> header
+      mv header ${prefix}"_readCounts.tsv"
       gzip ${prefix}"_readCounts.tsv"
       """
 }
