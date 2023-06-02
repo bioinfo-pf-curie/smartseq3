@@ -758,7 +758,7 @@ process mergeReadMatrices {
 
   script:
   """
-  merge_matrices.r 10XlikeMatrix_read/ read
+  merge_matrices.r ${umimatrices} read
   zip 10XlikeMatrix_read.zip 10XlikeMatrix_read/*
   """ 
 }
