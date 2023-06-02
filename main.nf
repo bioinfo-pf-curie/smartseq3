@@ -723,7 +723,7 @@ process mergeUMIMatrices {
   file (umimatrices) from chMatricesUMI.collect()
 
   output:
-  file ("10XlikeMatrix_umi/") into ch10X
+  file ("10XlikeMatrix_umi/") into ch10X, ch10X_mt
   file ("10Xoutput.zip") into ch10Xzip
   file ("UMI_gene_per_cell.txt") into chUmiResume, chUmiResume_mt
   file ("v_R.txt") into chRversion
