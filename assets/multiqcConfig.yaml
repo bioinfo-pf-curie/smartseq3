@@ -63,10 +63,22 @@ custom_data:
             format: '{:,.0f}'
             placement: 7000
           Number_of_genes:
-            title: 'Genes'
+            title: 'Genes (umis)'
             scale: 'RdPu'
             format: '{:,.0f}'
             placement: 8000
+          Number_of_reads:
+            title: 'Reads'
+            scale: 'Oranges'
+            format: '{:,.0f}'
+            placement: 9000
+          Number_of_genes:
+            title: 'Genes (reads)'
+            scale: 'RdPu'
+            format: '{:,.0f}'
+            placement: 10000
+
+
 
     final:
       file_format: 'csv'

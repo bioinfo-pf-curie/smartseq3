@@ -295,14 +295,14 @@ process umiExtraction {
   if [[ ${params.protocol} == "flashseq" ]]
   then 
     #tag="AAGCAGTGGTATCAACGCAGAGT"
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size}).*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
                     --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
                     --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\
                     --log=${prefix}_umiExtractR1.log
 
     # use R2 as stdin to exrtract umis also from R2 
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size}).*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${prefix}_noUMIinR1.R2.fastq.gz  --stdout=${prefix}_UMIsExtractedR2.R2.fastq.gz \\
                     --read2-in=${prefix}_noUMIinR1.R1.fastq.gz  --read2-out=${prefix}_UMIsExtractedR2.R1.fastq.gz \\
                     --filtered-out ${prefix}_nonUMIreads.R2.fastq.gz --filtered-out2 ${prefix}_nonUMIreads.R1.fastq.gz \\
@@ -350,7 +350,6 @@ process umiExtraction {
   umi_tools --version &> v_umi_tools.txt
   """
 }
-
 
 process trimReads{
   tag "${prefix}"
@@ -400,7 +399,6 @@ process trimReads{
   cutadapt --version &> v_cutadapt.txt
   """
 }
-
 
 // From nf-core
 // Function that checks the alignment rate of the STAR output
@@ -517,54 +515,6 @@ process readAssignment {
   # -R results format
   """
 }
-
-/**
-* Step - summarize featureCounts
-*/
-process countMatrices_reads {
-  tag "${prefix}"
-  label 'featureCounts'
-  label 'lowCpu'
-  label 'highMem'
-
-  publishDir "${params.outDir}/countMatrices_reads", mode: 'copy'
-
-  input:
-    set val(prefix), file(featureCountsBed) from featureCountMatrix
-
-  output:
-    set val(prefix), file("*_readCounts.tsv") into readCountMatx
-    set val(prefix), file("*_nbGenes.txt") into readCountGenes
-
-  script:
-      """
-      grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
-      awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
-      wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
-      """
-}
-
-/**
-* Step - generate final count matrices
-* This additional step is required because of a failure with
-* "too many open files" when pasting all filese in one go.
-*/
-/*process make_matrices_fc {
-  publishDir "$outdir/featureCounts", mode: "$mode"
-
-  input:
-      file x from result_files_fc.collect()
-      file y from count_files2.collect()
-
-  output:
-      file("resultCOUNT.txt") into fc_cr
-
-  script:
-  """
-  cut -f 1 ${y.get(0)} | grep -v "^#" > header_fc.txt
-  paste header_fc.txt *_resfc.txt > resultCOUNT.txt
-  """
-}*/
 
 process sortAndIndexBam {
   tag "${prefix}"
@@ -713,19 +663,45 @@ process extractNonUMIreads {
   """
 }
 
-process countMatrices {
+/**
+* Step - summarize featureCounts
+*/
+process countMatricesAllReads {
+  tag "${prefix}"
+  label 'featureCounts'
+  label 'lowCpu'
+  label 'highMem'
+
+  publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
+
+  input:
+    set val(prefix), file(featureCountsBed) from featureCountMatrix
+
+  output:
+    set val(prefix), file("*_readCounts.tsv") into chMatricesRead
+    set val(prefix), file("*_nbGenes.txt") into chReadCountGenes //for mqc 
+
+  script:
+      """
+      grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
+      awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
+      wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
+      """
+}
+
+process countMatricesUMIs {
   tag "${prefix}"
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/countMatrices", mode: 'copy'
+  publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
 
   input:
   set val(prefix), file(umiBam) from chUmiBamCountMtx
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatrices, chMatrices_dist, chMatrices_counts, chGenvCov
+  set val(prefix), file("*_Counts.tsv.gz") into chMatricesUMI, chMatrices_dist, chMatrices_counts, chGenvCov
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -733,6 +709,79 @@ process countMatrices {
   # Count UMIs per gene per cell
   umi_tools count --method=cluster --per-gene --gene-tag=XT --assigned-status-tag=XS -I ${umiBam[0]} -S ${prefix}_Counts.tsv.gz > ${prefix}_UmiCounts.log
   """
+}
+
+process mergeUMIMatrices {
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/Matrices", mode: 'copy'
+
+  input:
+  file (umimatrices) from chMatricesUMI.collect()
+  file (readmatrices) from chMatricesRead.collect()
+
+  output:
+  file ("10XlikeMatrix_umi/") into ch10X
+  file ("10Xoutput.zip") into ch10Xzip
+  file ("UMI_gene_per_cell.txt") into chUmiResume, chUmiResume_mt
+  file ("v_R.txt") into chRversion
+
+  script:
+  """
+  merge_matrices.r 10Xoutput/ umi
+  zip 10Xoutput.zip 10Xoutput/*
+  R --version &> v_R.txt  
+  """ 
+}
+
+process mergeReadMatrices {
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/Matrices", mode: 'copy'
+
+  input:
+  file (readmatrices) from chMatricesRead.collect()
+
+  output:
+  file ("10XlikeMatrix_read/") into ch10X_read
+  file ("10Xoutput.zip") into ch10Xzip_read
+  file ("read_gene_per_cell.txt") into chReadResume
+  file ("v_R.txt") into chRversion
+
+  script:
+  """
+  merge_matrices.r 10Xoutput/ read
+  zip 10Xoutput.zip 10Xoutput/*
+  R --version &> v_R.txt  
+  """ 
+}
+
+process mtRNA {
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/mtRNA", mode: 'copy'
+
+  input:
+  file ("10XlikeMatrix_umi/*") from ch10X_mt
+  file (umiSummary) from chUmiResume_mt
+
+  output:
+  file ("RatioPerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
+
+  script:
+  """
+  mt_ratio_rna.r 10XlikeMatrix_umi/ ${params.genome} ${umiSummary}
+  """ 
 }
 
 process bigWig {
@@ -846,32 +895,6 @@ process countUMIGenePerCell{
   """ 
 } 
 
-process cellAnalysis {
-  tag "${prefix}"
-  label 'R'
-  label 'highCpu'
-  label 'medMem'
-
-  publishDir "${params.outDir}/cellAnalysis", mode: 'copy'
-
-  input:
-  file (matrices) from chMatrices.collect()
-
-  output:
-  file ("10Xoutput/") into ch10X
-  file ("10Xoutput.zip") into ch10Xzip
-  file ("resume.txt") into chResume
-  file ("RatioPerCell.csv") into chUmiGeneRatio
-  file ("MtGenePerCell.csv") into chMT
-  file ("v_R.txt") into chRversion
-
-  script:
-  """
-  cellViability.r 10Xoutput/ ${params.genome}
-  zip 10Xoutput.zip 10Xoutput/*
-  R --version &> v_R.txt  
-  """ 
-}
 
  // Gene-based saturation
 process geneSaturation {
@@ -992,7 +1015,8 @@ process multiqc {
   file('pUMIs/*') from chCountSummaryExtUMI.collect()
   file('totFrag/*') from chTotFrag.collect()
   file ('bigwig/*') from chBigWigLog.collect()
-  file (resume) from chResume // general stats 
+  file (umiResume) from chUmiResume // general stats 
+  file (readResume) from chReadResume
   //PLOTS
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
   file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph

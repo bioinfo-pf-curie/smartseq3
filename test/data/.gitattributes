@@ -1,0 +1,4 @@
+V590T10.R1.fastq.gz filter=lfs diff=lfs merge=lfs -text
+V590T10.R2.fastq.gz filter=lfs diff=lfs merge=lfs -text
+V660T22.R1.fastq.gz filter=lfs diff=lfs merge=lfs -text
+V660T22.R2.fastq.gz filter=lfs diff=lfs merge=lfs -text
