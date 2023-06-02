@@ -678,7 +678,7 @@ process countMatricesAllReads {
     set val(prefix), file(featureCountsBed) from featureCountMatrix
 
   output:
-    set val(prefix), file("*_readCounts.tsv") into chMatricesRead
+    set val(prefix), file("*_readCounts.tsv.gz") into chMatricesRead
     set val(prefix), file("*_nbGenes.txt") into chReadCountGenes //for mqc 
 
   script:
@@ -686,6 +686,7 @@ process countMatricesAllReads {
       grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
       awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
       wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
+      gzip ${prefix}"_readCounts.tsv"
       """
 }
 
