@@ -8,7 +8,7 @@ library(Matrix)
 
 matrix_dir<-as.character(commandArgs(TRUE)[1])
 genome<- as.character(commandArgs(TRUE)[2])
-summaryFile <- as.character(commandArgs(TRUE)[2])
+summaryFile <- as.character(commandArgs(TRUE)[3])
 
 ### Ratio GeneVSumi & %MT for mqc plots
 #--------------------------------------
