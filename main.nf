@@ -721,7 +721,6 @@ process mergeUMIMatrices {
 
   input:
   file (umimatrices) from chMatricesUMI.collect()
-  file (readmatrices) from chMatricesRead.collect()
 
   output:
   file ("10XlikeMatrix_umi/") into ch10X
