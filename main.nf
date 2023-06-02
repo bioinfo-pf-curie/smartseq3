@@ -686,7 +686,7 @@ process countMatricesAllReads {
       grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
       awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
       wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
-      echo -e 'gene\tcount' > header
+      echo -e 'gene count' > header
       cat ${prefix}"_nbGenes.txt" >> header
       mv header ${prefix}"_readCounts.tsv"
       gzip ${prefix}"_readCounts.tsv"
@@ -734,8 +734,8 @@ process mergeUMIMatrices {
 
   script:
   """
-  merge_matrices.r 10Xoutput/ umi
-  zip 10Xoutput.zip 10Xoutput/*
+  merge_matrices.r 10XlikeMatrix_umi/ umi
+  zip 10XlikeMatrix_umi.zip 10XlikeMatrix_umi/*
   R --version &> v_R.txt  
   """ 
 }
@@ -758,8 +758,8 @@ process mergeReadMatrices {
 
   script:
   """
-  merge_matrices.r 10Xoutput/ read
-  zip 10Xoutput.zip 10Xoutput/*
+  merge_matrices.r 10XlikeMatrix_read/ read
+  zip 10XlikeMatrix_read.zip 10XlikeMatrix_read/*
   """ 
 }
 
