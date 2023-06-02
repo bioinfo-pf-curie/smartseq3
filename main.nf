@@ -751,13 +751,11 @@ process mergeReadMatrices {
   file ("10XlikeMatrix_read/") into ch10X_read
   file ("10Xoutput.zip") into ch10Xzip_read
   file ("read_gene_per_cell.txt") into chReadResume
-  file ("v_R.txt") into chRversion
 
   script:
   """
   merge_matrices.r 10Xoutput/ read
   zip 10Xoutput.zip 10Xoutput/*
-  R --version &> v_R.txt  
   """ 
 }
 
