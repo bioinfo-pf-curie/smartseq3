@@ -908,14 +908,14 @@ process geneSaturation {
   //!params.skip_qc && !params.skip_saturation
 
   input:
-  file ("10Xoutput/*") from ch10X
+  file (matDir) from ch10X
 
   output:
   file "*gcurve.txt" into genesat_results
 
   script:
   """
-  gene_saturation.r "10Xoutput/" counts.gcurve.txt
+  gene_saturation.r ${matDir} counts.gcurve.txt
   """
 }
 
