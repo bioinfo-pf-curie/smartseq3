@@ -687,7 +687,7 @@ process countMatricesAllReads {
       awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
       wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
       echo -e 'gene count' > header
-      cat ${prefix}"_nbGenes.txt" >> header
+      cat ${prefix}"_readCounts.tsv" >> header
       mv header ${prefix}"_readCounts.tsv"
       gzip ${prefix}"_readCounts.tsv"
       """
