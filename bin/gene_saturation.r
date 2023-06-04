@@ -3,9 +3,9 @@
 .libPaths(setdiff(.libPaths(), normalizePath(Sys.getenv("R_LIBS_USER"))))
 
 library(Seurat)
-
 # Command line argument processing
 args = commandArgs(trailingOnly=TRUE)
+
 if (length(args) < 1) {
   stop("Usage: gene_saturation.r <counts_table> <R-package-location (optional)>", call.=FALSE)
 }
@@ -74,7 +74,7 @@ estimate_saturation <- function(counts, max_reads=Inf, ndepths=6, nreps=1, minco
   return(saturation)
 }##estimate_saturation
 
-counts <- Read10X(data.dir = "10Xoutput/10Xoutput/")
+counts <- Read10X(data.dir = rawCounts)
 counts <- as.data.frame(as.matrix(counts))
 
 #counts <- read.csv(rawCounts, row.names=1, check.names=FALSE)
