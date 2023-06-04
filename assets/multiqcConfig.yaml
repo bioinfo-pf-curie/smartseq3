@@ -62,7 +62,7 @@ custom_data:
             scale: 'Oranges'
             format: '{:,.0f}'
             placement: 7000
-          Number_of_genes:
+          Number_of_genes_umi:
             title: 'Genes (umis)'
             scale: 'RdPu'
             format: '{:,.0f}'
@@ -72,7 +72,7 @@ custom_data:
             scale: 'Oranges'
             format: '{:,.0f}'
             placement: 9000
-          Number_of_genes:
+          Number_of_genes_read:
             title: 'Genes (reads)'
             scale: 'RdPu'
             format: '{:,.0f}'
