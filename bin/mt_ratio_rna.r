@@ -13,7 +13,7 @@ summaryFile <- as.character(commandArgs(TRUE)[3])
 ### Ratio GeneVSumi & %MT for mqc plots
 #--------------------------------------
 sparseMtx <- Read10X(data.dir = matrix_dir)
-resume<-read.table(summaryFile, sep=',', row.names=TRUE, col.names=FALSE)
+resume<-read.table(summaryFile, sep=',', row.names=1)
 
 # Ratio
 Ratio<-cbind(rownames(resume), resume)
