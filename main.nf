@@ -355,7 +355,7 @@ process trimReads{
   tag "${prefix}"
   label 'cutadapt'
   label 'highCpu'
-  label 'medMem'
+  label 'highMem'
 
   publishDir "${params.outDir}/trimReads", mode: 'copy'
 

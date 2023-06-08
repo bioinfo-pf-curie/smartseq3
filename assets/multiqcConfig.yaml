@@ -78,8 +78,6 @@ custom_data:
             format: '{:,.0f}'
             placement: 10000
 
-
-
     final:
       file_format: 'csv'
       section_name: 'Mapping summary'
