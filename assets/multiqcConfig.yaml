@@ -15,7 +15,7 @@ custom_data:
     stats:
       file_format: 'csv'
       section_name: 'General Metrics'
-      description: 'Result summaries of each cell. The number of fragments is the number of cDNA sequenced. It is the sequencing depth. The percentage of UMIs is the proportion of fragments having tag-UMI-GGG pattern within their sequences. Alignment is made on non UMI and UMI reads. The assignment is made on correctly aligned reads. The number of genes is calculated from UMI reads only.'
+      description: 'Result summaries of each cell. The number of fragments is the number of cDNA sequenced. It is the sequencing depth. The percentage of UMIs is the proportion of fragments having tag-UMI-GGG pattern within their sequences. Alignment is made on non UMI and UMI reads. The assignment is made on correctly aligned reads. Gene counts is calculating using all the reads or only UMI reads to have a cleaner count.'
       plot_type: 'table'
       pconfig:
           namespace: 'stats'

@@ -379,7 +379,8 @@ process trimReads{
 
     # 2) antisens strand 
     cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 \
-    --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
+    --cores=${task.cpus} 
+    -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
     ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
 
   else 
