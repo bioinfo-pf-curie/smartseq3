@@ -1,8 +1,0 @@
-name: salmon-0.14.2
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::salmon=0.14.2=ha0cc327_0
-

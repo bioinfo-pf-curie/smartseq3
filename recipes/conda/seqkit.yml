@@ -1,7 +1,0 @@
-name: seqkit-0.15.0
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::seqkit=0.15.0=0
