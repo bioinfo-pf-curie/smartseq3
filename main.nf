@@ -370,6 +370,8 @@ process trimReads{
   script:
   """
   ## Delete linker + polyA/T queue
+  ## cutadpat look for the tag+polyA/T in 5' and cut them if some bases are found 
+
   if [[ ${params.protocol} == "flashseq" ]]
   then 
     # 1) sens strand
@@ -377,7 +379,7 @@ process trimReads{
     --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
     <(gzip -cd ${totReadsR1}) <(gzip -cd ${totReadsR2}) > ${prefix}_trimSens.log
 
-    # 2) antisens strand 
+    # 2) antisens strand == check in 5' part of my R1 (-g) and my R2 (-G) 
     cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 \
     --cores=${task.cpus} \
     -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
