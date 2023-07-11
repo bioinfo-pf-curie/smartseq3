@@ -374,26 +374,42 @@ process trimReads{
 
   if [[ ${params.protocol} == "flashseq" ]]
   then 
-    # 1) sens strand
-    cutadapt -g A{30}GTACTCTGCGTTGATACCACTGCTT -G A{30}GTACTCTGCGTTGATACCACTGCTT --minimum-length=20 \
+    # 1) sens strand = AAAAAtag
+    cutadapt \
+    -g A{30}GTACTCTGCGTTGATACCACTGCTT -g A{20}GTACTCTGCGTTGATACCACTGCTT -g A{15}GTACTCTGCGTTGATACCACTGCTT \
+    -G A{30}GTACTCTGCGTTGATACCACTGCTT -G A{20}GTACTCTGCGTTGATACCACTGCTT -G A{15}GTACTCTGCGTTGATACCACTGCTT \
+    --minimum-length=20 \
     --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
     <(gzip -cd ${totReadsR1}) <(gzip -cd ${totReadsR2}) > ${prefix}_trimSens.log
 
     # 2) antisens strand == check in 5' part of my R1 (-g) and my R2 (-G) 
-    cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 \
+  
+    cutadapt \
+    -g AAGCAGTGGTATCAACGCAGAGTACT{30} -g AAGCAGTGGTATCAACGCAGAGTACT{20} -g AAGCAGTGGTATCAACGCAGAGTACT{15} \
+    -G AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{20} -G AAGCAGTGGTATCAACGCAGAGTACT{15} \
+    --minimum-length=20 \
     --cores=${task.cpus} \
     -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
     ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
 
   else 
+
+    #5'- cDNA(pA)TCGTATGCTGCT GATGCTCGT -3' 
+    #3'- cDNA(dT)AGCATACGACGA CTACGAGCA -5' 
+
     # 1) sens strand
-    cutadapt -a A{30}TCGTATGCTGCTGATGCTCGT -A A{30}TCGTATGCTGCTGATGCTCGT --minimum-length=20 \
+    # -a remove matches between the polyA and the 3' end
+    cutadapt -a A{30}TCGTATGCTGCT -a A{20}TCGTATGCTGCT \
+    -A A{30}TCGTATGCTGCT -A A{20}TCGTATGCTGCT \
+    --minimum-length=20 \
     --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
     ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
-
-    # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
+    
     # 2) antisens strand 
-    cutadapt -a ACGAGCATCAGCAGCATACGAT{30} -A ACGAGCATCAGCAGCATACGAT{30} --minimum-length=20 \
+    # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
+    cutadapt -g ATCAGCAGCATACGAT{30} -g ATCAGCAGCATACGAT{20} \
+    -G ATCAGCAGCATACGAT{30} -G ATCAGCAGCATACGAT{20} \
+    --minimum-length=20 \
     --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
     ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
 
