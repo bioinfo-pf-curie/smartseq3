@@ -295,14 +295,14 @@ process umiExtraction {
   if [[ ${params.protocol} == "flashseq" ]]
   then 
     #tag="AAGCAGTGGTATCAACGCAGAGT"
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT){s<=3}(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG){s<=1}.*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT){s<=3}(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
                     --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
                     --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\
                     --log=${prefix}_umiExtractR1.log
 
     # use R2 as stdin to exrtract umis also from R2 
-    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT){s<=3}(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG){s<=1}.*' \\
+    umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT){s<=3}(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
                     --stdin=${prefix}_noUMIinR1.R2.fastq.gz  --stdout=${prefix}_UMIsExtractedR2.R2.fastq.gz \\
                     --read2-in=${prefix}_noUMIinR1.R1.fastq.gz  --read2-out=${prefix}_UMIsExtractedR2.R1.fastq.gz \\
                     --filtered-out ${prefix}_nonUMIreads.R2.fastq.gz --filtered-out2 ${prefix}_nonUMIreads.R1.fastq.gz \\
