@@ -701,15 +701,15 @@ process countMatricesAllReads {
     set val(prefix), file("*_nbGenes.txt") into chReadCountGenes //for mqc 
 
   script:
-      """
-      grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
-      awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
-      wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
-      echo -e 'gene count' > header
-      cat ${prefix}"_readCounts.tsv" >> header
-      mv header ${prefix}"_readCounts.tsv"
-      gzip ${prefix}"_readCounts.tsv"
-      """
+  """
+    grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
+    awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
+    wc -l ${prefix}"_readCounts.tsv"  > ${prefix}"_nbGenes.txt"
+    echo -e 'gene count' > header
+    cat ${prefix}"_readCounts.tsv" >> header
+    mv header ${prefix}"_readCounts.tsv"
+    gzip ${prefix}"_readCounts.tsv"
+  """
 }
 
 process countMatricesUMIs {
