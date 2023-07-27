@@ -501,7 +501,7 @@ process rmPcrDup_samtools {
 
 script :
   """
-    samtools collate $alignBam -o namecollate.bam 
+    samtools collate ${alignBam} -o namecollate.bam 
     ##Add ms and MC tags for markdup to use later:
     samtools fixmate -m namecollate.bam  fixmate.bam
     #Markdup needs position order:
@@ -718,7 +718,7 @@ process countMatricesAllReads {
   """
     grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
     awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv"
-    nbgene=$(wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" ")
+    nbgene=\$(wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" ")
     echo $prefix $nbgene > ${prefix}"_nbGenes.txt"
     echo -e 'gene count' > header
     cat ${prefix}"_readCounts.tsv" >> header
