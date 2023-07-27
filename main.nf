@@ -484,6 +484,35 @@ chAlignBam
   .set { chAlignBamCheck }
 
 
+process rmPcrDup_samtools {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medMem'
+  label 'medMem'
+
+  publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
+
+  input:
+  file(alignBam) from chAlignBamCheck
+
+  output:
+  set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
+  set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
+
+script :
+  """
+    samtools collate $alignBam -o namecollate.bam 
+    ##Add ms and MC tags for markdup to use later:
+    samtools fixmate -m namecollate.bam  fixmate.bam
+    #Markdup needs position order:
+    samtools sort fixmate.bam -o positionsort.bam 
+    #Finally mark duplicates:
+    samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
+    rm *.bam
+  """
+}
+
+
 process readAssignment {
   tag "${prefix}"
   label 'featureCounts'
@@ -493,7 +522,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  file(alignedBam) from chAlignBamCheck
+  file(alignedRmDupBam) from chDedupBam
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -503,14 +532,14 @@ process readAssignment {
   file("v_featurecounts.txt") into chFCversion
 
   script:
-  prefix = alignedBam[0].toString() - ~/(Aligned.sortedByCoord.out)?(.bam)?$/
+  prefix = alignedRmDupBam[0].toString() - ~/(Aligned.sortedByCoord.out)?(.bam)?$/
   """	
   featureCounts  -p \
     -a ${genome} \
     -o ${prefix}_counts \
     -T ${task.cpus} \
     -R BAM \
-    -g gene_name ${alignedBam}
+    -g gene_name ${alignedRmDupBam}
 
   featureCounts -v &> v_featurecounts.txt
 
@@ -541,6 +570,7 @@ process sortAndIndexBam {
   samtools --version &> v_samtools.txt
   """
 }
+
 
 /* Saturation Curves*/
 process saturationCurves {
@@ -678,7 +708,7 @@ process countMatricesAllReads {
   publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
 
   input:
-    set val(prefix), file(featureCountsBed) from featureCountMatrix
+    file(featureCountsBed) from featureCountMatrix
 
   output:
     set val(prefix), file("*_readCounts.tsv.gz") into chMatricesRead
@@ -687,8 +717,9 @@ process countMatricesAllReads {
   script:
   """
     grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
-    awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv" 
-    wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" " > ${prefix}"_nbGenes.txt"
+    awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv"
+    nbgene=$(wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" ")
+    echo $prefix $nbgene > ${prefix}"_nbGenes.txt"
     echo -e 'gene count' > header
     cat ${prefix}"_readCounts.tsv" >> header
     mv header ${prefix}"_readCounts.tsv"
