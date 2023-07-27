@@ -267,58 +267,6 @@ summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
-process trimReads{
-  tag "${prefix}"
-  label 'cutadapt'
-  label 'highCpu'
-  label 'highMem'
-
-  publishDir "${params.outDir}/trimReads", mode: 'copy'
-
-  input:
-  set val(prefix), file(reads) from rawReads
-
-  output:
-  set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads 
-  set val(prefix), file("*_trimSens.log"), file("*_trimAntisens.log") into chtrimmedReadsLog
-  file("v_cutadapt.txt") into chCutadaptVersion
-
-  script:
-  """
-  ## Delete linker + polyA/T queue
-  ## cutadpat look for the tag+polyA/T in 5' and cut them if some bases are found 
-
-  if [[ ${params.protocol} == "flashseq" ]]
-  then 
-    # 1) sens strand
-    cutadapt -g A{30}GTACTCTGCGTTGATACCACTGCTT -G A{30}GTACTCTGCGTTGATACCACTGCTT --minimum-length=20 \
-    --cores=${task.cpus} \
-    -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
-    <(gzip -cd ${reads[0]}) <(gzip -cd ${reads[1]}) > ${prefix}_trimSens.log
-
-    # 2) antisens strand == check in 5' part of my R1 (-g) and my R2 (-G) 
-    cutadapt -g AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{30} --minimum-length=20 \
-    --cores=${task.cpus} \
-    -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
-    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
-
-  else 
-    # 1) sens strand
-    cutadapt -a A{30}TCGTATGCTGCTGATGCTCGT -A A{30}TCGTATGCTGCTGATGCTCGT --minimum-length=20 \
-    --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
-    ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
-
-    # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
-    # 2) antisens strand 
-    cutadapt -a ACGAGCATCAGCAGCATACGAT{30} -A ACGAGCATCAGCAGCATACGAT{30} --minimum-length=20 \
-    --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
-    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
-  fi
-  
-  cutadapt --version &> v_cutadapt.txt
-  """
-}
-
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
@@ -328,7 +276,7 @@ process umiExtraction {
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
   input: 
-  set val(prefix), file(trimmedR1), file(trimmedR2) from chTrimReads
+  set val(prefix), file(reads) from rawReads
 
   output:
   set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chTrimReads
@@ -348,8 +296,8 @@ process umiExtraction {
   then 
     #tag="AAGCAGTGGTATCAACGCAGAGT"
     umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*AACGCAGAGT)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --stdin=${trimmedR1} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
-                    --read2-in=${trimmedR2} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
+                    --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
+                    --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
                     --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\
                     --log=${prefix}_umiExtractR1.log
 
@@ -363,8 +311,8 @@ process umiExtraction {
     #tag="TGCGCAATG"
     # extract umis from R1 
     umi_tools extract --extract-method=regex --bc-pattern='(?P<discard_1>.*TGCGCAATG)(?P<umi_1>.{$params.umi_size})(?P<discard_2>GGG).*' \\
-                    --stdin=${trimmedR1} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
-                    --read2-in=${trimmedR2} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
+                    --stdin=${reads[0]} --stdout=${prefix}_UMIsExtractedR1.R1.fastq.gz \\
+                    --read2-in=${reads[1]} --read2-out=${prefix}_UMIsExtractedR1.R2.fastq.gz \\
                     --filtered-out ${prefix}_noUMIinR1.R1.fastq.gz --filtered-out2 ${prefix}_noUMIinR1.R2.fastq.gz \\
                     --log=${prefix}_umiExtractR1.log
     # extract umi from R2 
@@ -381,7 +329,7 @@ process umiExtraction {
   # concatenate R1 and R2 umi reads == all umi reads 
   cat ${prefix}_UMIsExtractedR2.R1.fastq.gz >> ${prefix}_UMIsExtractedR1.R1.fastq.gz 
   ############## Save % UMIs reads
-  nb_lines=`wc -l < <(gzip -cd ${trimmedR1})`
+  nb_lines=`wc -l < <(gzip -cd ${reads[0]})`
   nb_totFrag=\$(( \$nb_lines / 4 ))
   echo "totFrag: \$nb_totFrag" > ${prefix}_nbTotFrag.txt
 
@@ -402,6 +350,75 @@ process umiExtraction {
   umi_tools --version &> v_umi_tools.txt
   """
 }
+
+process trimReads{
+  tag "${prefix}"
+  label 'cutadapt'
+  label 'highCpu'
+  label 'highMem'
+
+  publishDir "${params.outDir}/trimReads", mode: 'copy'
+
+  input:
+  set val(prefix), file(totReadsR1), file(totReadsR2) from chTrimReads
+
+  output:
+  set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads 
+  set val(prefix), file("*_trimSens.log"), file("*_trimAntisens.log") into chtrimmedReadsLog
+  file("v_cutadapt.txt") into chCutadaptVersion
+
+  script:
+  """
+  ## Delete linker + polyA/T queue
+  ## cutadpat look for the tag+polyA/T in 5' and cut them if some bases are found 
+
+  if [[ ${params.protocol} == "flashseq" ]]
+  then 
+    # 1) sens strand = AAAAAtag
+    cutadapt \
+    -g A{30}GTACTCTGCGTTGATACCACTGCTT -g A{20}GTACTCTGCGTTGATACCACTGCTT -g A{15}GTACTCTGCGTTGATACCACTGCTT \
+    -G A{30}GTACTCTGCGTTGATACCACTGCTT -G A{20}GTACTCTGCGTTGATACCACTGCTT -G A{15}GTACTCTGCGTTGATACCACTGCTT \
+    --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
+    <(gzip -cd ${totReadsR1}) <(gzip -cd ${totReadsR2}) > ${prefix}_trimSens.log
+
+    # 2) antisens strand == check in 5' part of my R1 (-g) and my R2 (-G) 
+  
+    cutadapt \
+    -g AAGCAGTGGTATCAACGCAGAGTACT{30} -g AAGCAGTGGTATCAACGCAGAGTACT{20} -g AAGCAGTGGTATCAACGCAGAGTACT{15} \
+    -G AAGCAGTGGTATCAACGCAGAGTACT{30} -G AAGCAGTGGTATCAACGCAGAGTACT{20} -G AAGCAGTGGTATCAACGCAGAGTACT{15} \
+    --minimum-length=20 \
+    --cores=${task.cpus} \
+    -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
+    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+
+  else 
+
+    #5'- cDNA(pA)TCGTATGCTGCT GATGCTCGT -3' 
+    #3'- cDNA(dT)AGCATACGACGA CTACGAGCA -5' 
+
+    # 1) sens strand
+    # -a remove matches between the polyA and the 3' end
+    cutadapt -a A{30}TCGTATGCTGCT -a A{20}TCGTATGCTGCT \
+    -A A{30}TCGTATGCTGCT -A A{20}TCGTATGCTGCT \
+    --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimSens.R1.fastq.gz -p ${prefix}_trimSens.R2.fastq.gz \
+    ${totReadsR1} ${totReadsR2} > ${prefix}_trimSens.log
+    
+    # 2) antisens strand 
+    # echo AGCATACGACGACTACGAGCA | rev = ACGAGCATCAGCAGCATACGA
+    cutadapt -g ATCAGCAGCATACGAT{30} -g ATCAGCAGCATACGAT{20} \
+    -G ATCAGCAGCATACGAT{30} -G ATCAGCAGCATACGAT{20} \
+    --minimum-length=20 \
+    --cores=${task.cpus} -o ${prefix}_trimmed.R1.fastq.gz -p ${prefix}_trimmed.R2.fastq.gz \
+    ${prefix}_trimSens.R1.fastq.gz ${prefix}_trimSens.R2.fastq.gz > ${prefix}_trimAntisens.log
+
+  fi
+  
+  cutadapt --version &> v_cutadapt.txt
+  """
+}
+
 
 // From nf-core
 // Function that checks the alignment rate of the STAR output
