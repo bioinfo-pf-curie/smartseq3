@@ -9,6 +9,7 @@ dependencies:
   - pymdown-extensions=8.1.1=pyh44b312d_0
   - conda-forge::biopython=1.78=py37h5e8e339_2
   - bioconda::python-sortedcontainers=2.3.0=pyh3252c3a_0
+  - conda-forge::zipp=3.4.1=pyhd8ed1ab_0
   # tools
   - bioconda::salmon=0.14.2=ha0cc327_0
   - bioconda::subread=2.0.1=hed695b0_0
