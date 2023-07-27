@@ -24,7 +24,7 @@ for (file in listFile ){
     if( nrow(matrix)!=0 ){
         # If repeated gene names (different chr (often Y_RNA))
         matrix<-aggregate(matrix$count ~ matrix$gene, FUN=sum)
-        sample<-strsplit(x = file ,split = "_umi") [[1]][1]
+        sample<-strsplit(x = file ,split = "_readCounts") [[1]][1]
         colnames(matrix)<-c("gene", sample)
         if(i==1){
             matrixFinal<-matrix
