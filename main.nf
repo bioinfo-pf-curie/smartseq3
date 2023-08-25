@@ -1059,7 +1059,7 @@ process multiqc {
   stat2mqc.sh ${splan}
   #mean_calculation.r
   mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} > multiqc-config-header.yaml
-  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
+  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list --cl_config '{max_table_rows: 2000}'
   """
 }
 
