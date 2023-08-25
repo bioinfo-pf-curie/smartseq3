@@ -526,6 +526,13 @@ script :
     #Finally mark duplicates:
     samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
     rm *.bam
+
+    # get percent dup
+    dup=$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
+    tot=$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
+    percent_dup=$(echo "${dup} ${tot}" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
+    echo ${prefix} "nonumireads samtools duplicates: " $dup >> dedup_summary.log
+    echo ${prefix}  "nonumireads samtools duplicate_percent: " $percent_dup >> dedup_summary.log
   """
 }
 
@@ -1091,7 +1098,7 @@ process multiqc {
   stat2mqc.sh ${splan}
   #mean_calculation.r
   mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} > multiqc-config-header.yaml
-  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list
+  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list --cl_config '{max_table_rows: 2000}'
   """
 }
 
