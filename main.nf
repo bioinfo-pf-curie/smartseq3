@@ -462,7 +462,7 @@ process readAlignment {
   set val(prefix), file(trimmedR1) , file(trimmedR2) from chStarRawReads
 	
   output :
-  set val(prefix), file("*Log.final.out"), file("*Aligned.sortedByCoord.out.bam") into chAlignBam
+  file("${prefix}Log.final.out"), file("${prefix}Aligned.sortedByCoord.out.bam") into chAlignBam
   file "*.out" into chAlignmentLogs
   file("v_star.txt") into chStarVersion
 
@@ -500,7 +500,7 @@ chAlignBam
   .dump (tag:'starbams')
   .into { chAlignBamCheck; chAlignBam2 }
 
-chAlignBam2.view{}
+chAlignBam2.view()
 
 process chRmPcrDup_samtools {
   tag "${prefix}"
