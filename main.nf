@@ -496,13 +496,17 @@ process readAlignment {
 // Filter removes all 'aligned' channels that fail the check
 chAlignBam
   .filter { prefix, logs, bams -> checkStarLog(logs) }
+  .map { [prefix, logs, bams] -> [prefix, bams] }
   .into { chAlignBamCheck; chAlignBam2 }
 
 chAlignBam2.view()
 
-/*  .map { prefix , bams -> bams }
+/* 
   .dump (tag:'starbams')
   .into { chAlignBamCheck; chAlignBam2 }
+
+
+  .map() {item -> [item[0], item[2]] }
 
 chAlignBam2.view()*/
 
