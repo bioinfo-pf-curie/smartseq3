@@ -497,20 +497,11 @@ process readAlignment {
 chAlignBam
   .filter { prefix, logs, bams -> checkStarLog(logs) }
   .map() {item -> [item[0], item[2]] }
+  .dump (tag:'starbams')
   .into { chAlignBamCheck; chAlignBam2 }
 
 chAlignBam2.view()
 
-/* 
-  .dump (tag:'starbams')
-  .into { chAlignBamCheck; chAlignBam2 }
-
-
-  .map() {item -> [item[0], item[2]] }
-
-chAlignBam2.view()*/
-
-/*
 process chRmPcrDup_samtools {
   tag "${prefix}"
   label 'samtools'
@@ -1193,5 +1184,3 @@ workflow.onComplete {
     log.info "FAILED: $workflow.runName"
   }
 }
-
-*/
