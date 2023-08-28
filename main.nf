@@ -510,7 +510,7 @@ process rmPcrDup_samtools {
   publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
 
   input:
-  file(alignBam) from chAlignBamCheck
+  set val(prefix), file(alignBam) from chAlignBamCheck
 
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
