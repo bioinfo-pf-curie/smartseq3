@@ -419,7 +419,6 @@ process trimReads{
   """
 }
 
-
 // From nf-core
 // Function that checks the alignment rate of the STAR output
 // and returns true if the alignment passed and otherwise false
@@ -498,8 +497,53 @@ chAlignBam
   .filter { prefix, logs, bams -> checkStarLog(logs) }
   .map() {item -> [item[0], item[2]] }
   .dump (tag:'starbams')
-  .set {chAlignBamCheck}
+  .into {chAlignBamCheck_umi; chAlignBamCheck_allreads}
 
+
+
+// Umi Reads  ----------------------------------------------------------------------------------//
+
+process extractUMIreads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
+
+  input :
+  set val(prefix), file(aligned), file(nonUmisReadsIDs) from chAlignBamCheck_umi.join(chUmiReadsIDs_exUMIreads)
+
+  output:
+  set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam
+  set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${aligned} > ${prefix}assignedAll.sam
+
+  # save header for extracting umi reads 
+  samtools view -H ${aligned} > ${prefix}_assignedUMIs.sam
+
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
+  if((\$nbLines!=0))
+  then
+    fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam || echo "no sequence found"
+  else
+    cat ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
+  fi
+
+  cut -f1 ${prefix}_assignedUMIs.sam > ${prefix}_list_id_umi_seq.txt
+
+  # sam to bam
+  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
+
+  # index
+  samtools index ${prefix}_umi_assignedUMIs.bam
+  rm *.sam
+  """
+}
 
 process readAssignment {
   tag "${prefix}"
@@ -510,7 +554,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(aligned) from chAlignBamCheck
+  set val(prefix), file(aligned) from chUmiBam
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -544,7 +588,7 @@ process sortAndIndexBam {
   publishDir "${params.outDir}/sortBam", mode: 'copy'
 
   input:
-  set val(prefix), file(assignBam) from chAssignBam
+  set val(prefix), file(assignBam) from chAssignBam, chAssignBam_dedup
 	
   output:
   set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM_rmDup, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads, chSortedBAMBigWig, chSortedBAMSaturationCurve
@@ -558,50 +602,6 @@ process sortAndIndexBam {
   """
 }
 
-// Umi Matrix  ----------------------------------------------------------------------//
-
-process extractUMIreads {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medCpu'
-  label 'extraMem'
-
-  publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
-
-  input :
-  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exUMIreads.join(chUmiReadsIDs_exUMIreads)
-
-  output:
-  set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
-  set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
-
-  script:  
-  """
-  # Separate umi and non umi reads
-  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-
-  # save header for extracting umi reads 
-  samtools view -H ${sortedBam[0]} > ${prefix}_assignedUMIs.sam
-
-  nbLines=\$(wc -l < ${nonUmisReadsIDs})
-  if((\$nbLines!=0))
-  then
-    fgrep -v -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam || echo "no sequence found"
-  else
-    cat ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
-  fi
-
-  cut -f1 ${prefix}_assignedUMIs.sam > ${prefix}_list_id_umi_seq.txt
-
-  # sam to bam
-  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
-
-  # index
-  samtools index ${prefix}_umi_assignedUMIs.bam
-  rm *.sam
-  """
-}
-
 process countMatricesUMIs {
   tag "${prefix}"
   label 'umiTools'
@@ -611,7 +611,7 @@ process countMatricesUMIs {
   publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
 
   input:
-  set val(prefix), file(umiBam) from chUmiBamCountMtx
+  set val(prefix), file(umiBam) from chAssignBam
 
   output:
   set val(prefix), file("*_Counts.tsv.gz") into chMatricesUMI, chMatrices_dist, chMatrices_counts, chGenvCov
@@ -649,7 +649,45 @@ process mergeUMIMatrices {
   """ 
 }
 
-// Read Matrix  ----------------------------------------------------------------------//
+// Non Umi reads  -------------------------------------------------------------------------------//
+
+process extractNonUMIreads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
+
+  input :
+  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chAlignBamCheck_allreads.join(chUmiReadsIDs_exNonUMIreads)
+
+  output:
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
+
+  # save header and extract non umi reads 
+  samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
+
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
+  # get reads that match non umi read IDs
+  if((\$nbLines!=0))
+  then
+    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam || echo "no sequence found"
+  fi
+ 
+  # sam to bam
+  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
+
+  # index
+  samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
+  rm *.sam
+  """
+}
 
 process chRmPcrDup_samtools {
   tag "${prefix}"
@@ -660,7 +698,7 @@ process chRmPcrDup_samtools {
   publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
 
   input:
-  set val(prefix), file(sortedBam) from chSortedBAM_rmDup
+  set val(prefix), file(aligned) from chNonUmiBam
 
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
@@ -669,7 +707,7 @@ process chRmPcrDup_samtools {
 
 script :
   """
-    samtools collate ${sortedBam} -o namecollate.bam 
+    samtools collate ${aligned[0]} -o namecollate.bam 
     ##Add ms and MC tags for markdup to use later:
     samtools fixmate -m namecollate.bam  fixmate.bam
     #Markdup needs position order:
@@ -688,6 +726,90 @@ script :
     echo ${prefix} "," \$dup "," \$percent_dup >> dedup_summary.log
   """
 }
+
+process dedupUMIs {
+  tag "${prefix}"
+  label 'umiTools'
+  label 'medCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
+
+  input:
+  set val(prefix), file(umiBam) from chAssignBam_dedup
+
+  output:
+ 
+
+  script:
+  """
+  # Count UMIs per gene per cell
+  umi_tools dedup -I ${umiBam[0]} 
+  """
+}
+
+process chMergeUmiNonUmiBam {
+
+}
+
+process readAssignmentAllReads {
+  tag "${prefix}"
+  label 'featureCounts'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/readAssignmentAllReads", mode: 'copy'
+
+  input :
+  set val(prefix), file(bam) from chDedupBam
+  file(genome) from chGtfFC.collect()
+
+  output : 
+  set val(prefix), file("*featureCounts.bam") into chAssignDedupBam
+  file "*.summary" into chAssignmentLogs
+  set val(prefix), file("*_counts") into featureCountMatrix
+  file("v_featurecounts.txt") into chFCversion
+
+  script:
+  """	
+  featureCounts  -p \
+    -a ${genome} \
+    -o ${prefix}_counts \
+    -T ${task.cpus} \
+    -R BAM \
+    -g gene_name ${bam}
+
+  featureCounts -v &> v_featurecounts.txt
+
+  # -a annotation file
+  # -R results format
+  """
+}
+
+process sortAndIndexBamAllReads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/sortAndIndexBamAllReads", mode: 'copy'
+
+  input:
+  set val(prefix), file(assignDedupBam) from chAssignDedupBam
+	
+  output:
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM_rmDup, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads, chSortedBAMBigWig, chSortedBAMSaturationCurve
+  file("v_samtools.txt") into chSamtoolsVersion
+
+  script :
+  """
+  samtools sort -@ ${task.cpus} ${assignDedupBam} -o ${prefix}_Sorted.bam
+  samtools index ${prefix}_Sorted.bam
+  samtools --version &> v_samtools.txt
+  """
+}
+
+// All reads  ----------------------------------------------------------------------//
 
 //Step - summarize featureCounts
 process countMatricesAllReads {
@@ -835,44 +957,6 @@ process mtRNA {
   """
   mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
   """ 
-}
-
-process extractNonUMIreads {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medCpu'
-  label 'extraMem'
-
-  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
-
-  input :
-  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
-
-  output:
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
-
-  script:  
-  """
-  # Separate umi and non umi reads
-  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-
-  # save header and extract non umi reads 
-  samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
-
-  nbLines=\$(wc -l < ${nonUmisReadsIDs})
-  # get reads that match non umi read IDs
-  if((\$nbLines!=0))
-  then
-    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam || echo "no sequence found"
-  fi
- 
-  # sam to bam
-  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
-
-  # index
-  samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
-  rm *.sam
-  """
 }
 
 //Gene body Coverage
