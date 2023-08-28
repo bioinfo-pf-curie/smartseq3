@@ -529,7 +529,7 @@ script :
 
     # get percent dup
     dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
-    tot=$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
+    tot=\$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
     percent_dup=\$(echo "${dup} ${tot}" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     echo ${prefix} "nonumireads samtools duplicates: " $dup >> dedup_summary.log
     echo ${prefix}  "nonumireads samtools duplicate_percent: " $percent_dup >> dedup_summary.log
