@@ -42,11 +42,11 @@ do
 	paligned_assigned=0
     fi
 
-    nbUMIs=$(grep ${sample}\" UMI_gene_per_cell.txt | cut -d, -f2)
-    nbGenesUmi=$(grep ${sample}\" UMI_gene_per_cell.txt | cut -d, -f3)
+    nbUMIs=$(grep ${sample} UMI_gene_per_cell.txt | cut -d, -f2)
+    nbGenesUmi=$(grep ${sample} UMI_gene_per_cell.txt | cut -d, -f3)
     
-    nbReads=$(grep ${sample}_ read_gene_per_cell.txt | cut -d, -f2)
-    nbGenesRead=$(grep ${sample}_ read_gene_per_cell.txt | cut -d, -f3)
+    nbReads=$(grep ${sample} read_gene_per_cell.txt | cut -d, -f2)
+    nbGenesRead=$(grep ${sample} read_gene_per_cell.txt | cut -d, -f3)
 
     echo -e ${sample},${sname},${tot_frag},${pUMIs},${paligned},${paligned_assigned},${nbUMIs},${nbGenesUmi},${nbReads},${nbGenesRead}  >> table_mqc.stats
     echo -e ${sample},${sname},${aligned_assigned},${aligned_NotAssigned},${NotAligned} >> final_mqc.stats
