@@ -493,6 +493,8 @@ process readAlignment {
   """
 }
 
+chAlignBam.view()
+
 // Filter removes all 'aligned' channels that fail the check
 /*chAlignBam
   .filter { logs, bams -> checkStarLog(logs) }
