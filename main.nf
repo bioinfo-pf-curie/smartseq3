@@ -526,7 +526,8 @@ script :
     samtools sort fixmate.bam -o positionsort.bam 
     #Finally mark duplicates:
     samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
-    rm *.bam
+    
+    rm fixmate.bam positionsort.bam namecollate.bam
 
     # get percent dup
     dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
