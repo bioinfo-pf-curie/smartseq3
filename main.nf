@@ -500,7 +500,7 @@ chAlignBam
   .dump (tag:'starbams')
   .into { chAlignBamCheck; chAlignBam2 }
 
-chAlignBam2.view()
+chAlignBam2.view{}
 
 process chRmPcrDup_samtools {
   tag "${prefix}"
