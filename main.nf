@@ -498,10 +498,10 @@ chAlignBam
   .filter { logs, bams -> checkStarLog(logs) }
   .map { logs, bams -> bams }
   .dump (tag:'starbams')
-  .set { chAlignBamCheck }
+  .into { chAlignBamCheck; chAlignBam2 }
 
- chAlignBamCheck.view()
- 
+chAlignBam2.view()
+
 process chRmPcrDup_samtools {
   tag "${prefix}"
   label 'samtools'
