@@ -504,13 +504,13 @@ chAlignBam
 process chRmPcrDup_samtools {
   tag "${prefix}"
   label 'samtools'
-  label 'medMem'
+  label 'medCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
 
   input:
-  set val(prefix), file(alignBam) from chAlignBamCheck
+  set val(prefix), file(log), file(alignBam) from chAlignBamCheck
 
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
@@ -518,7 +518,7 @@ process chRmPcrDup_samtools {
 
 script :
   """
-    samtools collate ${alignBam[1]} -o namecollate.bam 
+    samtools collate ${alignBam} -o namecollate.bam 
     ##Add ms and MC tags for markdup to use later:
     samtools fixmate -m namecollate.bam  fixmate.bam
     #Markdup needs position order:
