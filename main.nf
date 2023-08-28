@@ -496,7 +496,7 @@ process readAlignment {
 // Filter removes all 'aligned' channels that fail the check
 chAlignBam
   .filter { logs, bams -> checkStarLog(logs) }
-  .map { bams -> bams }
+  .map { logs, bams -> bams }
   .dump (tag:'starbams')
   .set { chAlignBamCheck }
 
@@ -510,7 +510,7 @@ process rmPcrDup_samtools {
   publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
 
   input:
-  set val(prefix), file(alignBam) from chAlignBamCheck
+  set val(prefix), file(log), file(alignBam) from chAlignBamCheck
 
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
