@@ -501,7 +501,7 @@ chAlignBam
   .set { chAlignBamCheck }
 
 
-process rmPcrDup_samtools {
+process chRmPcrDup_samtools {
   tag "${prefix}"
   label 'samtools'
   label 'medMem'
@@ -546,7 +546,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  file(alignedRmDupBam) from chDedupBam
+  set val(prefix), file(alignedRmDupBam) from chDedupBam
   file(genome) from chGtfFC.collect()
 
   output : 
