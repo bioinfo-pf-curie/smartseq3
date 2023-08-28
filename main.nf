@@ -500,7 +500,7 @@ chAlignBam
   .dump (tag:'starbams')
   .set { chAlignBamCheck }
 
-chAlignBamCheck.view()
+chAlignBamCheck.view{}
 
 
 process rmPcrDup_samtools {
