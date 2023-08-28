@@ -502,41 +502,6 @@ chAlignBam
 
 chAlignBam2.view()
 
-process chRmPcrDup_samtools {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medCpu'
-  label 'medMem'
-
-  publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
-
-  input:
-  file (alignBam) from chAlignBamCheck
-
-  output:
-  set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
-  set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
-
-script :
-  """
-    samtools collate ${alignBam} -o namecollate.bam 
-    ##Add ms and MC tags for markdup to use later:
-    samtools fixmate -m namecollate.bam  fixmate.bam
-    #Markdup needs position order:
-    samtools sort fixmate.bam -o positionsort.bam 
-    #Finally mark duplicates:
-    samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
-    rm *.bam
-
-    # get percent dup
-    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
-    tot=\$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
-    percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
-    echo ${prefix} "nonumireads samtools duplicates: " \$dup >> dedup_summary.log
-    echo ${prefix}  "nonumireads samtools duplicate_percent: " \$percent_dup >> dedup_summary.log
-  """
-}
-
 
 process readAssignment {
   tag "${prefix}"
@@ -547,7 +512,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedRmDupBam) from chDedupBam
+  set val(prefix), file(alignedRmDupBam) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
