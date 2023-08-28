@@ -498,46 +498,7 @@ chAlignBam
   .filter { prefix, logs, bams -> checkStarLog(logs) }
   .map() {item -> [item[0], item[2]] }
   .dump (tag:'starbams')
-  .into { chAlignBamCheck; chAlignBam2 }
-
-chAlignBam2.view()
-
-process chRmPcrDup_samtools {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medCpu'
-  label 'medMem'
-
-  publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
-
-  input:
-  set val(prefix), file(alignBam) from chAlignBamCheck
-
-  output:
-  set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
-  set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
-  file("dedup_summary.log") into chDedupLog
-
-script :
-  """
-    samtools collate ${alignBam} -o namecollate.bam 
-    ##Add ms and MC tags for markdup to use later:
-    samtools fixmate -m namecollate.bam  fixmate.bam
-    #Markdup needs position order:
-    samtools sort fixmate.bam -o positionsort.bam 
-    #Finally mark duplicates:
-    samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
-    
-    rm fixmate.bam positionsort.bam namecollate.bam
-
-    # get percent dup
-    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
-    tot=\$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
-    percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
-    echo ${prefix} "nonumireads samtools duplicates: " \$dup >> dedup_summary.log
-    echo ${prefix}  "nonumireads samtools duplicate_percent: " \$percent_dup >> dedup_summary.log
-  """
-}
+  .set {chAlignBamCheck}
 
 
 process readAssignment {
@@ -549,7 +510,7 @@ process readAssignment {
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
   input :
-  set val(prefix), file(alignedRmDupBam) from chDedupBam
+  set val(prefix), file(aligned) from chAlignBamCheck
   file(genome) from chGtfFC.collect()
 
   output : 
@@ -565,7 +526,7 @@ process readAssignment {
     -o ${prefix}_counts \
     -T ${task.cpus} \
     -R BAM \
-    -g gene_name ${alignedRmDupBam}
+    -g gene_name ${aligned}
 
   featureCounts -v &> v_featurecounts.txt
 
@@ -586,7 +547,7 @@ process sortAndIndexBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads,chSortedBAMSaturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM_rmDup, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads, chSortedBAMBigWig, chSortedBAMSaturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -597,51 +558,7 @@ process sortAndIndexBam {
   """
 }
 
-process saturationCurves {
-  tag "${prefix}"
-  label 'preseq'
-  label 'extraCpu'
-  label 'extraMem'
-
-  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
-  
-  errorStrategy 'ignore'
-
-  when:
-  !params.skipSatCurves
-
-  input:
-  set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
-
-  output:
-  set val(prefix), file ("*curve.txt") into preseq_results
-  file("v_preseq.txt") into chPreseqVersion
-
-  script:
-  """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
-
-  if grep ERROR ${prefix}.extrap_curve.log
-  then 
-    touch ${prefix}.extrap_curve.txt
-  fi
-  
-  # install bedtools
-  # bedtools bamtobed [OPTIONS] -i <BAM>
-  # prendre le bed en input pour gc_extrap
-
-  preseq gc_extrap 
-  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
-  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
-  # -s, -step The step size for samples. Default is 1 000 000 reads
-  # -n, -bootstraps The number of bootstraps. Default is 100
-  # -c, -cval Level for confidence intervals. Default is 0.95
-  # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
-  # -x, -termsMax number of terms for extrapolation. Default is 100
-  # -pe,  Input is a paired end read file
-  preseq &> v_preseq.txt
-  """
-}
+// Umi Matrix  ----------------------------------------------------------------------//
 
 process extractUMIreads {
   tag "${prefix}"
@@ -656,6 +573,7 @@ process extractUMIreads {
 
   output:
   set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBamCountMtx
+  set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
 
   script:  
   """
@@ -673,79 +591,14 @@ process extractUMIreads {
     cat ${prefix}assignedAll.sam >> ${prefix}_assignedUMIs.sam
   fi
 
+  cut -f1 ${prefix}_assignedUMIs.sam > ${prefix}_list_id_umi_seq.txt
+
   # sam to bam
   samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
 
   # index
   samtools index ${prefix}_umi_assignedUMIs.bam
   rm *.sam
-  """
-}
-
-process extractNonUMIreads {
-  tag "${prefix}"
-  label 'samtools'
-  label 'medCpu'
-  label 'extraMem'
-
-  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
-
-  input :
-  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
-
-  output:
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
-
-  script:  
-  """
-  # Separate umi and non umi reads
-  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
-
-  # save header and extract non umi reads 
-  samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
-
-  nbLines=\$(wc -l < ${nonUmisReadsIDs})
-  # get reads that match non umi read IDs
-  if((\$nbLines!=0))
-  then
-    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam || echo "no sequence found"
-  fi
- 
-  # sam to bam
-  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
-
-  # index
-  samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
-  rm *.sam
-  """
-}
-
-//Step - summarize featureCounts
-process countMatricesAllReads {
-  tag "${prefix}"
-  label 'featureCounts'
-  label 'lowCpu'
-  label 'highMem'
-
-  publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
-
-  input:
-  set val(prefix), file(featureCountsBed) from featureCountMatrix
-
-  output:
-    set val(prefix), file("*_readCounts.tsv.gz") into chMatricesRead
-    set val(prefix), file("*_nbGenes.txt") into chReadCountGenes //for mqc 
-
-  script:
-  """
-    grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
-    awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv"
-    nbgene=\$(wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" ")
-    echo ${prefix} \$nbgene > ${prefix}"_nbGenes.txt"
-    echo -e 'gene count' > header
-    cat ${prefix}"_readCounts.tsv" >> header
-    mv header ${prefix}"_readCounts.tsv"
-    gzip ${prefix}"_readCounts.tsv"
   """
 }
 
@@ -796,6 +649,75 @@ process mergeUMIMatrices {
   """ 
 }
 
+// Read Matrix  ----------------------------------------------------------------------//
+
+process chRmPcrDup_samtools {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
+
+  input:
+  set val(prefix), file(sortedBam) from chSortedBAM_rmDup
+
+  output:
+  set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
+  set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
+  file("dedup_summary.log") into chDedupLog
+
+script :
+  """
+    samtools collate ${sortedBam} -o namecollate.bam 
+    ##Add ms and MC tags for markdup to use later:
+    samtools fixmate -m namecollate.bam  fixmate.bam
+    #Markdup needs position order:
+    samtools sort fixmate.bam -o positionsort.bam 
+    #Finally mark duplicates:
+    samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
+    
+    rm fixmate.bam positionsort.bam namecollate.bam
+
+    # get percent dup
+    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
+    tot=\$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
+    percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
+    # pour plot dans mqc : prefix, x, y
+    # x=number of duplicates, y=percent of duplicates
+    echo ${prefix} "," \$dup "," \$percent_dup >> dedup_summary.log
+  """
+}
+
+//Step - summarize featureCounts
+process countMatricesAllReads {
+  tag "${prefix}"
+  label 'featureCounts'
+  label 'lowCpu'
+  label 'highMem'
+
+  publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
+
+  input:
+  set val(prefix), file(featureCountsBed) from featureCountMatrix
+
+  output:
+    set val(prefix), file("*_readCounts.tsv.gz") into chMatricesRead
+    set val(prefix), file("*_nbGenes.txt") into chReadCountGenes //for mqc 
+
+  script:
+  """
+    grep -v "^#"  ${featureCountsBed} | cut -f 1,7 | tail -n+2 >> ${prefix}"_selected"
+    awk '{if(\$2!=0) print }' ${prefix}"_selected" >> ${prefix}"_readCounts.tsv"
+    nbgene=\$(wc -l ${prefix}"_readCounts.tsv" | cut -f1 -d" ")
+    echo ${prefix} \$nbgene > ${prefix}"_nbGenes.txt"
+    echo -e 'gene count' > header
+    cat ${prefix}"_readCounts.tsv" >> header
+    mv header ${prefix}"_readCounts.tsv"
+    gzip ${prefix}"_readCounts.tsv"
+  """
+}
+
 process mergeReadMatrices {
   tag "${prefix}"
   label 'R'
@@ -819,27 +741,7 @@ process mergeReadMatrices {
   """ 
 }
 
-process mtRNA {
-  tag "${prefix}"
-  label 'R'
-  label 'highCpu'
-  label 'medMem'
-
-  publishDir "${params.outDir}/mtRNA", mode: 'copy'
-
-  input:
-  file (matDir) from ch10X_mt
-  file (umiSummary) from chUmiResume_mt
-
-  output:
-  file ("RatioPerCell.csv") into chUmiGeneRatio
-  file ("MtGenePerCell.csv") into chMT
-
-  script:
-  """
-  mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
-  """ 
-}
+// Bigwig  ----------------------------------------------------------------------//
 
 process bigWig {
   tag "${prefix}"
@@ -865,6 +767,113 @@ process bigWig {
   """
 }
 
+// Analysis  ----------------------------------------------------------------------//
+
+process saturationCurves {
+  tag "${prefix}"
+  label 'preseq'
+  label 'extraCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
+  
+  errorStrategy 'ignore'
+
+  when:
+  !params.skipSatCurves
+
+  input:
+  set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
+
+  output:
+  set val(prefix), file ("*curve.txt") into preseq_results
+  file("v_preseq.txt") into chPreseqVersion
+
+  script:
+  """
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
+
+  if grep ERROR ${prefix}.extrap_curve.log
+  then 
+    touch ${prefix}.extrap_curve.txt
+  fi
+  
+  # install bedtools
+  # bedtools bamtobed [OPTIONS] -i <BAM>
+  # prendre le bed en input pour gc_extrap
+
+  preseq gc_extrap 
+  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
+  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
+  # -s, -step The step size for samples. Default is 1 000 000 reads
+  # -n, -bootstraps The number of bootstraps. Default is 100
+  # -c, -cval Level for confidence intervals. Default is 0.95
+  # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
+  # -x, -termsMax number of terms for extrapolation. Default is 100
+  # -pe,  Input is a paired end read file
+  preseq &> v_preseq.txt
+  """
+}
+
+process mtRNA {
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/mtRNA", mode: 'copy'
+
+  input:
+  file (matDir) from ch10X_mt
+  file (umiSummary) from chUmiResume_mt
+
+  output:
+  file ("RatioPerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
+
+  script:
+  """
+  mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
+  """ 
+}
+
+process extractNonUMIreads {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'extraMem'
+
+  publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
+
+  input :
+  set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chSortedBAM_exNonUMIreads.join(chUmiReadsIDs_exNonUMIreads)
+
+  output:
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
+
+  script:  
+  """
+  # Separate umi and non umi reads
+  samtools view ${sortedBam[0]} > ${prefix}assignedAll.sam
+
+  # save header and extract non umi reads 
+  samtools view -H ${sortedBam[0]} > ${prefix}_assignedNonUMIs.sam
+
+  nbLines=\$(wc -l < ${nonUmisReadsIDs})
+  # get reads that match non umi read IDs
+  if((\$nbLines!=0))
+  then
+    fgrep -f ${nonUmisReadsIDs} ${prefix}assignedAll.sam >> ${prefix}_assignedNonUMIs.sam || echo "no sequence found"
+  fi
+ 
+  # sam to bam
+  samtools view -bh ${prefix}_assignedNonUMIs.sam > ${prefix}_NonUmi_assignedNonUMIs.bam
+
+  # index
+  samtools index ${prefix}_NonUmi_assignedNonUMIs.bam
+  rm *.sam
+  """
+}
 
 //Gene body Coverage
 process genebodyCoverage {
@@ -903,7 +912,6 @@ process genebodyCoverage {
   geneBody_coverage.py --version &> v_rseqc
   """
 }
-
 
 //Cell Viability
 process umiPerGeneDist{
@@ -973,7 +981,8 @@ process geneSaturation {
 
 
 
-//MultiQC 
+// MultiQC ----------------------------------------------------------------------//
+
 process getSoftwareVersions{
   label 'python'
   label 'lowCpu'
