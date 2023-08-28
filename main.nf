@@ -500,8 +500,9 @@ chAlignBam
   .dump (tag:'starbams')
   .into { chAlignBamCheck; chAlignBam2 }
 
-chAlignBam2.view()
+chAlignBam2.view{}
 
+/*
 process chRmPcrDup_samtools {
   tag "${prefix}"
   label 'samtools'
@@ -596,8 +597,6 @@ process sortAndIndexBam {
   """
 }
 
-
-/* Saturation Curves*/
 process saturationCurves {
   tag "${prefix}"
   label 'preseq'
@@ -721,9 +720,7 @@ process extractNonUMIreads {
   """
 }
 
-/**
-* Step - summarize featureCounts
-*/
+//Step - summarize featureCounts
 process countMatricesAllReads {
   tag "${prefix}"
   label 'featureCounts'
@@ -868,10 +865,8 @@ process bigWig {
   """
 }
 
-/*
- * Gene body Coverage
- */
 
+//Gene body Coverage
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
@@ -909,10 +904,8 @@ process genebodyCoverage {
   """
 }
 
-/*
- * Cell Viability
- */
 
+//Cell Viability
 process umiPerGeneDist{
   tag "${prefix}"
   label 'R'
@@ -979,10 +972,8 @@ process geneSaturation {
 }
 
 
-/*
- * MultiQC 
- */
 
+//MultiQC 
 process getSoftwareVersions{
   label 'python'
   label 'lowCpu'
@@ -1103,10 +1094,8 @@ process multiqc {
   """
 }
 
-/****************
- * Sub-routines *
- ****************/
 
+//Sub-routines
 process outputDocumentation {
   label 'python'
   label 'lowCpu'
@@ -1185,7 +1174,7 @@ workflow.onComplete {
   String execInfo = "Execution summary\n${endWfSummary}\n"
   woc.write(execInfo)
 
-  /*final logs*/
+  //final logs
   if(skippedPoorAlignment.size() > 0){
     log.info "WARNING - ${skippedPoorAlignment.size()} samples skipped due to poor alignment scores!"
   }
@@ -1196,3 +1185,5 @@ workflow.onComplete {
     log.info "FAILED: $workflow.runName"
   }
 }
+
+*/
