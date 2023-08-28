@@ -516,6 +516,7 @@ process chRmPcrDup_samtools {
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
   set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
+  file("dedup_summary.log") into chDedupLog
 
 script :
   """
@@ -558,7 +559,6 @@ process readAssignment {
   file("v_featurecounts.txt") into chFCversion
 
   script:
-  prefix = alignedRmDupBam[0].toString() - ~/(Aligned.sortedByCoord.out)?(.bam)?$/
   """	
   featureCounts  -p \
     -a ${genome} \
