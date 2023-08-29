@@ -791,7 +791,6 @@ process readAssignmentAllReads {
   set val(prefix), file("*featureCounts.bam") into chAssignMergeDedupBam
   file "*.summary" into chAssignmentLogs_allreads
   set val(prefix), file("*_counts") into featureCountMatrix_allreads
-  file("v_featurecounts.txt") into chFCversion
 
   script:
   """	
@@ -822,13 +821,11 @@ process sortAndIndexBamAllReads {
 	
   output:
   set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAMSaturationCurve
-  file("v_samtools.txt") into chSamtoolsVersion
 
   script :
   """
   samtools sort -@ ${task.cpus} ${assignDedupBam} -o ${prefix}_Sorted.bam
   samtools index ${prefix}_Sorted.bam
-  samtools --version &> v_samtools.txt
   """
 }
 
