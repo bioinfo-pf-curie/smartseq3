@@ -702,7 +702,7 @@ process chRmPcrDup_samtools {
   set val(prefix), file(aligned) from chNonUmiBam
 
   output:
-  set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
+  set val(prefix), file("*_dedup.log") into chDedupBamLog
   set val(prefix), file("*_dedup.bam") into chNonUmi_dedup
   file("*dedup_summary.log") into chDedupLog_mqc
 
@@ -714,7 +714,7 @@ script :
     #Markdup needs position order:
     samtools sort fixmate.bam -o positionsort.bam 
     #Finally mark duplicates:
-    samtools markdup positionsort.bam ${prefix}_rmPcrDup.bam -s -r &> ${prefix}_samtools_dedup.log
+    samtools markdup positionsort.bam ${prefix}_dedup.bam -s -r &> ${prefix}_dedup.log
     
     rm fixmate.bam positionsort.bam namecollate.bam
 
@@ -724,7 +724,7 @@ script :
     percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of duplicates, y=percent of duplicates
-    echo ${prefix} "," \$dup "," \$percent_dup > ${prefix}_dedup_NonUmi_summary.log
+    echo ${prefix} "," \$tot "," \$dup "," \$percent_dup > ${prefix}_dedup_summary.log
   """
 }
 
@@ -766,7 +766,6 @@ process chMergeUmiNonUmiBam {
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
  
-
   script:
   """
   samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
@@ -912,14 +911,56 @@ process bigWig {
 
 // Analysis all reads ----------------------------------------------------------------------//
 
+process  {
+  tag "${prefix}"
+  label 'preseq'
+  label 'extraCpu'
+  label 'extraMem'
+  
+  errorStrategy 'ignore'
+
+  when:
+  !params.skipSatCurves
+
+  input:
+  set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
+
+  output:
+  set val(prefix), file ("*curve.txt") into preseq_results
+  file("v_preseq.txt") into chPreseqVersion
+
+  script:
+  """
+  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
+
+  if grep ERROR ${prefix}.extrap_curve.log
+  then 
+    touch ${prefix}.extrap_curve.txt
+  fi
+  
+  # install bedtools
+  # bedtools bamtobed [OPTIONS] -i <BAM>
+  # prendre le bed en input pour gc_extrap
+
+  preseq gc_extrap 
+  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
+  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
+  # -s, -step The step size for samples. Default is 1 000 000 reads
+  # -n, -bootstraps The number of bootstraps. Default is 100
+  # -c, -cval Level for confidence intervals. Default is 0.95
+  # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
+  # -x, -termsMax number of terms for extrapolation. Default is 100
+  # -pe,  Input is a paired end read file
+  preseq &> v_preseq.txt
+  """
+}
+
 process saturationCurves {
   tag "${prefix}"
   label 'preseq'
   label 'extraCpu'
   label 'extraMem'
 
-  publishDir "${params.outDir}/saturationCurves", mode: 'copy'
-  
   errorStrategy 'ignore'
 
   when:
@@ -963,7 +1004,6 @@ process geneSaturation {
   label 'R'
   label 'medCpu'
   label 'medMem'
-  publishDir "${params.outDir}/gene_saturation" , mode: 'copy'
 
   //when:
   //!params.skip_qc && !params.skip_saturation
@@ -987,7 +1027,7 @@ process genebodyCoverage {
   label 'medCpu'
   label 'medMem'
   errorStrategy 'ignore'
-  publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
+
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
       else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
@@ -1018,6 +1058,24 @@ process genebodyCoverage {
   """
 }
 
+/*process DupPerGeneRatio{
+  tag "${prefix}"
+  label 'R'
+  label 'lowCpu'
+  label 'lowMem'
+
+  input:
+  set val(prefix), file(matrix) from chMatrices_dist
+
+  output:
+  file ("DupPerGene.csv") into chDupPerGene_mqc
+
+  script:
+  """
+  
+  """ 
+}
+*/
 
 // UMI reads only --------------------------------------------------------------------------
 
@@ -1042,13 +1100,11 @@ process umiPerGeneDist{
   """ 
 }
 
-process mtRNA {
+process mtRNAratio {
   tag "${prefix}"
   label 'R'
   label 'highCpu'
   label 'medMem'
-
-  publishDir "${params.outDir}/mtRNA", mode: 'copy'
 
   input:
   file (matDir) from ch10X_mt
@@ -1070,8 +1126,6 @@ process countUMIGenePerCell{
   label 'R'
   label 'lowCpu'
   label 'medMem'
-
-  publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
 
   input:
   file(matrices) from chMatrices_UMIGenePerCell.collect()
@@ -1185,9 +1239,11 @@ process multiqc {
   file ("umiPerGene/*") from chUMIperGene.collect() // linegraph == histogram
   file ("nbUMI/*") from chUmiPerCell.collect()  // bargraph
   file ("nbGene/*") from chGenePerCell.collect() // bargraph 
-  file ("ratio/*") from chUmiGeneRatio.collect() // UmiGenePerCell_mqc.csv
-  file ("mt/*") from chMT.collect() // MtGenePerCell_mqc.csv
-  file ('genesat/*') from genesat_results.collect().ifEmpty([])
+  file ("ratio/*") from chUmiGeneRatio.collect() // dotplot UmiGenePerCell_mqc.csv
+  file ("mt/*") from chMT.collect() // dotplot MtGenePerCell_mqc.csv
+  //file ("dupPerGene/*") from chDupPerGene_mqc.collect() // dotplot DupPerGene.csv
+  file ('genesat/*') from genesat_results.collect().ifEmpty([]) // linegraph
+
 
   output: 
   file splan
