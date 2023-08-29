@@ -983,7 +983,7 @@ process genebodyCoverage {
   label 'medCpu'
   label 'medMem'
   errorStrategy 'ignore'
-
+  publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
       if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
       else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
