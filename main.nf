@@ -811,6 +811,8 @@ process sortAndIndexBamAllReads {
 
 // All reads  ----------------------------------------------------------------------//
 
+//percent dup = (dup seq umi + dup seq non umi)/tot seq before dedup
+
 //Step - summarize featureCounts
 process countMatricesAllReads {
   tag "${prefix}"
