@@ -812,6 +812,9 @@ process bigWig {
 
   publishDir "${params.outDir}/bigWig", mode: 'copy'
 
+  when:
+  !params.skipBigWig
+
   input:
   set val(prefix), file(bam) from chSortedBAMBigWig
 
