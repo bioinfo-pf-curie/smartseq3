@@ -270,8 +270,8 @@ log.info "========================================="
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
-  label 'medCpu'
-  label 'medMem'
+  label 'lowCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
@@ -354,8 +354,8 @@ process umiExtraction {
 process trimReads{
   tag "${prefix}"
   label 'cutadapt'
-  label 'highCpu'
-  label 'highMem'
+  label 'extraCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/trimReads", mode: 'copy'
 
@@ -450,7 +450,7 @@ chStarRawReads = chTrimmedReads
 process readAlignment {
   tag "${prefix}"
   label 'star'
-  label 'extraCpu'
+  label 'highCpu'
   label 'highMem'
 
   publishDir "${params.outDir}/readAlignment", mode: 'copy'
@@ -503,8 +503,8 @@ chAlignBam
 process readAssignment {
   tag "${prefix}"
   label 'featureCounts'
-  label 'highCpu'
-  label 'medMem'
+  label 'extraCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/readAssignment", mode: 'copy'
 
@@ -538,7 +538,7 @@ process readAssignment {
 process sortAndIndexBam {
   tag "${prefix}"
   label 'samtools'
-  label 'highCpu'
+  label 'extraCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/sortBam", mode: 'copy'
@@ -562,8 +562,8 @@ process sortAndIndexBam {
 process saturationCurves {
   tag "${prefix}"
   label 'preseq'
-  label 'extraCpu'
-  label 'extraMem'
+  label 'lowCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/saturationCurves", mode: 'copy'
   
@@ -608,8 +608,8 @@ process saturationCurves {
 process extractUMIreads {
   tag "${prefix}"
   label 'samtools'
-  label 'medCpu'
-  label 'extraMem'
+  label 'lowCpu'
+  label 'highMem'
 
   publishDir "${params.outDir}/extractUMIreads", mode: 'copy'
 
@@ -647,8 +647,8 @@ process extractUMIreads {
 process extractNonUMIreads {
   tag "${prefix}"
   label 'samtools'
-  label 'medCpu'
-  label 'extraMem'
+  label 'lowCpu'
+  label 'highMem'
 
   publishDir "${params.outDir}/extractNonUMIreads", mode: 'copy'
 
@@ -689,7 +689,7 @@ process countMatricesAllReads {
   tag "${prefix}"
   label 'featureCounts'
   label 'lowCpu'
-  label 'highMem'
+  label 'lowMem'
 
   publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
 
@@ -716,7 +716,7 @@ process countMatricesUMIs {
   tag "${prefix}"
   label 'umiTools'
   label 'medCpu'
-  label 'medMem'
+  label 'lowMem'
 
   publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
 
@@ -737,8 +737,8 @@ process countMatricesUMIs {
 process mergeUMIMatrices {
   tag "${prefix}"
   label 'R'
-  label 'highCpu'
-  label 'medMem'
+  label 'medCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/Matrices", mode: 'copy'
 
@@ -762,8 +762,8 @@ process mergeUMIMatrices {
 process mergeReadMatrices {
   tag "${prefix}"
   label 'R'
-  label 'highCpu'
-  label 'medMem'
+  label 'medCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/Matrices", mode: 'copy'
 
@@ -785,8 +785,8 @@ process mergeReadMatrices {
 process mtRNA {
   tag "${prefix}"
   label 'R'
-  label 'highCpu'
-  label 'medMem'
+  label 'medCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/mtRNA", mode: 'copy'
 
@@ -808,7 +808,7 @@ process bigWig {
   tag "${prefix}"
   label 'deeptools'
   label 'extraCpu'
-  label 'medMem'
+  label 'lowMem'
 
   publishDir "${params.outDir}/bigWig", mode: 'copy'
 
@@ -835,8 +835,8 @@ process bigWig {
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
-  label 'medCpu'
-  label 'medMem'
+  label 'lowCpu'
+  label 'lowMem'
   errorStrategy 'ignore'
   publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
@@ -898,7 +898,7 @@ process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
-  label 'medMem'
+  label 'lowMem'
 
   publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
 
@@ -920,7 +920,7 @@ process countUMIGenePerCell{
 process geneSaturation {
   label 'R'
   label 'medCpu'
-  label 'medMem'
+  label 'lowMem'
   publishDir "${params.outDir}/gene_saturation" , mode: 'copy'
 
   //when:
