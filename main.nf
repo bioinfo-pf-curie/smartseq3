@@ -515,7 +515,7 @@ process extractUMIreads {
   set val(prefix), file(aligned), file(nonUmisReadsIDs) from chAlignBamCheck_umi.join(chUmiReadsIDs_exUMIreads)
 
   output:
-  set val("${prefix}_Umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam
+  set val("${prefix}_Umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBam_geneBody
   set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
 
   script:  
@@ -1000,7 +1000,7 @@ process genebodyCoverage {
 
   input:
   file bed12 from chBedGeneCov.collect()
-  set val(prefix), file(bm) from chUmiBam.concat(chNonUmiBam) 
+  set val(prefix), file(bm) from chUmiBam_geneBody.concat(chNonUmiBam) 
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
