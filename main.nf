@@ -559,7 +559,7 @@ process readAssignmentUmis {
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
-  file "*.summary" into chAssignmentLogs
+  file "*.summary" into chAssignmentLogs_umis
   set val(prefix), file("*_counts") into featureCountMatrix_umi
   file("v_featurecounts.txt") into chFCversion
 
@@ -789,7 +789,7 @@ process readAssignmentAllReads {
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignMergeDedupBam
-  file "*.summary" into chAssignmentLogs
+  file "*.summary" into chAssignmentLogs_allreads
   set val(prefix), file("*_counts") into featureCountMatrix_allreads
   file("v_featurecounts.txt") into chFCversion
 
@@ -1173,11 +1173,11 @@ process multiqc {
   file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
   //Modules
   file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
-  file ('FC/*') from chAssignmentLogs.collect().ifEmpty([])
+  file ('FC/*') from chAssignmentLogs_umis.collect().ifEmpty([])
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
   file ('preseq/*') from preseq_results.collect().ifEmpty([])
   //LOGS
-  file ('umiExtract/*') from chUmiExtractedLog.collect()
+  //file ('umiExtract/*') from chUmiExtractedLog.collect()
   file('pUMIs/*') from chCountSummaryExtUMI.collect()
   file('totFrag/*') from chTotFrag.collect()
   file ('bigwig/*') from chBigWigLog.collect()
