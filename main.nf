@@ -591,7 +591,7 @@ process sortAndIndexBam {
   set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM, chAssignBam_dedup
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
