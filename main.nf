@@ -660,7 +660,7 @@ process extractNonUMIreads {
   set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chAlignBamCheck_allreads.join(chUmiReadsIDs_exNonUMIreads)
 
   output:
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam
+  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam, chNonUmiBam_geneBody
 
   script:  
   """
@@ -1000,7 +1000,7 @@ process genebodyCoverage {
 
   input:
   file bed12 from chBedGeneCov.collect()
-  set val(prefix), file(bm) from chUmiBam_geneBody.concat(chNonUmiBam) 
+  set val(prefix), file(bm) from chUmiBam_geneBody.concat(chNonUmiBam_geneBody) 
 
   output:
   file "*.{txt,pdf,r}" into chGeneCov_res
