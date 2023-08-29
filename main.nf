@@ -873,7 +873,8 @@ process mergeReadMatrices {
   file (readmatrices) from chMatricesRead.collect()
 
   output:
-  file ("10XlikeMatrix_read.zip") into ch10Xzip_read
+  file ("10XlikeMatrix_read") into ch10X_allreads
+  file ("10XlikeMatrix_read.zip") into ch10Xzip_allreads
   file ("read_gene_per_cell.txt") into chReadResume
 
   script:
@@ -909,7 +910,7 @@ process bigWig {
   """
 }
 
-// Analysis  ----------------------------------------------------------------------//
+// Analysis all reads ----------------------------------------------------------------------//
 
 process saturationCurves {
   tag "${prefix}"
@@ -957,26 +958,26 @@ process saturationCurves {
   """
 }
 
-process mtRNA {
-  tag "${prefix}"
+// Gene-based saturation
+process geneSaturation {
   label 'R'
-  label 'highCpu'
+  label 'medCpu'
   label 'medMem'
+  publishDir "${params.outDir}/gene_saturation" , mode: 'copy'
 
-  publishDir "${params.outDir}/mtRNA", mode: 'copy'
+  //when:
+  //!params.skip_qc && !params.skip_saturation
 
   input:
-  file (matDir) from ch10X_mt
-  file (umiSummary) from chUmiResume_mt
+  file (matDir) from ch10X_allreads
 
   output:
-  file ("RatioPerCell.csv") into chUmiGeneRatio
-  file ("MtGenePerCell.csv") into chMT
+  file "*gcurve.txt" into genesat_results
 
   script:
   """
-  mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
-  """ 
+  gene_saturation.r ${matDir} counts.gcurve.txt
+  """
 }
 
 //Gene body Coverage
@@ -1017,7 +1018,9 @@ process genebodyCoverage {
   """
 }
 
-//Cell Viability
+
+// UMI reads only --------------------------------------------------------------------------
+
 process umiPerGeneDist{
   tag "${prefix}"
   label 'R'
@@ -1039,6 +1042,29 @@ process umiPerGeneDist{
   """ 
 }
 
+process mtRNA {
+  tag "${prefix}"
+  label 'R'
+  label 'highCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/mtRNA", mode: 'copy'
+
+  input:
+  file (matDir) from ch10X_mt
+  file (umiSummary) from chUmiResume_mt
+
+  output:
+  file ("RatioPerCell.csv") into chUmiGeneRatio
+  file ("MtGenePerCell.csv") into chMT
+
+  script:
+  """
+  mt_ratio_rna.r ${matDir} ${params.genome} ${umiSummary}
+  """ 
+}
+
+
 process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
@@ -1059,31 +1085,6 @@ process countUMIGenePerCell{
   umiGenePerCell.r
   """ 
 } 
-
-
- // Gene-based saturation
-process geneSaturation {
-  label 'R'
-  label 'medCpu'
-  label 'medMem'
-  publishDir "${params.outDir}/gene_saturation" , mode: 'copy'
-
-  //when:
-  //!params.skip_qc && !params.skip_saturation
-
-  input:
-  file (matDir) from ch10X
-
-  output:
-  file "*gcurve.txt" into genesat_results
-
-  script:
-  """
-  gene_saturation.r ${matDir} counts.gcurve.txt
-  """
-}
-
-
 
 // MultiQC ----------------------------------------------------------------------//
 
