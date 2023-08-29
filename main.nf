@@ -704,9 +704,9 @@ process chRmPcrDup_samtools {
   output:
   set val(prefix), file("*_dedup.log") into chDedupBamLog
   set val(prefix), file("*_dedup.bam") into chNonUmi_dedup
-  file("*dedup_summary.log") into chDedupLog_mqc
+  set val(prefix),file("*dedup_summary.log") into chDedupSummary
 
-script :
+  script :
   """
     samtools collate ${aligned[0]} -o namecollate.bam 
     ##Add ms and MC tags for markdup to use later:
@@ -910,50 +910,6 @@ process bigWig {
 }
 
 // Analysis all reads ----------------------------------------------------------------------//
-
-process  {
-  tag "${prefix}"
-  label 'preseq'
-  label 'extraCpu'
-  label 'extraMem'
-  
-  errorStrategy 'ignore'
-
-  when:
-  !params.skipSatCurves
-
-  input:
-  set val(prefix), file(sortBam) from chSortedBAMSaturationCurve
-
-  output:
-  set val(prefix), file ("*curve.txt") into preseq_results
-  file("v_preseq.txt") into chPreseqVersion
-
-  script:
-  """
-  preseq lc_extrap -v -B ${sortBam[0]} -o ${prefix}.extrap_curve.txt -e 200e+06 &> ${prefix}.extrap_curve.log
-
-  if grep ERROR ${prefix}.extrap_curve.log
-  then 
-    touch ${prefix}.extrap_curve.txt
-  fi
-  
-  # install bedtools
-  # bedtools bamtobed [OPTIONS] -i <BAM>
-  # prendre le bed en input pour gc_extrap
-
-  preseq gc_extrap 
-  # -e, -extrap = Max extrapolation. Here extrapolate until 200 000 000 reads
-  # -D, -defects = estimates the complexity curve without checking for instabilities in the curve.
-  # -s, -step The step size for samples. Default is 1 000 000 reads
-  # -n, -bootstraps The number of bootstraps. Default is 100
-  # -c, -cval Level for confidence intervals. Default is 0.95
-  # -d, -dupllevelFraction of duplicates to predict. Default is 0.5
-  # -x, -termsMax number of terms for extrapolation. Default is 100
-  # -pe,  Input is a paired end read file
-  preseq &> v_preseq.txt
-  """
-}
 
 process saturationCurves {
   tag "${prefix}"
