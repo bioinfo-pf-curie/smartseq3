@@ -279,7 +279,7 @@ process umiExtraction {
   set val(prefix), file(reads) from rawReads
 
   output:
-  set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chTrimReads
+  set val(prefix), file("*_totReads.R1.fastq.gz"), file("*_totReads.R2.fastq.gz") into chTrimTag
   set val(prefix), file("*_umiExtractR1.log"), file("*_umiExtractR2.log") into chUmiExtractedLog
   set val(prefix), file("*_nonUmisReadsIDs.txt") into chUmiReadsIDs_exUMIreads, chUmiReadsIDs_exNonUMIreads
   set val(prefix), file("*_pUMIs.txt") into chCountSummaryExtUMI
@@ -351,16 +351,16 @@ process umiExtraction {
   """
 }
 
-process trimReads{
+process trimTag{
   tag "${prefix}"
   label 'cutadapt'
   label 'highCpu'
   label 'highMem'
 
-  publishDir "${params.outDir}/trimReads", mode: 'copy'
+  publishDir "${params.outDir}/trimTag", mode: 'copy'
 
   input:
-  set val(prefix), file(totReadsR1), file(totReadsR2) from chTrimReads
+  set val(prefix), file(totReadsR1), file(totReadsR2) from chTrimTag
 
   output:
   set val(prefix), file("*_trimmed.R1.fastq.gz"), file("*_trimmed.R2.fastq.gz") into chTrimmedReads 
@@ -453,7 +453,7 @@ process readAlignment {
   label 'extraCpu'
   label 'highMem'
 
-  publishDir "${params.outDir}/readAlignment", mode: 'copy'
+  publishDir "${params.outDir}/star", mode: 'copy'
 
   input :
   file genomeIndex from chStar.collect()
@@ -515,7 +515,7 @@ process extractUMIreads {
   set val(prefix), file(aligned), file(nonUmisReadsIDs) from chAlignBamCheck_umi.join(chUmiReadsIDs_exUMIreads)
 
   output:
-  set val("${prefix}_umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam
+  set val("${prefix}_Umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam
   set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
 
   script:  
@@ -546,12 +546,12 @@ process extractUMIreads {
 }
 
 process readAssignment {
-  tag "${prefix}"
+  tag "${prefix}" //${prefix}_Umi
   label 'featureCounts'
   label 'highCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/readAssignment", mode: 'copy'
+  publishDir "${params.outDir}/featurecounts/umi", mode: 'copy'
 
   input :
   set val(prefix), file(aligned) from chUmiBam
@@ -560,7 +560,7 @@ process readAssignment {
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
   file "*.summary" into chAssignmentLogs
-  set val(prefix), file("*_counts") into featureCountMatrix
+  set val(prefix), file("*_counts") into featureCountMatrix_umi
   file("v_featurecounts.txt") into chFCversion
 
   script:
@@ -580,18 +580,18 @@ process readAssignment {
 }
 
 process sortAndIndexBam {
-  tag "${prefix}"
+  tag "${prefix}" //${prefix}_Umi
   label 'samtools'
   label 'highCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/sortBam", mode: 'copy'
+  publishDir "${params.outDir}/bams/umi", mode: 'copy'
 
   input:
-  set val(prefix), file(assignBam) from chAssignBam, chAssignBam_dedup
+  set val(prefix), file(assignBam) from chAssignBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM_rmDup, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads, chSortedBAMBigWig, chSortedBAMSaturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -601,20 +601,18 @@ process sortAndIndexBam {
   samtools --version &> v_samtools.txt
   """
 }
-
+// dedup and count in the same time
 process countMatricesUMIs {
-  tag "${prefix}"
+  tag "${prefix}" //${prefix}_Umi
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
-
   input:
-  set val(prefix), file(umiBam) from chAssignBam
+  set val(prefix), file(umiBam) from chSortedBAM
 
   output:
-  set val(prefix), file("*_Counts.tsv.gz") into chMatricesUMI, chMatrices_dist, chMatrices_counts, chGenvCov
+  set val(prefix), file("*_Counts.tsv.gz") into chMatricesUMI, chMatrices_dist, chMatrices_UMIGenePerCell
   set val(prefix), file("*_UmiCounts.log") into chMatricesLog
 
   script:
@@ -625,7 +623,6 @@ process countMatricesUMIs {
 }
 
 process mergeUMIMatrices {
-  tag "${prefix}"
   label 'R'
   label 'highCpu'
   label 'medMem'
@@ -636,7 +633,7 @@ process mergeUMIMatrices {
   file (umimatrices) from chMatricesUMI.collect()
 
   output:
-  file ("10XlikeMatrix_umi/") into ch10X, ch10X_mt
+  file ("10XlikeMatrix_umi/") into ch10X_mt
   file ("10XlikeMatrix_umi.zip") into ch10Xzip
   file ("UMI_gene_per_cell.txt") into chUmiResume, chUmiResume_mt
   file ("v_R.txt") into chRversion
@@ -689,21 +686,25 @@ process extractNonUMIreads {
   """
 }
 
+// All reads  -------------------------------------------------------------------------------------------------------//
+
+// Remove PCR duplicates  -------------------------------------------------------------------------------//
+
 process chRmPcrDup_samtools {
-  tag "${prefix}"
+  tag "${prefix}" // "${prefix}_NonUmi"
   label 'samtools'
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/rmPcrDup_samtools", mode: 'copy'
+  publishDir "${params.outDir}/rmPcrDup", mode: 'copy'
 
   input:
   set val(prefix), file(aligned) from chNonUmiBam
 
   output:
   set val(prefix), file("*_samtools_dedup.log") into chDedupBamLog
-  set val(prefix), file("*_rmPcrDup.bam") into chDedupBam
-  file("dedup_summary.log") into chDedupLog
+  set val(prefix), file("*_dedup.bam") into chNonUmi_dedup
+  file("*dedup_summary.log") into chDedupLog_mqc
 
 script :
   """
@@ -723,34 +724,56 @@ script :
     percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of duplicates, y=percent of duplicates
-    echo ${prefix} "," \$dup "," \$percent_dup >> dedup_summary.log
+    echo ${prefix} "," \$dup "," \$percent_dup > ${prefix}_dedup_NonUmi_summary.log
   """
 }
 
-process dedupUMIs {
-  tag "${prefix}"
+process chRmPcrDup_umitools {
+  tag "${prefix}" // "${prefix}_Umi"
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/countMatricesUMIs", mode: 'copy'
+  publishDir "${params.outDir}/rmPcrDup", mode: 'copy'
 
   input:
   set val(prefix), file(umiBam) from chAssignBam_dedup
 
   output:
+  set val(prefix), file("*_dedup.bam") into chUmi_dedup
+
+  script:
+  """
+  # Dedup per position and UMI (hamming=1)
+  umi_tools dedup --stdin=${umiBam[0]}  --log=${prefix}_dedup.log > ${prefix}_dedup.bam
+  """
+}
+
+
+// Merge umi & non umi  -----------------------------------------------------------------//
+
+process chMergeUmiNonUmiBam {
+  tag "${prefix}"
+  label 'samtools'
+  label 'medCpu'
+  label 'medMem'
+
+  publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
+
+  input:
+  set val(prefix), file(umiBam), file(nonUmiBam) from chUmi_dedup.join(chNonUmi_dedup)
+
+  output:
+  set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
  
 
   script:
   """
-  # Count UMIs per gene per cell
-  umi_tools dedup -I ${umiBam[0]} 
+  samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
   """
 }
 
-process chMergeUmiNonUmiBam {
-
-}
+// Assign  -------------------------------------------------------------------------------//
 
 process readAssignmentAllReads {
   tag "${prefix}"
@@ -758,16 +781,16 @@ process readAssignmentAllReads {
   label 'highCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/readAssignmentAllReads", mode: 'copy'
+  publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input :
-  set val(prefix), file(bam) from chDedupBam
+  set val(prefix), file(bam) from chMergeDedupBam
   file(genome) from chGtfFC.collect()
 
   output : 
-  set val(prefix), file("*featureCounts.bam") into chAssignDedupBam
+  set val(prefix), file("*featureCounts.bam") into chAssignMergeDedupBam
   file "*.summary" into chAssignmentLogs
-  set val(prefix), file("*_counts") into featureCountMatrix
+  set val(prefix), file("*_counts") into featureCountMatrix_allreads
   file("v_featurecounts.txt") into chFCversion
 
   script:
@@ -792,13 +815,13 @@ process sortAndIndexBamAllReads {
   label 'highCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/sortAndIndexBamAllReads", mode: 'copy'
+  publishDir "${params.outDir}/bams/allreads", mode: 'copy'
 
   input:
-  set val(prefix), file(assignDedupBam) from chAssignDedupBam
+  set val(prefix), file(assignDedupBam) from chAssignMergeDedupBam
 	
   output:
-  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAM_rmDup, chSortedBAM_exUMIreads, chSortedBAM_exNonUMIreads, chSortedBAMBigWig, chSortedBAMSaturationCurve
+  set val(prefix), file("*_Sorted.{bam,bam.bai}") into chSortedBAMBigWig, chSortedBAMSaturationCurve
   file("v_samtools.txt") into chSamtoolsVersion
 
   script :
@@ -809,21 +832,19 @@ process sortAndIndexBamAllReads {
   """
 }
 
-// All reads  ----------------------------------------------------------------------//
-
 //percent dup = (dup seq umi + dup seq non umi)/tot seq before dedup
 
-//Step - summarize featureCounts
+// Matrix  -------------------------------------------------------------------------------//
+
+// per cell
 process countMatricesAllReads {
   tag "${prefix}"
   label 'featureCounts'
   label 'lowCpu'
   label 'highMem'
 
-  publishDir "${params.outDir}/countMatricesAllReads", mode: 'copy'
-
   input:
-  set val(prefix), file(featureCountsBed) from featureCountMatrix
+  set val(prefix), file(featureCountsBed) from featureCountMatrix_allreads
 
   output:
     set val(prefix), file("*_readCounts.tsv.gz") into chMatricesRead
@@ -842,6 +863,7 @@ process countMatricesAllReads {
   """
 }
 
+// merge all cell
 process mergeReadMatrices {
   tag "${prefix}"
   label 'R'
@@ -854,7 +876,6 @@ process mergeReadMatrices {
   file (readmatrices) from chMatricesRead.collect()
 
   output:
-  file ("10XlikeMatrix_read/") into ch10X_read
   file ("10XlikeMatrix_read.zip") into ch10Xzip_read
   file ("read_gene_per_cell.txt") into chReadResume
 
@@ -873,7 +894,7 @@ process bigWig {
   label 'extraCpu'
   label 'medMem'
 
-  publishDir "${params.outDir}/bigWig", mode: 'copy'
+  publishDir "${params.outDir}/AllReads/bigWig", mode: 'copy'
 
   input:
   set val(prefix), file(bam) from chSortedBAMBigWig
@@ -1030,7 +1051,7 @@ process countUMIGenePerCell{
   publishDir "${params.outDir}/countUMIGenePerCell", mode: 'copy'
 
   input:
-  file(matrices) from chMatrices_counts.collect()
+  file(matrices) from chMatrices_UMIGenePerCell.collect()
 
   output:
   file ("nbGenePerCell.csv") into chGenePerCell
@@ -1151,7 +1172,6 @@ process multiqc {
   file ('workflowSummary/*') from workflowSummaryYaml.collect()
   file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
   //Modules
-  //file ('trimming/*') from chtrimmedReadsLog.collect().ifEmpty([])
   file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
   file ('FC/*') from chAssignmentLogs.collect().ifEmpty([])
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
@@ -1184,7 +1204,7 @@ process multiqc {
   """
   stat2mqc.sh ${splan}
   #mean_calculation.r
-  mqc_header.py --splan ${splan} --name "SmartSeq3 scRNA-seq" --version ${workflow.manifest.version} > multiqc-config-header.yaml
+  mqc_header.py --splan ${splan} --name "${params.protocol} scRNA-seq" --version ${workflow.manifest.version} > multiqc-config-header.yaml
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modules_list --cl_config '{max_table_rows: 2000}'
   """
 }
