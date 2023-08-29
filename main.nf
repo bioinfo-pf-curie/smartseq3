@@ -130,7 +130,7 @@ params.gtf = genomeRef ? params.genomes[ genomeRef ].gtf ?: false : false
 if (params.gtf) {
   Channel
     .fromPath(params.gtf, checkIfExists: true)
-    .into { chGtfSTAR; chGtfFC }
+    .into { chGtfSTAR; chGtfFCumis, chGtfFCallreads }
 }else {
   exit 1, "GTF annotation file not not found: ${params.gtf}"
 }
@@ -545,7 +545,7 @@ process extractUMIreads {
   """
 }
 
-process readAssignment {
+process readAssignmentUmis {
   tag "${prefix}" //${prefix}_Umi
   label 'featureCounts'
   label 'highCpu'
@@ -555,7 +555,7 @@ process readAssignment {
 
   input :
   set val(prefix), file(aligned) from chUmiBam
-  file(genome) from chGtfFC.collect()
+  file(genome) from chGtfFCumis.collect()
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignBam
@@ -785,7 +785,7 @@ process readAssignmentAllReads {
 
   input :
   set val(prefix), file(bam) from chMergeDedupBam
-  file(genome) from chGtfFC.collect()
+  file(genome) from chGtfFCallreads.collect()
 
   output : 
   set val(prefix), file("*featureCounts.bam") into chAssignMergeDedupBam
