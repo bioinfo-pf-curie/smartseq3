@@ -570,7 +570,7 @@ process readAssignmentUmis {
     -o ${prefix}_counts \
     -T ${task.cpus} \
     -R BAM \
-    -g gene_name ${aligned}
+    -g gene_name ${aligned[0]}
 
   featureCounts -v &> v_featurecounts.txt
 
