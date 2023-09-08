@@ -759,6 +759,7 @@ chUmi_deduptest.concat(chNonUmi_deduptest).view()
 
 
 process chMergeUmiNonUmiBam {
+  tag "${prefix}"
   label 'samtools'
   label 'medCpu'
   label 'medMem'
@@ -766,7 +767,8 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val("${prefix}_Umi"), file(bam), val("${prefix}_NonUmi"), file(bamn) from chUmi_dedup.join(chNonUmi_dedup)
+  set val("${prefix}_Umi"), file(bam) from chUmi_dedup
+  set val("${prefix}_NonUmi"), file(bamn) from chNonUmi_dedup
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
