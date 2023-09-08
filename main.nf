@@ -755,6 +755,8 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
+chUmi_dedup.join(chNonUmi_dedup).view{}
+
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
   label 'samtools'
