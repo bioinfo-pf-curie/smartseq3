@@ -755,7 +755,8 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chUmi_dedup.join(chNonUmi_dedup).view{}
+chUmi_dedup.view{}
+chNonUmi_dedup.view{}
 
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
