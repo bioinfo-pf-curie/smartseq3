@@ -766,7 +766,7 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val(prefix), file(umibam), file(nonumibam) from chUmi_dedup.concat(chNonUmi_dedup)
+  set val(prefix), file(umibam), file(nonumibam) from chUmi_dedup.join(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
