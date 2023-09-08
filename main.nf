@@ -760,7 +760,7 @@ process chRmPcrDup_umitools {
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
   label 'samtools'
-  label 'medCpu'
+  label 'highCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
@@ -773,7 +773,7 @@ process chMergeUmiNonUmiBam {
  
   script:
   """
-  samtools merge -o ${prefix}_merged_dedup.bam ${umibam} ${nonumibam}
+  samtools merge -@ ${task.cpu} ${prefix}_merged_dedup.bam ${umibam} ${nonumibam}
   """
 }
 
