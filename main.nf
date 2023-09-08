@@ -759,7 +759,7 @@ chUmi_dedup.join(chNonUmi_dedup).view()
 
 chUmi_dedup.concat(chNonUmi_dedup).view()
 
-process chMergeUmiNonUmiBam {
+/*process chMergeUmiNonUmiBam {
   tag "${prefix}"
   label 'samtools'
   label 'medCpu'
@@ -777,7 +777,7 @@ process chMergeUmiNonUmiBam {
   """
   samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
   """
-}
+}*/
 
 // Assign  -------------------------------------------------------------------------------//
 
