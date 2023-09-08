@@ -46,6 +46,7 @@ def helpMessage() {
   
   Inputs:
     --starIndex [dir]             Index for STAR aligner
+    --gtf [dir]                   GTF for STAR aligner
 
   Skip options: All are false by default
     --skipSoftVersion [bool]      Do not report software version. Default is false.
@@ -608,6 +609,8 @@ process countMatricesUMIs {
   label 'medCpu'
   label 'medMem'
 
+  publishDir "${params.outDir}/countMatricesUMI_logs", mode: 'copy'
+
   input:
   set val(prefix), file(umiBam) from chSortedBAM
 
@@ -719,8 +722,8 @@ process chRmPcrDup_samtools {
     rm fixmate.bam positionsort.bam namecollate.bam
 
     # get percent dup
-    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_samtools_dedup.log | cut -f3 -d" ") 
-    tot=\$(grep "READ:" ${prefix}_samtools_dedup.log | cut -f2 -d" ")
+    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_dedup.log | cut -f3 -d" ") 
+    tot=\$(grep "READ:" ${prefix}_dedup.log | cut -f2 -d" ")
     percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of duplicates, y=percent of duplicates
@@ -1014,6 +1017,9 @@ process genebodyCoverage {
   """
 }
 
+// UMI reads only --------------------------------------------------------------------------
+
+
 /*process DupPerGeneRatio{
   tag "${prefix}"
   label 'R'
@@ -1021,7 +1027,6 @@ process genebodyCoverage {
   label 'lowMem'
 
   input:
-  set val(prefix), file(matrix) from chMatrices_dist
 
   output:
   file ("DupPerGene.csv") into chDupPerGene_mqc
@@ -1033,7 +1038,6 @@ process genebodyCoverage {
 }
 */
 
-// UMI reads only --------------------------------------------------------------------------
 
 process umiPerGeneDist{
   tag "${prefix}"
