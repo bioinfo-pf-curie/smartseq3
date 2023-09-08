@@ -757,7 +757,7 @@ process chRmPcrDup_umitools {
 
 chUmi_dedup.join(chNonUmi_dedup).view()
 
-chUmi_dedup.concat(chNonUmi_dedup).view()
+//chUmi_dedup.concat(chNonUmi_dedup).view()
 
 /*process chMergeUmiNonUmiBam {
   tag "${prefix}"
