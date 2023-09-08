@@ -755,6 +755,10 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
+chUmi_dedup.join(chNonUmi_dedup).view()
+
+chUmi_dedup.concat(chNonUmi_dedup).view()
+
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
   label 'samtools'
@@ -764,14 +768,14 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val(prefix), file(bams) from chUmi_dedup.concat(chNonUmi_dedup)
+  set val(prefix), file(umiBam), file(nonUmiBam) from chUmi_dedup.join(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
  
   script:
   """
-  samtools merge -o ${prefix}_merged_dedup.bam ${bams[0]} 
+  samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
   """
 }
 
