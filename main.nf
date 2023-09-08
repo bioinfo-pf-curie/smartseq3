@@ -706,7 +706,7 @@ process chRmPcrDup_samtools {
 
   output:
   set val(prefix), file("*_dedup.log") into chDedupBamLog
-  set val(prefix), file("*_dedup.bam") into chNonUmi_dedup
+  set val(prefix), file("*_dedup.bam") into chNonUmi_dedup, chNonUmi_deduptest
   set val(prefix),file("*dedup_summary.log") into chDedupSummary
 
   script :
@@ -743,7 +743,7 @@ process chRmPcrDup_umitools {
   set val(prefix), file(umiBam) from chAssignBam_dedup
 
   output:
-  set val(prefix), file("*_dedup.bam") into chUmi_dedup
+  set val(prefix), file("*_dedup.bam") into chUmi_dedup, chUmi_deduptest
 
   script:
   """
@@ -755,11 +755,11 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chUmi_dedup.join(chNonUmi_dedup).view{}
+chUmi_deduptest.join(chNonUmi_deduptest).view{}
 
 //chUmi_dedup.concat(chNonUmi_dedup).view()
 
-/*process chMergeUmiNonUmiBam {
+process chMergeUmiNonUmiBam {
   tag "${prefix}"
   label 'samtools'
   label 'medCpu'
@@ -777,7 +777,7 @@ chUmi_dedup.join(chNonUmi_dedup).view{}
   """
   samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
   """
-}*/
+}
 
 // Assign  -------------------------------------------------------------------------------//
 
