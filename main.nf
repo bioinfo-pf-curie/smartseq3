@@ -516,7 +516,7 @@ process extractUMIreads {
   set val(prefix), file(aligned), file(nonUmisReadsIDs) from chAlignBamCheck_umi.join(chUmiReadsIDs_exUMIreads)
 
   output:
-  set val("${prefix}_Umi"), file("*_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBam_geneBody
+  set val("${prefix}"), file("*_Umi_assignedUMIs.{bam,bam.bai}") into chUmiBam, chUmiBam_geneBody
   set val(prefix), file("*_list_id_umi_seq.txt") into chListIDumis
 
   script:  
@@ -538,10 +538,10 @@ process extractUMIreads {
   cut -f1 ${prefix}_assignedUMIs.sam > ${prefix}_list_id_umi_seq.txt
 
   # sam to bam
-  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_umi_assignedUMIs.bam
+  samtools view -bh ${prefix}_assignedUMIs.sam > ${prefix}_Umi_assignedUMIs.bam
 
   # index
-  samtools index ${prefix}_umi_assignedUMIs.bam
+  samtools index ${prefix}_Umi_assignedUMIs.bam
   rm *.sam
   """
 }
@@ -663,7 +663,7 @@ process extractNonUMIreads {
   set val(prefix), file(sortedBam), file(nonUmisReadsIDs) from chAlignBamCheck_allreads.join(chUmiReadsIDs_exNonUMIreads)
 
   output:
-  set val("${prefix}_NonUmi"), file("*_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam, chNonUmiBam_geneBody
+  set val("${prefix}"), file("*_NonUmi_assignedNonUMIs.{bam,bam.bai}") into chNonUmiBam, chNonUmiBam_geneBody
 
   script:  
   """
@@ -743,7 +743,7 @@ process chRmPcrDup_umitools {
   set val(prefix), file(umiBam) from chAssignBam_dedup
 
   output:
-  set val(prefix), file("*_dedup.bam") into chUmi_dedup, chUmi_deduptest
+  set val(prefix), file("*_dedup.bam") into chUmi_dedup
 
   script:
   """
@@ -755,9 +755,6 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chNonUmi_deduptest.view()
-
-chUmi_deduptest.first().splitText().view()
 
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
@@ -768,14 +765,14 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val(prefix), file(bam) from chUmi_dedup.concat(chNonUmi_dedup)
+  set val(prefix), file(umibam), file(nonumibam) from chUmi_dedup.concat(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
  
   script:
   """
-  samtools view ${bam} > ${prefix}_merged_dedup.bam
+  samtools merge -o ${prefix}_merged_dedup.bam ${umibam} ${nonumibam}
   """
 }
 
