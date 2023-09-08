@@ -722,8 +722,8 @@ process chRmPcrDup_samtools {
     rm fixmate.bam positionsort.bam namecollate.bam
 
     # get percent dup
-    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_dedup.log | cut -f3 -d" ") 
-    tot=\$(grep "READ:" ${prefix}_dedup.log | cut -f2 -d" ")
+    dup=\$(grep "DUPLICATE TOTAL:"  ${prefix}_NonUmi_dedup.log | cut -f3 -d" ") 
+    tot=\$(grep "READ:" ${prefix}_NonUmi_dedup.log | cut -f2 -d" ")
     percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of duplicates, y=percent of duplicates
