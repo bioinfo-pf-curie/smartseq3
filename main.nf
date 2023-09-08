@@ -755,8 +755,7 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chUmi_deduptest.view()
-chNonUmi_deduptest.view()
+chUmi_deduptest.join(chNonUmi_deduptest).view()
 
 
 process chMergeUmiNonUmiBam {
@@ -775,7 +774,7 @@ process chMergeUmiNonUmiBam {
  
   script:
   """
-  samtools merge -o ${prefix}_merged_dedup.bam ${bam}
+  samtools  view ${bam} | head
   """
 }
 
