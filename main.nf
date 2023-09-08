@@ -717,7 +717,7 @@ process chRmPcrDup_samtools {
     #Markdup needs position order:
     samtools sort fixmate.bam -o positionsort.bam 
     #Finally mark duplicates:
-    samtools markdup positionsort.bam ${prefix}_dedup.bam -s -r &> ${prefix}_dedup.log
+    samtools markdup positionsort.bam ${prefix}_NonUmi_dedup.bam -s -r &> ${prefix}_NonUmi_dedup.log
     
     rm fixmate.bam positionsort.bam namecollate.bam
 
@@ -727,7 +727,7 @@ process chRmPcrDup_samtools {
     percent_dup=\$(echo "\$dup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of duplicates, y=percent of duplicates
-    echo ${prefix} "," \$tot "," \$dup "," \$percent_dup > ${prefix}_dedup_summary.log
+    echo ${prefix} "," \$tot "," \$dup "," \$percent_dup > ${prefix}_NonUmi_dedup_summary.log
   """
 }
 
@@ -744,11 +744,12 @@ process chRmPcrDup_umitools {
 
   output:
   set val(prefix), file("*_dedup.bam") into chUmi_dedup
+  set val(prefix), file("*_dedup.log") into chUmi_dedup_log
 
   script:
   """
   # Dedup per position and UMI (hamming=1)
-  umi_tools dedup --stdin=${umiBam[0]}  --log=${prefix}_dedup.log > ${prefix}_dedup.bam
+  umi_tools dedup --stdin=${umiBam[0]}  --log=${prefix}_Umi_dedup.log > ${prefix}_Umi_dedup.bam
   """
 }
 
