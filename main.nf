@@ -547,7 +547,7 @@ process extractUMIreads {
 }
 
 process readAssignmentUmis {
-  tag "${prefix}" //${prefix}_Umi
+  tag "${prefix}_Umi" //${prefix}_Umi
   label 'featureCounts'
   label 'highCpu'
   label 'medMem'
@@ -581,7 +581,7 @@ process readAssignmentUmis {
 }
 
 process sortAndIndexBam {
-  tag "${prefix}" //${prefix}_Umi
+  tag "${prefix}_Umi" //${prefix}_Umi
   label 'samtools'
   label 'highCpu'
   label 'medMem'
@@ -604,7 +604,7 @@ process sortAndIndexBam {
 }
 // dedup and count in the same time
 process countMatricesUMIs {
-  tag "${prefix}" //${prefix}_Umi
+  tag "${prefix}_Umi" //${prefix}_Umi
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
@@ -694,7 +694,7 @@ process extractNonUMIreads {
 // Remove PCR duplicates  -------------------------------------------------------------------------------//
 
 process chRmPcrDup_samtools {
-  tag "${prefix}" // "${prefix}_NonUmi"
+  tag "${prefix}_NonUmi" // "${prefix}_NonUmi"
   label 'samtools'
   label 'medCpu'
   label 'medMem'
@@ -732,7 +732,7 @@ process chRmPcrDup_samtools {
 }
 
 process chRmPcrDup_umitools {
-  tag "${prefix}" // "${prefix}_Umi"
+  tag "${prefix}_Umi" // "${prefix}_Umi"
   label 'umiTools'
   label 'medCpu'
   label 'medMem'
@@ -755,7 +755,8 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chUmi_deduptest.concat(chNonUmi_deduptest).view()
+chUmi_deduptest.view()
+chNonUmi_deduptest.view()
 
 
 process chMergeUmiNonUmiBam {
@@ -767,7 +768,7 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val(prefix), file(bam) from chUmi_dedup.concat(chNonUmi_dedup)
+  set val(prefix), file(bam), file(bamn) from chUmi_dedup.join(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
