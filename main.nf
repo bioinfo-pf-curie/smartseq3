@@ -768,14 +768,14 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  file(umiBam), file(nonUmiBam) from chUmi_dedup.concat(chNonUmi_dedup)
+  file(bam) from chUmi_dedup.concat(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
  
   script:
   """
-  samtools merge -o ${prefix}_merged_dedup.bam ${umiBam} ${nonUmiBam}
+  samtools merge -o ${prefix}_merged_dedup.bam ${bam}
   """
 }
 
