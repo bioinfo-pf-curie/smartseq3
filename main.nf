@@ -755,8 +755,9 @@ process chRmPcrDup_umitools {
 
 // Merge umi & non umi  -----------------------------------------------------------------//
 
-chUmi_deduptest.groupTuple(chNonUmi_deduptest).view()
+chNonUmi_deduptest.view()
 
+chUmi_deduptest.first().splitText().view()
 
 process chMergeUmiNonUmiBam {
   tag "${prefix}"
@@ -767,8 +768,7 @@ process chMergeUmiNonUmiBam {
   publishDir "${params.outDir}/featurecounts/allreads", mode: 'copy'
 
   input:
-  set val("${prefix}_Umi"), file(bam) from chUmi_dedup.join(chNonUmi_dedup)
-  set val("${prefix}_NonUmi"), file(bamn) from 
+  set val(prefix), file(bam) from chUmi_dedup.concat(chNonUmi_dedup)
 
   output:
   set val(prefix), file("*_merged_dedup.bam") into chMergeDedupBam
