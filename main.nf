@@ -705,9 +705,9 @@ process chRmPcrDup_samtools {
   set val(prefix), file(aligned) from chNonUmiBam
 
   output:
-  set val(prefix), file("*_dedup.log") into chDedupBamLog
-  set val(prefix), file("*_dedup.bam") into chNonUmi_dedup, chNonUmi_deduptest
-  set val(prefix),file("*dedup_summary.log") into chDedupSummary
+  set val(prefix), file("*_dedup.bam") into chNonUmi_dedup
+  set val(prefix), file("*_dedup.log") into chNonUmi_dedup_log
+  set val(prefix),file("*dedup_summary.log") into chNonUmi_dedup_mqc
 
   script :
   """
@@ -745,11 +745,22 @@ process chRmPcrDup_umitools {
   output:
   set val(prefix), file("*_dedup.bam") into chUmi_dedup
   set val(prefix), file("*_dedup.log") into chUmi_dedup_log
+  file("*_dedup_summary.log") into chUmi_dedup_mqc
+
 
   script:
   """
   # Dedup per position and UMI (hamming=1)
   umi_tools dedup --stdin=${umiBam[0]}  --log=${prefix}_Umi_dedup.log > ${prefix}_Umi_dedup.bam
+
+
+  # get percent dup
+    tot=\$(grep "Reads: Input Reads:"  ${prefix}_Umi_dedup.log | cut -f7 -d" ") 
+    dedup=\$(grep "Number of reads out:" ${prefix}_Umi_dedup.log | cut -f7 -d" ") 
+    percent_dedup=\$(echo "\$dedup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
+    # pour plot dans mqc : prefix, x, y
+    # x=number of dedduplicates, y=percent of duplicates
+    echo ${prefix} "," \$tot "," \$dedup "," \$percent_dup > ${prefix}_Umi_dedup_summary.log
   """
 }
 
