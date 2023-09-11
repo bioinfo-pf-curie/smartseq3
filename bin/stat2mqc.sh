@@ -44,7 +44,7 @@ do
 
     nbUMIs=$(grep ${sample}_ UMI_gene_per_cell.txt | cut -d, -f2)
     nbGenesUmi=$(grep ${sample}_ UMI_gene_per_cell.txt | cut -d, -f3)
-    pDedupUmi=$(grep rmPCRumi/${sample}_dedup_summary.log | cut -d, -f4)
+    pDedupUmi=$(grep ${sample} rmPCRumi/${sample}_dedup_summary.log | cut -d, -f4)
     
     nbReads=$(grep ${sample}\" read_gene_per_cell.txt | cut -d, -f2)
     nbGenesRead=$(grep ${sample}\" read_gene_per_cell.txt | cut -d, -f3)
