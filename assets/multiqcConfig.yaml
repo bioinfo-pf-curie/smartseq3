@@ -174,8 +174,8 @@ custom_data:
             namespace: 'umi deduplication'
             id: 'umideduplication'
             title: 'Deduplication'
-            ylab: 'Total UMIs'
-            xlab: 'Deduplicated UMIs'
+            xlab: 'Total UMIs'
+            ylab: 'Deduplicated UMIs'
 
 
 sp:
