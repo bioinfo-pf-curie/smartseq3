@@ -1187,7 +1187,7 @@ process multiqc {
   file ('workflowSummary/*') from chWarn.collect().ifEmpty([]) 
   //Modules
   file ('star/*') from chAlignmentLogs.collect().ifEmpty([])
-  file ('FC/*') from chAssignmentLogs_umis.collect().ifEmpty([])
+  file ('FC/*') from chAssignmentLogs_allreads.collect().ifEmpty([])
   file ('coverage/*') from chGeneCov_res.collect().ifEmpty([])
   file ('preseq/*') from preseq_results.collect().ifEmpty([])
   //LOGS
