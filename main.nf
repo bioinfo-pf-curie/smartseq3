@@ -745,7 +745,7 @@ process chRmPcrDup_umitools {
   output:
   set val(prefix), file("*_dedup.bam") into chUmi_dedup
   set val(prefix), file("*_dedup.log") into chUmi_dedup_log
-  file("*_dedup_summary.log") into chUmi_dedup_mqc
+  set val(prefix), file("*_dedup_summary.log") into chUmi_dedup_mqc
 
 
   script:
@@ -1216,6 +1216,7 @@ process multiqc {
   file ("mt/*") from chMT.collect() // dotplot MtGenePerCell_mqc.csv
   //file ("dupPerGene/*") from chDupPerGene_mqc.collect() // dotplot DupPerGene.csv
   file ('genesat/*') from genesat_results.collect().ifEmpty([]) // linegraph
+  file('rmPCRumi/*') from chUmi_dedup_mqc.collect()
 
 
   output: 

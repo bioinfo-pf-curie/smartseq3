@@ -160,6 +160,18 @@ custom_data:
             ylab: 'Number of detected genes'
             xlab: 'Number of UMIs (per thousand)'
 
+    umi_deduplication:
+       file_format: 'csv'
+       section_name: 'PCR deduplication'
+       description: 'Plot showing the number of UMIs before and after PCR removal.'
+       plot_type: 'scatter'
+       pconfig:
+            namespace: 'umi deduplication'
+            id: 'umi_deduplication'
+            title: 'Deduplication'
+            ylab: 'Total UMIs'
+            xlab: 'Deduplicated UMIs'
+
 
 sp:
   stats:
@@ -178,6 +190,8 @@ sp:
       fn: 'MtGenePerCell.csv'
   gene_saturation:
       fn: '*gcurve.txt'
+  umi_deduplication:
+      fn: '*_Umi_dedup_summary.log'
 
 
 
