@@ -68,16 +68,21 @@ custom_data:
             scale: 'RdPu'
             format: '{:,.0f}'
             placement: 8000
+          Percent_dedup:
+            title: '%Dedup'
+            scale: 'RdPu'
+            format: '{:,.0f}'
+            placement: 9000
           Number_of_reads:
             title: 'Reads'
             scale: 'Oranges'
             format: '{:,.0f}'
-            placement: 9000
+            placement: 10000
           Number_of_genes_read:
             title: 'Genes (reads)'
             scale: 'RdPu'
             format: '{:,.0f}'
-            placement: 10000
+            placement: 20000
 
     final:
       file_format: 'csv'
@@ -167,7 +172,7 @@ custom_data:
        plot_type: 'scatter'
        pconfig:
             namespace: 'umi deduplication'
-            id: 'umi_deduplication'
+            id: 'umideduplication'
             title: 'Deduplication'
             ylab: 'Total UMIs'
             xlab: 'Deduplicated UMIs'

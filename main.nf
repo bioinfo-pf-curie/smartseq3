@@ -756,11 +756,11 @@ process chRmPcrDup_umitools {
 
   # get percent dup
     tot=\$(grep "Reads: Input Reads:"  ${prefix}_Umi_dedup.log | cut -f7 -d" ") 
-    dedup=\$(grep "Number of reads out:" ${prefix}_Umi_dedup.log | cut -f7 -d" ") 
-    percent_dedup=\$(echo "\$dedup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
+    dedup=\$(grep "Number of reads out:" ${prefix}_Umi_dedup.log | cut -f8 -d" ") 
+    percent_dedup=\$(echo "\$dedup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2*100 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of dedduplicates, y=percent of duplicates
-    echo ${prefix} "," \$tot "," \$dedup "," \$percent_dedup > ${prefix}_Umi_dedup_summary.log
+    echo ${prefix}","\$tot","\$dedup","\$percent_dedup > ${prefix}_Umi_dedup_summary.log
   """
 }
 

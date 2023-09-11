@@ -16,7 +16,7 @@ fi
 
 ## Header
 #Table:
-echo -e "Sample_id,Sample_name,Number_of_fragments,Percent_UMIs,Percent_Aligned,Percent_Assigned,Number_of_UMIs,Number_of_genes_umi,Number_of_reads,Number_of_genes_read" > table_mqc.stats
+echo -e "Sample_id,Sample_name,Number_of_fragments,Percent_UMIs,Percent_Aligned,Percent_Assigned,Number_of_UMIs,Number_of_genes_umi,Percent_dedup,Number_of_reads,Number_of_genes_read" > table_mqc.stats
 #Bargraph:
 echo -e "Sample_id,Sample_name,Aligned_Assigned,Aligned_NotAssigned,NotAligned_NotAssagned" > final_mqc.stats
 
@@ -44,11 +44,12 @@ do
 
     nbUMIs=$(grep ${sample}_ UMI_gene_per_cell.txt | cut -d, -f2)
     nbGenesUmi=$(grep ${sample}_ UMI_gene_per_cell.txt | cut -d, -f3)
+    pDedupUmi=$(grep rmPCRumi/${sample}_dedup_summary.log | cut -d, -f4)
     
     nbReads=$(grep ${sample}\" read_gene_per_cell.txt | cut -d, -f2)
     nbGenesRead=$(grep ${sample}\" read_gene_per_cell.txt | cut -d, -f3)
 
-    echo -e ${sample},${sname},${tot_frag},${pUMIs},${paligned},${paligned_assigned},${nbUMIs},${nbGenesUmi},${nbReads},${nbGenesRead}  >> table_mqc.stats
+    echo -e ${sample},${sname},${tot_frag},${pUMIs},${paligned},${paligned_assigned},${nbUMIs},${nbGenesUmi},${pDedupUmi},${nbReads},${nbGenesRead}  >> table_mqc.stats
     echo -e ${sample},${sname},${aligned_assigned},${aligned_NotAssigned},${NotAligned} >> final_mqc.stats
 
 done
