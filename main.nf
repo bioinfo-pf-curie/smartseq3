@@ -760,7 +760,7 @@ process chRmPcrDup_umitools {
     percent_dedup=\$(echo "\$dedup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of dedduplicates, y=percent of duplicates
-    echo ${prefix} "," \$tot "," \$dedup "," \$percent_dup > ${prefix}_Umi_dedup_summary.log
+    echo ${prefix} "," \$tot "," \$dedup "," \$percent_dedup > ${prefix}_Umi_dedup_summary.log
   """
 }
 
