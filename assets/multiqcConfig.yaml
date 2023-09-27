@@ -35,7 +35,7 @@ custom_data:
             format: '{:,.0f}'
             placement: 3000
           Percent_UMIs:
-            title: 'UMI reads (%)'
+            title: 'UMI reads'
             min: 0
             max: 100
             scale: 'Purples'
@@ -43,7 +43,7 @@ custom_data:
             format: '{:,.1f}'
             placement: 4000
           Percent_Aligned:
-            title: 'Aligned (%)'
+            title: 'Aligned'
             min: 0
             max: 100
             scale: 'Greens'
@@ -51,7 +51,7 @@ custom_data:
             format: '{:,.1f}'
             placement: 5000
           Percent_Assigned:
-            title: 'Assigned (%)'
+            title: 'Assigned'
             min: 0
             max: 100
             scale: 'YlGn'
@@ -69,9 +69,10 @@ custom_data:
             format: '{:,.0f}'
             placement: 8000
           Percent_dedup:
-            title: '%Dedup'
-            scale: 'RdPu'
-            format: '{:,.0f}'
+            title: 'Duplicates'
+            scale: 'YlGn'
+            suffix: '%'
+            format: '{:,.1f}'
             placement: 9000
           Number_of_reads:
             title: 'Reads'
