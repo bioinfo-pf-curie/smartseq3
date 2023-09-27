@@ -755,8 +755,8 @@ process chRmPcrDup_umitools {
 
 
   # get percent dup
-    tot=\$(grep "Reads: Input Reads:"  ${prefix}_Umi_dedup.log | cut -f7 -d" ") 
-    dedup=\$(grep "Number of reads out:" ${prefix}_Umi_dedup.log | cut -f8 -d" ") 
+    tot=\$(grep "Reads: Input Reads:"  ${prefix}_Umi_dedup.log | cut -f7 -d" " | sed 's/,//') 
+    dedup=\$(grep "Number of reads out:" ${prefix}_Umi_dedup.log | cut -f8 -d" " | sed 's/,//') 
     percent_dedup=\$(echo "\$dedup \$tot" | awk ' { printf "%.*f", 2, \$1/\$2*100 } ')
     # pour plot dans mqc : prefix, x, y
     # x=number of dedduplicates, y=percent of duplicates
@@ -1149,7 +1149,7 @@ process getSoftwareVersions{
 process workflowSummaryMqc {
   label 'lowCpu'
   label 'lowMem'
-  label 'onlyLinux'
+  label 'multiqc'
 
   when:
   !params.skipMultiQC
