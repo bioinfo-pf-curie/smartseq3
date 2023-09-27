@@ -68,7 +68,7 @@ custom_data:
             scale: 'RdPu'
             format: '{:,.0f}'
             placement: 8000
-          Percent_dedup:
+          Percent_dup:
             title: 'Duplicates'
             scale: 'YlGn'
             suffix: '%'
