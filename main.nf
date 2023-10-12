@@ -602,6 +602,7 @@ process sortAndIndexBam {
   samtools --version &> v_samtools.txt
   """
 }
+
 // dedup and count in the same time
 process countMatricesUMIs {
   tag "${prefix}" //${prefix}_Umi
@@ -924,6 +925,10 @@ process bigWig {
   bamCoverage --version &> v_deeptools.txt
   """
 }
+
+/*collect summary dedup
+cat >> all_summary
+*/
 
 // Analysis all reads ----------------------------------------------------------------------//
 
