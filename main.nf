@@ -271,8 +271,8 @@ log.info "========================================="
 process umiExtraction {
   tag "${prefix}"
   label 'umiTools'
-  label 'medCpu'
-  label 'medMem'
+  label 'lowCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/umiExtraction", mode: 'copy'
 
@@ -355,8 +355,8 @@ process umiExtraction {
 process trimTag{
   tag "${prefix}"
   label 'cutadapt'
-  label 'highCpu'
-  label 'highMem'
+  label 'extraCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/trimTag", mode: 'copy'
 
@@ -451,7 +451,7 @@ chStarRawReads = chTrimmedReads
 process readAlignment {
   tag "${prefix}"
   label 'star'
-  label 'extraCpu'
+  label 'highCpu'
   label 'highMem'
 
   publishDir "${params.outDir}/star", mode: 'copy'
@@ -549,8 +549,8 @@ process extractUMIreads {
 process readAssignmentUmis {
   tag "${prefix}" //${prefix}_Umi
   label 'featureCounts'
-  label 'highCpu'
-  label 'medMem'
+  label 'extraCpu'
+  label 'lowMem'
 
   publishDir "${params.outDir}/featurecounts/umi", mode: 'copy'
 
@@ -583,7 +583,7 @@ process readAssignmentUmis {
 process sortAndIndexBam {
   tag "${prefix}" //${prefix}_Umi
   label 'samtools'
-  label 'highCpu'
+  label 'extraCpu'
   label 'medMem'
 
   publishDir "${params.outDir}/bams/umi", mode: 'copy'
@@ -748,12 +748,10 @@ process chRmPcrDup_umitools {
   set val(prefix), file("*_dedup.log") into chUmi_dedup_log
   set val(prefix), file("*_dedup_summary.log") into chUmi_dedup_mqc
 
-
   script:
   """
   # Dedup per position and UMI (hamming=1)
   umi_tools dedup --stdin=${umiBam[0]}  --log=${prefix}_Umi_dedup.log > ${prefix}_Umi_dedup.bam
-
 
   # get percent dup
     tot=\$(grep "Reads: Input Reads:"  ${prefix}_Umi_dedup.log | cut -f7 -d" " | sed 's/,//') 
@@ -935,8 +933,8 @@ cat >> all_summary
 process saturationCurves {
   tag "${prefix}"
   label 'preseq'
-  label 'extraCpu'
-  label 'extraMem'
+  label 'lowCpu'
+  label 'lowMem'
 
   errorStrategy 'ignore'
 
@@ -980,7 +978,7 @@ process saturationCurves {
 process geneSaturation {
   label 'R'
   label 'medCpu'
-  label 'medMem'
+  label 'lowMem'
 
   //when:
   //!params.skip_qc && !params.skip_saturation
@@ -1001,8 +999,8 @@ process geneSaturation {
 process genebodyCoverage {
   tag "${prefix}"
   label 'rseqc'
-  label 'medCpu'
-  label 'medMem'
+  label 'lowCpu'
+  label 'lowMem'
   errorStrategy 'ignore'
   publishDir "${params.outDir}/genebody_coverage" , mode: 'copy',
   saveAs: {filename ->
@@ -1103,7 +1101,7 @@ process countUMIGenePerCell{
   tag "${prefix}"
   label 'R'
   label 'lowCpu'
-  label 'medMem'
+  label 'lowMem'
 
   input:
   file(matrices) from chMatrices_UMIGenePerCell.collect()
